@@ -59,7 +59,7 @@ vector<Point2f> FindCorners(Mat grayFrame, int maxCornersNum)
 	return corners;
 }
 
-void СalcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status)
+void CalcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status)
 {
 	vector<float> err; // Вектор погрешностей. Тип меры погрешности может быть установлен соответсвующим флагом
 	Size winSize(21, 21); // Размер окна при поиске

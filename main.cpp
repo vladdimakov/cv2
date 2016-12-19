@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 		cvtColor(colorFrame, currentGrayFrame, CV_RGB2GRAY);
 		currentGrayFrame.copyTo(stabilizedGrayFrame);		
 		
-		ÑalcOpticalFlow(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status);
+        CalcOpticalFlow(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status);
 
 		size_t k = 0;
 		for (size_t i = 0; i < currentPoints.size(); i++)
@@ -80,7 +80,11 @@ int main(int argc, char** argv)
 		
 		offset += FindOffsetMedian(prevPoints, currentPoints);
 
-		stabilizedGrayFrame = TranslateFrame(stabilizedGrayFrame, (Point2i)offset);
+        Point2i offset2i;
+        offset2i.x = offset.x;
+        offset2i.y = offset.y;
+
+        stabilizedGrayFrame = TranslateFrame(stabilizedGrayFrame, offset2i);
 		imshow("Stabilized frame", stabilizedGrayFrame);
 		           
 		char key = (char)waitKey(1); // waitKey æäåò ñîáûòèÿ íàæàòèÿ êëàâèøè 1 ìñ
