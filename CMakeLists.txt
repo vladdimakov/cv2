@@ -33,11 +33,12 @@ endif()
 
 set(SOURCES_LIST ${SOURCES_LIST}
      ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+     ${CMAKE_CURRENT_LIST_DIR}/CVFuns.cpp
+     ${CMAKE_CURRENT_LIST_DIR}/FPSCounter.cpp
 )
 
 set(HEADERS_LIST ${HEADERS_LIST}
-     ${CMAKE_CURRENT_LIST_DIR}/CVFuns.h
-     ${CMAKE_CURRENT_LIST_DIR}/suppFuns.h
+     ${CMAKE_CURRENT_LIST_DIR}/lib.h
      )
 
 # get all needble libraries ===================================================
