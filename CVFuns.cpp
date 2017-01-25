@@ -3,6 +3,30 @@
 CVFuns::CVFuns()
 {
 	needToInit = true;
+
+	for (int i = 0; i < 4; i++)
+		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
+}
+
+void CVFuns::displayWindow()
+{
+	Mat imageToDisplay = Mat(CAP_FRAME_HEIGHT * 2, CAP_FRAME_WIDTH * 2, CV_8U);
+
+	namedWindow("Display window", CV_WINDOW_NORMAL);
+	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
+	{
+		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
+		{
+			imageToDisplay.at<uchar>(i, j) = imgToDisplay[0].at<uchar>(i, j);
+			imageToDisplay.at<uchar>(i, j + CAP_FRAME_WIDTH - 1) = imgToDisplay[1].at<uchar>(i, j);
+			imageToDisplay.at<uchar>(i + CAP_FRAME_HEIGHT - 1, j) = imgToDisplay[2].at<uchar>(i, j);
+			imageToDisplay.at<uchar>(i + CAP_FRAME_HEIGHT - 1, j + CAP_FRAME_WIDTH - 1) = imgToDisplay[3].at<uchar>(i, j);
+		}			
+	}
+
+	imshow("Display window", imageToDisplay); 
 }
 
 bool CVFuns::startCapture()
@@ -114,7 +138,7 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 	for (int i = 0; i < prevPoints.size(); i++)
 		circle(prevGrayFrame, prevPoints[i], 3, Scalar(255), -1, 8);
 
-	imshow("Initial frame", prevGrayFrame);
+	prevGrayFrame.copyTo(imgToDisplay[0]);
 }
 
 Mat CVFuns::stabilizeFrame(Mat& currentGrayFrame)
@@ -152,7 +176,7 @@ Mat CVFuns::stabilizeFrame(Mat& currentGrayFrame)
 	if (currentPoints.size() < MIN_CORNERS_NUM)
 		needToInit = true;
 
-	imshow("Current frame", currentGrayFrame);
+	currentGrayFrame.copyTo(imgToDisplay[1]);
 
 	offset += findOffsetMedian(prevPoints, currentPoints);
 

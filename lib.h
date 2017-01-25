@@ -6,17 +6,21 @@
 using namespace cv;
 using namespace std;
 
-const int CAP_FRAME_WIDTH = 641;
+const int CAP_FRAME_WIDTH = 640;
 const int CAP_FRAME_HEIGHT = 480;
 const int CAP_FPS = 20;
 
-const int MAX_CORNERS_NUM = 128;
-const int MIN_CORNERS_NUM = 32;
+const int MAX_CORNERS_NUM = 64;
+const int MIN_CORNERS_NUM = 16;
+
+const int WINDOW_WIDTH = 854;
+const int WINDOW_HEIGHT = 640;
 
 class CVFuns
 {
 public:
 	CVFuns();
+	void displayWindow();
 	bool startCapture();
 	vector<Point2f> findCorners(Mat, int);
 	void calcOpticalFlow(Mat, Mat, vector<Point2f>, vector<Point2f>&, vector<uchar>&);
@@ -28,6 +32,7 @@ public:
 	//Mat CalcAverageBackground(Mat currentFrame, );
 
 	VideoCapture cap;
+	vector<Mat> imgToDisplay;
 	bool needToInit;
 
 private:

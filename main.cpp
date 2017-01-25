@@ -17,8 +17,9 @@ int main(int argc, char** argv)
 		cvtColor(colorFrame, GrayFrame, CV_RGB2GRAY);
 
 		stabilizedGrayFrame = cvFuns.stabilizeFrame(GrayFrame);
+		stabilizedGrayFrame.copyTo(cvFuns.imgToDisplay[2]);
 
-		imshow("Stabilized frame", stabilizedGrayFrame);
+		cvFuns.displayWindow();
 		
 		char key = (char)waitKey(1); // waitKey ждет событи€ нажати€ клавиши 1 мс
 		if (key == 27) // ≈сли нажат ESC - выходим
