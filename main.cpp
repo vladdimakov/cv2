@@ -4,20 +4,38 @@ int main(int argc, char** argv)
 {
 	setlocale(LC_ALL, "Russian");
 	CVFuns cvFuns;
-	Mat colorFrame, GrayFrame, stabilizedGrayFrame;
+	Mat colorFrame, grayFrame, stabilizedGrayFrame;
 
 	if (cvFuns.startCapture()) 
 		cout << "Камера открыта" << endl;
 	else
 		return -1;
-	
+
+	Point2f currentOffset;
+	const double refreshRate = 0.01;
+	Mat C, translatedAverageBackImg;
+
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;
-		cvtColor(colorFrame, GrayFrame, CV_RGB2GRAY);
+		cvtColor(colorFrame, grayFrame, CV_RGB2GRAY);
 
-		stabilizedGrayFrame = cvFuns.stabilizeFrame(GrayFrame);
-		stabilizedGrayFrame.copyTo(cvFuns.imgToDisplay[2]);
+		currentOffset = cvFuns.calcFrameOffset(grayFrame);
+		cvFuns.offset += currentOffset;
+
+		cvFuns.imgToDisplay[2] = cvFuns.translateFrame(grayFrame, cvFuns.offset);
+
+		C = cvFuns.translateFrame(cvFuns.averageBackImage, grayFrame, currentOffset);
+
+		for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
+		{
+			for (int j = 0; j < CAP_FRAME_WIDTH; j++)
+			{
+				cvFuns.averageBackImage.at<uchar>(i, j) = (1 - refreshRate) * C.at<uchar>(i, j) + refreshRate * grayFrame.at<uchar>(i, j);
+			}
+		}
+
+		cvFuns.imgToDisplay[3] = cvFuns.averageBackImage;
 
 		cvFuns.displayWindow();
 		

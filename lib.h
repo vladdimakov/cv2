@@ -24,21 +24,24 @@ public:
 	bool startCapture();
 	vector<Point2f> findCorners(Mat, int);
 	void calcOpticalFlow(Mat, Mat, vector<Point2f>, vector<Point2f>&, vector<uchar>&);
-	Mat translateFrame(Mat, Point2i);
+	Mat translateFrame(Mat, Point2f);
+	Mat translateFrame(Mat, Mat, Point2f);
 	float findMedian(vector<float>);
 	Point2f findOffsetMedian(vector<Point2f>, vector<Point2f>);
 	void makeInitialFrame(Mat, vector<Point2f>&);
-	Mat stabilizeFrame(Mat&);
+	Point2f calcFrameOffset(Mat&);
 	//Mat CalcAverageBackground(Mat currentFrame, );
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
+	Mat averageBackImage;
 	bool needToInit;
+	Point2f offset;
 
 private:
 	Mat prevGrayFrame;
 	vector<Point2f> prevPoints, currentPoints;
-	Point2f offset;
+	
 };
 
 class FPSCounter

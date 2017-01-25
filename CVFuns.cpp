@@ -70,18 +70,44 @@ void CVFuns::calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Poi
 	calcOpticalFlowPyrLK(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status, err, winSize, maxLevel, criteria, flags, minEigThreshold);
 }
 
-Mat CVFuns::translateFrame(Mat frame, Point2i offset)
+Mat CVFuns::translateFrame(Mat frame, Point2f offset)
 {
 	Mat newFrame = Mat(frame.rows, frame.cols, CV_8U);
+
+	Point2i offset2i;
+	offset2i.x = offset.x;
+	offset2i.y = offset.y;
 
 	for (int y = 0; y < frame.rows; y++)
 	{
 		for (int x = 0; x < frame.cols; x++)
 		{
-			if (y - offset.y < frame.rows && y - offset.y >= 0 && x - offset.x < frame.cols && x - offset.x >= 0)
-				newFrame.at<uchar>(y, x) = frame.at<uchar>(y - offset.y, x - offset.x);
+			if (y - offset2i.y < frame.rows && y - offset2i.y >= 0 && x - offset2i.x < frame.cols && x - offset2i.x >= 0)
+				newFrame.at<uchar>(y, x) = frame.at<uchar>(y - offset2i.y, x - offset2i.x);
 			else
 				newFrame.at<uchar>(y, x) = 0;
+		}
+	}
+
+	return newFrame;
+}
+
+Mat CVFuns::translateFrame(Mat inputFrame, Mat outputFrame, Point2f offset)
+{
+	Mat newFrame;// = Mat(inputFrame.rows, inputFrame.cols, CV_8U);
+
+	outputFrame.copyTo(newFrame);
+	
+	Point2i offset2i;
+	offset2i.x = offset.x;
+	offset2i.y = offset.y;
+
+	for (int y = 0; y < inputFrame.rows; y++)
+	{
+		for (int x = 0; x < inputFrame.cols; x++)
+		{
+			if (y - offset2i.y < inputFrame.rows && y - offset2i.y >= 0 && x - offset2i.x < inputFrame.cols && x - offset2i.x >= 0)
+				newFrame.at<uchar>(y, x) = inputFrame.at<uchar>(y - offset2i.y, x - offset2i.x);
 		}
 	}
 
@@ -133,30 +159,32 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 {
 	offset = Point2f(0, 0);
 
+	prevGrayFrame.copyTo(averageBackImage);
+
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
 
-	for (int i = 0; i < prevPoints.size(); i++)
-		circle(prevGrayFrame, prevPoints[i], 3, Scalar(255), -1, 8);
-
 	prevGrayFrame.copyTo(imgToDisplay[0]);
+
+	for (int i = 0; i < prevPoints.size(); i++)
+		circle(imgToDisplay[0], prevPoints[i], 3, Scalar(255), -1, 8);
 }
 
-Mat CVFuns::stabilizeFrame(Mat& currentGrayFrame)
+Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 {
 	vector<uchar> status;
-	Mat stabilizedGrayFrame;
+	Point2f frameOffset;
 
 	if (needToInit)
 	{
 		currentGrayFrame.copyTo(prevGrayFrame);
 		makeInitialFrame(prevGrayFrame, prevPoints);
 		needToInit = false;
-		return currentGrayFrame;
+		return Point2f(0, 0);
 	}
 
-	currentGrayFrame.copyTo(stabilizedGrayFrame);
-
 	calcOpticalFlow(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status);
+
+	currentGrayFrame.copyTo(imgToDisplay[1]);
 
 	size_t k = 0;
 	for (size_t i = 0; i < currentPoints.size(); i++)
@@ -167,7 +195,7 @@ Mat CVFuns::stabilizeFrame(Mat& currentGrayFrame)
 			prevPoints[k] = prevPoints[i];
 			k++;
 
-			circle(currentGrayFrame, currentPoints[i], 3, Scalar(255), -1, 8);
+			circle(imgToDisplay[1], currentPoints[i], 3, Scalar(255), -1, 8);
 		}
 	}
 	currentPoints.resize(k);
@@ -176,20 +204,12 @@ Mat CVFuns::stabilizeFrame(Mat& currentGrayFrame)
 	if (currentPoints.size() < MIN_CORNERS_NUM)
 		needToInit = true;
 
-	currentGrayFrame.copyTo(imgToDisplay[1]);
-
-	offset += findOffsetMedian(prevPoints, currentPoints);
-
-	Point2i offset2i;
-	offset2i.x = offset.x;
-	offset2i.y = offset.y;
-
-	stabilizedGrayFrame = translateFrame(stabilizedGrayFrame, offset2i);
+	frameOffset = findOffsetMedian(prevPoints, currentPoints);
 
 	std::swap(prevPoints, currentPoints);
 	cv::swap(prevGrayFrame, currentGrayFrame);
 
-	return stabilizedGrayFrame;
+	return frameOffset;
 }
 
 /*
