@@ -29,4 +29,5 @@
 *.app
 
 *.sdf
+*.opensdf
 /x64/*

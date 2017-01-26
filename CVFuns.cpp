@@ -92,28 +92,6 @@ Mat CVFuns::translateFrame(Mat frame, Point2f offset)
 	return newFrame;
 }
 
-Mat CVFuns::translateFrame(Mat inputFrame, Mat outputFrame, Point2f offset)
-{
-	Mat newFrame;// = Mat(inputFrame.rows, inputFrame.cols, CV_8U);
-
-	outputFrame.copyTo(newFrame);
-	
-	Point2i offset2i;
-	offset2i.x = offset.x;
-	offset2i.y = offset.y;
-
-	for (int y = 0; y < inputFrame.rows; y++)
-	{
-		for (int x = 0; x < inputFrame.cols; x++)
-		{
-			if (y - offset2i.y < inputFrame.rows && y - offset2i.y >= 0 && x - offset2i.x < inputFrame.cols && x - offset2i.x >= 0)
-				newFrame.at<uchar>(y, x) = inputFrame.at<uchar>(y - offset2i.y, x - offset2i.x);
-		}
-	}
-
-	return newFrame;
-}
-
 float CVFuns::findMedian(vector<float> value)
 {
 	bool exit = false;
@@ -159,7 +137,8 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 {
 	offset = Point2f(0, 0);
 
-	prevGrayFrame.copyTo(averageBackImage);
+	//prevGrayFrame.copyTo(averageBackImg);
+	prevGrayFrame.convertTo(averageBackImg, CV_32F);
 
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
 
@@ -210,6 +189,31 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	cv::swap(prevGrayFrame, currentGrayFrame);
 
 	return frameOffset;
+}
+
+void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset)
+{
+	Mat newAverageBackImg;
+	currentFrame.convertTo(newAverageBackImg, CV_32F);
+
+	Point2i offset2i;
+	offset2i.x = -currentOffset.x;
+	offset2i.y = -currentOffset.y;
+
+	for (int y = 0; y < CAP_FRAME_HEIGHT; y++)
+	{
+		for (int x = 0; x < CAP_FRAME_WIDTH; x++)
+		{
+			if (y - offset2i.y < averageBackImg.rows && y - offset2i.y >= 0 && x - offset2i.x < averageBackImg.cols && x - offset2i.x >= 0)
+				newAverageBackImg.at<float>(y, x) = averageBackImg.at<float>(y - offset2i.y, x - offset2i.x);
+
+			newAverageBackImg.at<float>(y, x) = (1 - REFRESH_RATE) * newAverageBackImg.at<float>(y, x) + REFRESH_RATE * currentFrame.at<uchar>(y, x);
+		}
+	}
+
+	newAverageBackImg.copyTo(averageBackImg);
+
+	averageBackImg.convertTo(imgToDisplay[3], CV_8U);
 }
 
 /*

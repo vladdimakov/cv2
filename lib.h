@@ -16,25 +16,27 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 854;
 const int WINDOW_HEIGHT = 640;
 
+const float REFRESH_RATE = 0.01;
+
 class CVFuns
 {
 public:
 	CVFuns();
 	void displayWindow();
 	bool startCapture();
-	vector<Point2f> findCorners(Mat, int);
-	void calcOpticalFlow(Mat, Mat, vector<Point2f>, vector<Point2f>&, vector<uchar>&);
-	Mat translateFrame(Mat, Point2f);
-	Mat translateFrame(Mat, Mat, Point2f);
-	float findMedian(vector<float>);
-	Point2f findOffsetMedian(vector<Point2f>, vector<Point2f>);
-	void makeInitialFrame(Mat, vector<Point2f>&);
-	Point2f calcFrameOffset(Mat&);
-	//Mat CalcAverageBackground(Mat currentFrame, );
+	vector<Point2f> findCorners(Mat grayFrame, int maxCornersNum);
+	void calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status);
+	Mat translateFrame(Mat frame, Point2f offset);
+	Mat translateFrame(Mat, Mat outputFrame, Point2f offset);
+	float findMedian(vector<float> value);
+	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
+	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
+	Point2f calcFrameOffset(Mat& currentGrayFrame);
+	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
-	Mat averageBackImage;
+	Mat averageBackImg;
 	bool needToInit;
 	Point2f offset;
 
