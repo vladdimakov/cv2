@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 		return -1;
 
 	Point2f currentOffset;
-	const double refreshRate = 0.01;
+    const double refreshRate = 0.01;
 	Mat C, translatedAverageBackImg;
 
 	while (true)
@@ -25,7 +25,11 @@ int main(int argc, char** argv)
 
 		cvFuns.imgToDisplay[2] = cvFuns.translateFrame(grayFrame, cvFuns.offset);
 
-		C = cvFuns.translateFrame(cvFuns.averageBackImage, grayFrame, currentOffset);
+        currentOffset.x = -currentOffset.x;
+        currentOffset.y = -currentOffset.y;
+        //printf("%g %g\n",currentOffset.x, currentOffset.y);fflush(stdout);
+
+        C = cvFuns.translateFrame(cvFuns.averageBackImage, grayFrame, currentOffset);
 
 		for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
 		{
