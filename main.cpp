@@ -4,6 +4,7 @@ int main(int argc, char** argv)
 {
 	setlocale(LC_ALL, "Russian");
 	CVFuns cvFuns;
+	FPSCounter FPScounter;
 	Mat colorFrame, grayFrame, stabilizedGrayFrame;
 
 	if (cvFuns.startCapture()) 
@@ -27,6 +28,8 @@ int main(int argc, char** argv)
 
 		cvFuns.displayWindow();
 		
+		cout << "FPS: " << FPScounter.value() << endl;
+
 		char key = (char)waitKey(1); // waitKey ждет событи€ нажати€ клавиши 1 мс
 		if (key == 27) // ≈сли нажат ESC - выходим
 		{

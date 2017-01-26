@@ -14,7 +14,7 @@ void CVFuns::displayWindow()
 
 	namedWindow("Display window", CV_WINDOW_NORMAL);
 	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);
-
+	/*
 	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
 	{
 		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
@@ -25,6 +25,11 @@ void CVFuns::displayWindow()
 			imageToDisplay.at<uchar>(i + CAP_FRAME_HEIGHT - 1, j + CAP_FRAME_WIDTH - 1) = imgToDisplay[3].at<uchar>(i, j);
 		}			
 	}
+	*/
+	imgToDisplay[0].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH));
+	imgToDisplay[1].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
+	imgToDisplay[2].copyTo(imageToDisplay.rowRange(CAP_FRAME_HEIGHT, CAP_FRAME_HEIGHT * 2).colRange(0, CAP_FRAME_WIDTH));
+	imgToDisplay[3].copyTo(imageToDisplay.rowRange(CAP_FRAME_HEIGHT, CAP_FRAME_HEIGHT * 2).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
 
 	imshow("Display window", imageToDisplay); 
 }
@@ -137,7 +142,6 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 {
 	offset = Point2f(0, 0);
 
-	//prevGrayFrame.copyTo(averageBackImg);
 	prevGrayFrame.convertTo(averageBackImg, CV_32F);
 
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
