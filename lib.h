@@ -14,9 +14,19 @@ const int MAX_CORNERS_NUM = 64;
 const int MIN_CORNERS_NUM = 16;
 
 const int WINDOW_WIDTH = 854;
-const int WINDOW_HEIGHT = 640;
+const int WINDOW_HEIGHT = 670;
 
 const float REFRESH_RATE = 0.01;
+
+class FPSCounter
+{
+public:
+	FPSCounter();
+	size_t value();
+private:
+	clock_t oldTime;
+	size_t FPSCnt, oldFPS;
+};
 
 class CVFuns
 {
@@ -42,16 +52,5 @@ public:
 private:
 	Mat prevGrayFrame;
 	vector<Point2f> prevPoints, currentPoints;
-	
+	FPSCounter FPScounter;
 };
-
-class FPSCounter
-{
-public:
-	FPSCounter();
-	size_t value();
-private:
-	clock_t oldTime;
-	size_t FPSCnt, oldFPS;
-};
-

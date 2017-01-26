@@ -4,7 +4,6 @@ int main(int argc, char** argv)
 {
 	setlocale(LC_ALL, "Russian");
 	CVFuns cvFuns;
-	FPSCounter FPScounter;
 	Mat colorFrame, grayFrame;
 
 	if (cvFuns.startCapture()) 
@@ -22,15 +21,12 @@ int main(int argc, char** argv)
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		cvFuns.offset += currentOffset;
 
-		//cvFuns.imgToDisplay[2] = cvFuns.translateFrame(grayFrame, cvFuns.offset);
-		cvFuns.imgToDisplay[2] = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
+		cvFuns.imgToDisplay[2] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
 		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[2], cvFuns.offset);
 
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset);       
 
 		cvFuns.displayWindow();
-		
-		cout << "FPS: " << FPScounter.value() << endl;
 
 		char key = (char)waitKey(1); // waitKey ждет событи€ нажати€ клавиши 1 мс
 		if (key == 27) // ≈сли нажат ESC - выходим
