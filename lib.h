@@ -26,8 +26,7 @@ public:
 	bool startCapture();
 	vector<Point2f> findCorners(Mat grayFrame, int maxCornersNum);
 	void calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status);
-	Mat translateFrame(Mat frame, Point2f offset);
-	Mat translateFrame(Mat, Mat outputFrame, Point2f offset);
+	void translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset);
 	float findMedian(vector<float> value);
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);

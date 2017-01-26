@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 	setlocale(LC_ALL, "Russian");
 	CVFuns cvFuns;
 	FPSCounter FPScounter;
-	Mat colorFrame, grayFrame, stabilizedGrayFrame;
+	Mat colorFrame, grayFrame;
 
 	if (cvFuns.startCapture()) 
 		cout << "Камера открыта" << endl;
@@ -22,7 +22,9 @@ int main(int argc, char** argv)
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		cvFuns.offset += currentOffset;
 
-		cvFuns.imgToDisplay[2] = cvFuns.translateFrame(grayFrame, cvFuns.offset);
+		//cvFuns.imgToDisplay[2] = cvFuns.translateFrame(grayFrame, cvFuns.offset);
+		cvFuns.imgToDisplay[2] = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
+		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[2], cvFuns.offset);
 
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset);       
 

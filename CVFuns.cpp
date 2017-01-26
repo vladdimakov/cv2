@@ -14,18 +14,7 @@ void CVFuns::displayWindow()
 
 	namedWindow("Display window", CV_WINDOW_NORMAL);
 	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);
-	/*
-	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
-	{
-		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
-		{
-			imageToDisplay.at<uchar>(i, j) = imgToDisplay[0].at<uchar>(i, j);
-			imageToDisplay.at<uchar>(i, j + CAP_FRAME_WIDTH - 1) = imgToDisplay[1].at<uchar>(i, j);
-			imageToDisplay.at<uchar>(i + CAP_FRAME_HEIGHT - 1, j) = imgToDisplay[2].at<uchar>(i, j);
-			imageToDisplay.at<uchar>(i + CAP_FRAME_HEIGHT - 1, j + CAP_FRAME_WIDTH - 1) = imgToDisplay[3].at<uchar>(i, j);
-		}			
-	}
-	*/
+	
 	imgToDisplay[0].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH));
 	imgToDisplay[1].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
 	imgToDisplay[2].copyTo(imageToDisplay.rowRange(CAP_FRAME_HEIGHT, CAP_FRAME_HEIGHT * 2).colRange(0, CAP_FRAME_WIDTH));
@@ -75,26 +64,42 @@ void CVFuns::calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Poi
 	calcOpticalFlowPyrLK(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status, err, winSize, maxLevel, criteria, flags, minEigThreshold);
 }
 
-Mat CVFuns::translateFrame(Mat frame, Point2f offset)
+void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 {
-	Mat newFrame = Mat(frame.rows, frame.cols, CV_8U);
-
 	Point2i offset2i;
 	offset2i.x = offset.x;
 	offset2i.y = offset.y;
 
-	for (int y = 0; y < frame.rows; y++)
+	if (offset2i.x == 0 && offset2i.y == 0)
+		inputFrame.copyTo(outputFrame);
+	
+	int xOld[2] = { 0, CAP_FRAME_WIDTH };
+	int yOld[2] = { 0, CAP_FRAME_HEIGHT };
+	int xNew[2] = { 0, CAP_FRAME_WIDTH };
+	int yNew[2] = { 0, CAP_FRAME_HEIGHT };
+	
+	if (offset2i.x < 0)
 	{
-		for (int x = 0; x < frame.cols; x++)
-		{
-			if (y - offset2i.y < frame.rows && y - offset2i.y >= 0 && x - offset2i.x < frame.cols && x - offset2i.x >= 0)
-				newFrame.at<uchar>(y, x) = frame.at<uchar>(y - offset2i.y, x - offset2i.x);
-			else
-				newFrame.at<uchar>(y, x) = 0;
-		}
+		xOld[0] = -offset2i.x;
+		xNew[1] = CAP_FRAME_WIDTH + offset2i.x;
 	}
-
-	return newFrame;
+	if (offset2i.x > 0)
+	{
+		xOld[1] = CAP_FRAME_WIDTH - offset2i.x;
+		xNew[0] = offset2i.x;
+	}
+	if (offset2i.y < 0)
+	{
+		yOld[0] = -offset2i.y;
+		yNew[1] = CAP_FRAME_HEIGHT + offset2i.y;
+	}
+	if (offset2i.y > 0)
+	{
+		yOld[1] = CAP_FRAME_HEIGHT - offset2i.y;
+		yNew[0] = offset2i.y;
+	}
+		
+	inputFrame.rowRange(yOld[0], yOld[1]).colRange(xOld[0], xOld[1]).copyTo(outputFrame.rowRange(yNew[0], yNew[1]).colRange(xNew[0], xNew[1])); 
 }
 
 float CVFuns::findMedian(vector<float> value)
@@ -197,25 +202,16 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 
 void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset)
 {
-	Mat newAverageBackImg;
+	Mat newAverageBackImg, part2;
 	currentFrame.convertTo(newAverageBackImg, CV_32F);
+	
+	part2 = REFRESH_RATE * newAverageBackImg;
 
-	Point2i offset2i;
-	offset2i.x = -currentOffset.x;
-	offset2i.y = -currentOffset.y;
+	currentOffset.x = -currentOffset.x;
+	currentOffset.y = -currentOffset.y;
+	translateFrame(averageBackImg, newAverageBackImg, currentOffset);
 
-	for (int y = 0; y < CAP_FRAME_HEIGHT; y++)
-	{
-		for (int x = 0; x < CAP_FRAME_WIDTH; x++)
-		{
-			if (y - offset2i.y < averageBackImg.rows && y - offset2i.y >= 0 && x - offset2i.x < averageBackImg.cols && x - offset2i.x >= 0)
-				newAverageBackImg.at<float>(y, x) = averageBackImg.at<float>(y - offset2i.y, x - offset2i.x);
-
-			newAverageBackImg.at<float>(y, x) = (1 - REFRESH_RATE) * newAverageBackImg.at<float>(y, x) + REFRESH_RATE * currentFrame.at<uchar>(y, x);
-		}
-	}
-
-	newAverageBackImg.copyTo(averageBackImg);
+	averageBackImg = (1 - REFRESH_RATE) * newAverageBackImg + part2;
 
 	averageBackImg.convertTo(imgToDisplay[3], CV_8U);
 }
