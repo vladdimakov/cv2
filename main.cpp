@@ -14,6 +14,7 @@ int main(int argc, char** argv)
 	Point2f currentOffset;
 
 	const float refreshRate = 0.01;
+	const float scalingFactor = 2;
 
 	while (true)
 	{
@@ -23,11 +24,13 @@ int main(int argc, char** argv)
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		cvFuns.offset += currentOffset;
 
-		cvFuns.imgToDisplay[2] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
-		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[2], cvFuns.offset);
-		cvFuns.imgToDisplayInfo[2] = "Stabilized frame";
+		cvFuns.imgToDisplay[1] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
+		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
+		cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
 
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
+
+		cvFuns.deviationFromAverageBackImg(grayFrame, scalingFactor);
 
 		cvFuns.displayWindow();
 

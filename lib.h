@@ -40,6 +40,7 @@ public:
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
+	void deviationFromAverageBackImg(Mat currentFrame, float scalingFactor);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;

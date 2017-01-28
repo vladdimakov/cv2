@@ -162,13 +162,14 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 	prevGrayFrame.convertTo(averageBackImg, CV_32F);
 
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
-
+	/*
 	prevGrayFrame.copyTo(imgToDisplay[0]);
 
 	for (int i = 0; i < prevPoints.size(); i++)
 		circle(imgToDisplay[0], prevPoints[i], 3, Scalar(255), -1, 8);
 
 	imgToDisplayInfo[0] = "Initialization frame";
+	*/
 }
 
 Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
@@ -186,8 +187,8 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 
 	calcOpticalFlow(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status);
 
-	currentGrayFrame.copyTo(imgToDisplay[1]);
-	imgToDisplayInfo[1] = "Current frame";
+	currentGrayFrame.copyTo(imgToDisplay[0]);
+	imgToDisplayInfo[0] = "Current frame";
 
 	size_t k = 0;
 	for (size_t i = 0; i < currentPoints.size(); i++)
@@ -198,7 +199,7 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 			prevPoints[k] = prevPoints[i];
 			k++;
 
-			circle(imgToDisplay[1], currentPoints[i], 3, Scalar(255), -1, 8);
+			circle(imgToDisplay[0], currentPoints[i], 3, Scalar(255), -1, 8);
 		}
 	}
 	currentPoints.resize(k);
@@ -228,9 +229,23 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 
 	averageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
 
-	averageBackImg.convertTo(imgToDisplay[3], CV_8U);
+	averageBackImg.convertTo(imgToDisplay[2], CV_8U);
 
-	imgToDisplayInfo[3] = "Average backgroung";
+	imgToDisplayInfo[2] = "Average backgroung";
+}
+
+void CVFuns::deviationFromAverageBackImg(Mat currentFrame, float scalingFactor)
+{
+	Mat deviationImage;
+
+	currentFrame.convertTo(deviationImage, CV_32F);
+		
+	deviationImage = abs(deviationImage - averageBackImg);
+
+	deviationImage = deviationImage * scalingFactor;
+
+	deviationImage.convertTo(imgToDisplay[3], CV_8U);
+	imgToDisplayInfo[3] = "Deviation image";
 }
 
 /*
