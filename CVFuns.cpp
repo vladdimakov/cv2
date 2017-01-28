@@ -205,18 +205,18 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	return frameOffset;
 }
 
-void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset)
+void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate)
 {
 	Mat newAverageBackImg, part2;
 	currentFrame.convertTo(newAverageBackImg, CV_32F);
 	
-	part2 = REFRESH_RATE * newAverageBackImg;
+	part2 = refreshRate * newAverageBackImg;
 
 	currentOffset.x = -currentOffset.x;
 	currentOffset.y = -currentOffset.y;
 	translateFrame(averageBackImg, newAverageBackImg, currentOffset);
 
-	averageBackImg = (1 - REFRESH_RATE) * newAverageBackImg + part2;
+	averageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
 
 	averageBackImg.convertTo(imgToDisplay[3], CV_8U);
 }

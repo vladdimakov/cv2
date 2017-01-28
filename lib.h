@@ -16,8 +16,6 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 854;
 const int WINDOW_HEIGHT = 670;
 
-const float REFRESH_RATE = 0.01;
-
 class FPSCounter
 {
 public:
@@ -41,7 +39,7 @@ public:
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
-	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset);
+	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;

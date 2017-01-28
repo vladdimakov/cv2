@@ -13,6 +13,8 @@ int main(int argc, char** argv)
 
 	Point2f currentOffset;
 
+	const float refreshRate = 0.01;
+
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;
@@ -24,7 +26,7 @@ int main(int argc, char** argv)
 		cvFuns.imgToDisplay[2] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
 		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[2], cvFuns.offset);
 
-		cvFuns.calcAverageBackImg(grayFrame, currentOffset);       
+		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
 
 		cvFuns.displayWindow();
 
