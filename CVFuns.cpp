@@ -13,11 +13,18 @@ void CVFuns::displayWindow()
 	Mat imageToDisplay = Mat(CAP_FRAME_HEIGHT * 2 + 30, CAP_FRAME_WIDTH * 2, CV_8U);
 	Mat infoImg = Mat(30, CAP_FRAME_WIDTH * 2, CV_8U);
 
-	string infoStr = "FPS: " + to_string(FPScounter.value());
+	string FPSStr = to_string(FPScounter.value());
+	if (FPSStr.length() < 2)
+		FPSStr = "0" + FPSStr;
+
+	string infoStr = "FPS: " + FPSStr + " | 1." + imgToDisplayInfo[0] + " | 2." + imgToDisplayInfo[1] + " | 3." + imgToDisplayInfo[2] + " | 4." + imgToDisplayInfo[3];
 	putText(infoImg, infoStr, Point(10, 20), 1, 1.5, Scalar(0), 2);
 
 	namedWindow("Display window", CV_WINDOW_NORMAL);
 	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	for (int i = 1; i < 5; i++)
+		putText(imgToDisplay[i-1], to_string(i), Point(10, 30), 1, 1.5, Scalar(0), 2);
 	
 	imgToDisplay[0].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH));
 	imgToDisplay[1].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
@@ -160,6 +167,8 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 
 	for (int i = 0; i < prevPoints.size(); i++)
 		circle(imgToDisplay[0], prevPoints[i], 3, Scalar(255), -1, 8);
+
+	imgToDisplayInfo[0] = "Initialization frame";
 }
 
 Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
@@ -178,6 +187,7 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	calcOpticalFlow(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status);
 
 	currentGrayFrame.copyTo(imgToDisplay[1]);
+	imgToDisplayInfo[1] = "Current frame";
 
 	size_t k = 0;
 	for (size_t i = 0; i < currentPoints.size(); i++)
@@ -219,6 +229,8 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	averageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
 
 	averageBackImg.convertTo(imgToDisplay[3], CV_8U);
+
+	imgToDisplayInfo[3] = "Average backgroung";
 }
 
 /*

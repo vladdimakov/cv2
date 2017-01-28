@@ -25,6 +25,7 @@ int main(int argc, char** argv)
 
 		cvFuns.imgToDisplay[2] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
 		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[2], cvFuns.offset);
+		cvFuns.imgToDisplayInfo[2] = "Stabilized frame";
 
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
 

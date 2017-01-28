@@ -43,6 +43,7 @@ public:
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
+	string imgToDisplayInfo[4];
 	Mat averageBackImg;
 	bool needToInit;
 	Point2f offset;
