@@ -14,7 +14,7 @@ void CVFuns::displayWindow()
 	Mat infoImg = Mat(30, CAP_FRAME_WIDTH * 2, CV_8U);
 
 	string infoStr = "FPS: " + to_string(FPScounter.value());
-	putText(infoImg, infoStr, Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0), 2);
+	putText(infoImg, infoStr, Point(10, 20), 1, 1.5, Scalar(0), 2);
 
 	namedWindow("Display window", CV_WINDOW_NORMAL);
 	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);

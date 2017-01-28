@@ -13,8 +13,8 @@ const int CAP_FPS = 20;
 const int MAX_CORNERS_NUM = 64;
 const int MIN_CORNERS_NUM = 16;
 
-const int WINDOW_WIDTH = 854;
-const int WINDOW_HEIGHT = 670;
+const int WINDOW_WIDTH = 853;
+const int WINDOW_HEIGHT = 660;
 
 class FPSCounter
 {
