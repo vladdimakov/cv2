@@ -40,12 +40,13 @@ public:
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
-	void deviationFromAverageBackImg(Mat currentFrame, float scalingFactor);
+	void deviationFromAverageBackImg(Mat currentFrame, float refreshRate);
+	void brightestScaling(Mat frame, float scalingFactor);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
-	Mat averageBackImg;
+	Mat averageBackImg, deviationImg;
 	bool needToInit;
 	Point2f offset;
 

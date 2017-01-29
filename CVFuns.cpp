@@ -24,7 +24,7 @@ void CVFuns::displayWindow()
 	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	for (int i = 1; i < 5; i++)
-		putText(imgToDisplay[i-1], to_string(i), Point(10, 30), 1, 1.5, Scalar(0), 2);
+		putText(imgToDisplay[i-1], to_string(i), Point(10, 30), 1, 1.5, Scalar(255), 2);
 	
 	imgToDisplay[0].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH));
 	imgToDisplay[1].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
@@ -161,6 +161,8 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 
 	prevGrayFrame.convertTo(averageBackImg, CV_32F);
 
+	deviationImg = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F);
+
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
 	/*
 	prevGrayFrame.copyTo(imgToDisplay[0]);
@@ -234,17 +236,23 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	imgToDisplayInfo[2] = "Average backgroung";
 }
 
-void CVFuns::deviationFromAverageBackImg(Mat currentFrame, float scalingFactor)
+void CVFuns::deviationFromAverageBackImg(Mat currentFrame, float refreshRate)
 {
-	Mat deviationImage;
+	Mat currentDeviationImg;
+	currentFrame.convertTo(currentDeviationImg, CV_32F);
 
-	currentFrame.convertTo(deviationImage, CV_32F);
-		
-	deviationImage = abs(deviationImage - averageBackImg);
+	currentDeviationImg = abs(currentDeviationImg - averageBackImg);
+	
+	deviationImg = (1 - refreshRate) * deviationImg + refreshRate * currentDeviationImg;	
+}
 
-	deviationImage = deviationImage * scalingFactor;
+void CVFuns::brightestScaling(Mat frame, float scalingFactor)
+{
+	Mat scaledFrame;
 
-	deviationImage.convertTo(imgToDisplay[3], CV_8U);
+	scaledFrame = frame * scalingFactor;
+
+	scaledFrame.convertTo(imgToDisplay[3], CV_8U);
 	imgToDisplayInfo[3] = "Deviation image";
 }
 

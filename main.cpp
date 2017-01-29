@@ -30,7 +30,8 @@ int main(int argc, char** argv)
 
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
 
-		cvFuns.deviationFromAverageBackImg(grayFrame, scalingFactor);
+		cvFuns.deviationFromAverageBackImg(grayFrame, refreshRate);
+		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
 
 		cvFuns.displayWindow();
 
