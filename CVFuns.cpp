@@ -12,6 +12,7 @@ void CVFuns::displayWindow()
 {
 	Mat imageToDisplay = Mat(CAP_FRAME_HEIGHT * 2 + 30, CAP_FRAME_WIDTH * 2, CV_8U);
 	Mat infoImg = Mat(30, CAP_FRAME_WIDTH * 2, CV_8U);
+	infoImg.setTo(Scalar(255));
 
 	string FPSStr = to_string(FPScounter.value());
 	if (FPSStr.length() < 2)
