@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
 	Point2f currentOffset;
 
-	const float refreshRate = 0.01;
+	const float refreshRate = 0.01f;
 	const float scalingFactor = 2;
 
 	while (true)
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 		cvFuns.imgToDisplay[1] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
 		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
 		cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
-
+		
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
 
 		cvFuns.deviationFromAverageBackImg(grayFrame, refreshRate);

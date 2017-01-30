@@ -11,6 +11,7 @@ CVFuns::CVFuns()
 void CVFuns::displayWindow()
 {
 	Mat imageToDisplay = Mat(CAP_FRAME_HEIGHT * 2 + 30, CAP_FRAME_WIDTH * 2, CV_8U);
+	
 	Mat infoImg = Mat(30, CAP_FRAME_WIDTH * 2, CV_8U);
 	infoImg.setTo(Scalar(255));
 
@@ -79,40 +80,84 @@ void CVFuns::calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Poi
 
 void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 {
-	Point2i offset2i;
-	offset2i.x = offset.x;
-	offset2i.y = offset.y;
+	Point2i intOffset;
+	intOffset.x = (int)offset.x;
+	intOffset.y = (int)offset.y;
 
-	if (offset2i.x == 0 && offset2i.y == 0)
+	Point2f subPixOffset;
+	subPixOffset.x = offset.x - intOffset.x;
+	subPixOffset.y = offset.y - intOffset.y;
+
+	if (subPixOffset.x != 0.0f || subPixOffset.y != 0.0f)
+	{
+		if (subPixOffset.x > 0.5f)
+		{
+			subPixOffset.x -= 1.0f;
+			intOffset.x += 1;
+		}
+		if (subPixOffset.y > 0.5f)
+		{
+			subPixOffset.y -= 1.0f;
+			intOffset.y += 1;
+		}
+
+		Point2f center;
+		center.x = (float)CAP_FRAME_WIDTH / 2 - 0.5 - subPixOffset.x;
+		center.y = (float)CAP_FRAME_HEIGHT / 2 - 0.5 - subPixOffset.y;
+
+		getRectSubPix(inputFrame, Size(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT), center, inputFrame);
+
+		/*
+		Mat newFrame = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
+		for (int y = 0; y < CAP_FRAME_HEIGHT - 1; y++)
+		{
+			for (int x = 0; x < CAP_FRAME_WIDTH - 1; x++)
+			{
+				newFrame.at<uchar>(y, x) = inputFrame.at<uchar>(y, x) * (1 - subPixOffset.x) * (1 - subPixOffset.y) + 
+					inputFrame.at<uchar>(y, x + 1) * subPixOffset.x * (1 - subPixOffset.y) +
+					inputFrame.at<uchar>(y + 1, x) * (1 - subPixOffset.x) * subPixOffset.y + 
+					inputFrame.at<uchar>(y + 1, x + 1) * subPixOffset.x * subPixOffset.y;
+			}
+		}
+		newFrame.copyTo(inputFrame);
+		*/
+	}
+
+	if (intOffset.x != 0 || intOffset.y != 0)
+	{
+		int xOld[2] = { 0, CAP_FRAME_WIDTH };
+		int yOld[2] = { 0, CAP_FRAME_HEIGHT };
+		int xNew[2] = { 0, CAP_FRAME_WIDTH };
+		int yNew[2] = { 0, CAP_FRAME_HEIGHT };
+
+		if (intOffset.x < 0)
+		{
+			xOld[0] = -intOffset.x;
+			xNew[1] = CAP_FRAME_WIDTH + intOffset.x;
+		}
+		else if (intOffset.x > 0)
+		{
+			xOld[1] = CAP_FRAME_WIDTH - intOffset.x;
+			xNew[0] = intOffset.x;
+		}
+
+		if (intOffset.y < 0)
+		{
+			yOld[0] = -intOffset.y;
+			yNew[1] = CAP_FRAME_HEIGHT + intOffset.y;
+		}
+		else if (intOffset.y > 0)
+		{
+			yOld[1] = CAP_FRAME_HEIGHT - intOffset.y;
+			yNew[0] = intOffset.y;
+		}
+
+		inputFrame.rowRange(yOld[0], yOld[1]).colRange(xOld[0], xOld[1]).copyTo(outputFrame.rowRange(yNew[0], yNew[1]).colRange(xNew[0], xNew[1]));
+	}
+	else
+	{
 		inputFrame.copyTo(outputFrame);
-	
-	int xOld[2] = { 0, CAP_FRAME_WIDTH };
-	int yOld[2] = { 0, CAP_FRAME_HEIGHT };
-	int xNew[2] = { 0, CAP_FRAME_WIDTH };
-	int yNew[2] = { 0, CAP_FRAME_HEIGHT };
-	
-	if (offset2i.x < 0)
-	{
-		xOld[0] = -offset2i.x;
-		xNew[1] = CAP_FRAME_WIDTH + offset2i.x;
 	}
-	if (offset2i.x > 0)
-	{
-		xOld[1] = CAP_FRAME_WIDTH - offset2i.x;
-		xNew[0] = offset2i.x;
-	}
-	if (offset2i.y < 0)
-	{
-		yOld[0] = -offset2i.y;
-		yNew[1] = CAP_FRAME_HEIGHT + offset2i.y;
-	}
-	if (offset2i.y > 0)
-	{
-		yOld[1] = CAP_FRAME_HEIGHT - offset2i.y;
-		yNew[0] = offset2i.y;
-	}
-		
-	inputFrame.rowRange(yOld[0], yOld[1]).colRange(xOld[0], xOld[1]).copyTo(outputFrame.rowRange(yNew[0], yNew[1]).colRange(xNew[0], xNew[1])); 
 }
 
 float CVFuns::findMedian(vector<float> value)
