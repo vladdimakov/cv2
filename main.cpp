@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
 	Point2f currentOffset;
 
-	const float refreshRate = 0.01f;
+    const float refreshRate = 0.1f;
 	const float scalingFactor = 2;
 
 	while (true)
