@@ -288,6 +288,7 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	
 	currentOffset.x = -currentOffset.x;
 	currentOffset.y = -currentOffset.y;
+
 	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
 
 	translatedAverageBackImg.copyTo(part2);
