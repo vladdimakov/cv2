@@ -285,7 +285,7 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	currentOffset.x = -currentOffset.x;
 	currentOffset.y = -currentOffset.y;
 	translateFrame(averageBackImg, newAverageBackImg, currentOffset);
-    averageBackImg = newAverageBackImg;
+    newAverageBackImg.copyTo(averageBackImg);
 
 	newAverageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
 
