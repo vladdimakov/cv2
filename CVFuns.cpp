@@ -190,15 +190,22 @@ float CVFuns::findMedian(vector<float> value)
 
 Point2f CVFuns::findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints)
 {
-	vector<float> xOffset, yOffset;
-
-	for (int i = 0; i < currentPoints.size(); i++)
+	if (currentPoints.size() != 0)
 	{
-		xOffset.push_back(prevPoints[i].x - currentPoints[i].x);
-		yOffset.push_back(prevPoints[i].y - currentPoints[i].y);
-	}
+		vector<float> xOffset, yOffset;
 
-	return Point2f(findMedian(xOffset), findMedian(yOffset));
+		for (int i = 0; i < currentPoints.size(); i++)
+		{
+			xOffset.push_back(prevPoints[i].x - currentPoints[i].x);
+			yOffset.push_back(prevPoints[i].y - currentPoints[i].y);
+		}
+
+		return Point2f(findMedian(xOffset), findMedian(yOffset));
+	}
+	else
+	{
+		return Point2f(0, 0);		
+	}	
 }
 
 void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)

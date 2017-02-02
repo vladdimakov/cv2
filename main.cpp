@@ -27,12 +27,12 @@ int main(int argc, char** argv)
 		cvFuns.imgToDisplay[1] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
 		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
 		cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
-		
+
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
 
 		cvFuns.deviationFromAverageBackImg(grayFrame, refreshRate);
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-
+		
 		cvFuns.displayWindow();
 
 		char key = (char)waitKey(1); // waitKey ждет события нажатия клавиши 1 мс
