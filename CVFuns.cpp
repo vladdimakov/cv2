@@ -285,10 +285,11 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	currentOffset.x = -currentOffset.x;
 	currentOffset.y = -currentOffset.y;
 	translateFrame(averageBackImg, newAverageBackImg, currentOffset);
+    averageBackImg = newAverageBackImg;
 
 	newAverageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
 
-	newAverageBackImg.copyTo(averageBackImg, mask);
+    newAverageBackImg.copyTo(averageBackImg, mask);
 
 	averageBackImg.convertTo(imgToDisplay[2], CV_8U);
 	imgToDisplayInfo[2] = "Average backgroung";
