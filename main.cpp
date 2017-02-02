@@ -14,7 +14,8 @@ int main(int argc, char** argv)
 	Point2f currentOffset;
 
     const float refreshRate = 0.1f;
-	const float scalingFactor = 2;
+	const float deviationFactor = 2.0f;
+	const float scalingFactor = 2.0f;
 
 	while (true)
 	{
@@ -24,15 +25,15 @@ int main(int argc, char** argv)
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		cvFuns.offset += currentOffset;
 
-		cvFuns.imgToDisplay[1] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
-		cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
-		cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
-
-		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
+		//cvFuns.imgToDisplay[1] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
+		//cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
+		//cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
 
 		cvFuns.deviationFromAverageBackImg(grayFrame, refreshRate);
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-		
+
+		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate, deviationFactor);
+
 		cvFuns.displayWindow();
 
 		char key = (char)waitKey(1); // waitKey ждет события нажатия клавиши 1 мс

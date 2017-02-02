@@ -102,8 +102,8 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 		}
 
 		Point2f center;
-		center.x = (float)CAP_FRAME_WIDTH / 2 - 0.5 - subPixOffset.x;
-		center.y = (float)CAP_FRAME_HEIGHT / 2 - 0.5 - subPixOffset.y;
+		center.x = (float)CAP_FRAME_WIDTH / 2 - 0.5f - subPixOffset.x;
+		center.y = (float)CAP_FRAME_HEIGHT / 2 - 0.5f - subPixOffset.y;
 
 		getRectSubPix(inputFrame, Size(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT), center, inputFrame);
 
@@ -271,21 +271,26 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	return frameOffset;
 }
 
-void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate)
+void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor)
 {
-	Mat newAverageBackImg, part2;
+	Mat newAverageBackImg, part2, mask;
+
 	currentFrame.convertTo(newAverageBackImg, CV_32F);
 	
+	mask = deviationFactor * deviationImg - abs(newAverageBackImg - averageBackImg);
+	mask.convertTo(mask, CV_8U);
+
 	part2 = refreshRate * newAverageBackImg;
 
 	currentOffset.x = -currentOffset.x;
 	currentOffset.y = -currentOffset.y;
 	translateFrame(averageBackImg, newAverageBackImg, currentOffset);
 
-	averageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
+	newAverageBackImg = (1 - refreshRate) * newAverageBackImg + part2;
+
+	newAverageBackImg.copyTo(averageBackImg, mask);
 
 	averageBackImg.convertTo(imgToDisplay[2], CV_8U);
-
 	imgToDisplayInfo[2] = "Average backgroung";
 }
 
@@ -305,28 +310,6 @@ void CVFuns::brightestScaling(Mat frame, float scalingFactor)
 
 	scaledFrame = frame * scalingFactor;
 
-	scaledFrame.convertTo(imgToDisplay[3], CV_8U);
-	imgToDisplayInfo[3] = "Deviation image";
+	scaledFrame.convertTo(imgToDisplay[1], CV_8U);
+	imgToDisplayInfo[1] = "Deviation image";
 }
-
-/*
-Mat RGB2Gray(Mat frame)
-{
-Mat grayFrame = Mat(FRAME_HEIGHT, FRAME_WIDTH, CV_8U);
-
-uchar R, G, B;
-
-for (int i = 0; i < FRAME_HEIGHT; i++)
-for (int j = 0; j < FRAME_WIDTH; j++)
-{
-R = frame.at<cv::Vec3b>(i, j)[2];
-G = frame.at<cv::Vec3b>(i, j)[1];
-B = frame.at<cv::Vec3b>(i, j)[0];
-
-grayFrame.at<uchar>(i, j) = 0.299*R + 0.587*G + 0.114*B;
-}
-
-return grayFrame;
-}
-
-*/

@@ -39,7 +39,7 @@ public:
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
-	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
+	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor);
 	void deviationFromAverageBackImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
 
