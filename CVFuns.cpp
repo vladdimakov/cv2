@@ -39,16 +39,31 @@ void CVFuns::displayWindow()
 
 bool CVFuns::startCapture()
 {
-	cap.open(0); // Открытие камеры (0 - камера по умолчанию)
+	string fileName = "example.mp4";
+	int choice;
 
-	if (cap.isOpened()) // Успешно ли открыта камера 
-		return true;
+	cout << "Выберите источник видео:\n1.Камера\n2.Файл " << fileName << "\nВаш выбор: ";
+	cin >> choice;
+
+	if (choice == 2)
+		cap.open(fileName);
 	else
-		return false;
-
+		cap.open(0); // 0 - камера по умолчанию
+	
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, CAP_FRAME_WIDTH); // Установка параметров захватываемой картинки
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, CAP_FRAME_HEIGHT);
 	cap.set(CV_CAP_PROP_FPS, CAP_FPS);
+
+	if (cap.isOpened()) // Успешно ли открыта камера 
+	{
+		cout << "Видеозахват успешно начался" << endl;
+		return true;
+	}
+	else
+	{
+		cout << "Не удалось начать видеозахват" << endl;
+		return false;
+	}
 }
 
 vector<Point2f> CVFuns::findCorners(Mat grayFrame, int maxCornersNum)

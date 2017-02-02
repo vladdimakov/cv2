@@ -6,9 +6,7 @@ int main(int argc, char** argv)
 	CVFuns cvFuns;
 	Mat colorFrame, grayFrame;
 
-	if (cvFuns.startCapture()) 
-		cout << "Камера открыта" << endl;
-	else
+	if (!cvFuns.startCapture()) 
 		return -1;
 
 	Point2f currentOffset;
@@ -21,6 +19,11 @@ int main(int argc, char** argv)
 	{
 		cvFuns.cap >> colorFrame;
 		cvtColor(colorFrame, grayFrame, CV_RGB2GRAY);
+
+		if (grayFrame.empty())
+		{
+			return -1;
+		}
 
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		cvFuns.offset += currentOffset;
