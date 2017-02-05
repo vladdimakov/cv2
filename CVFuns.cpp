@@ -288,10 +288,9 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 
 void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor)
 {
-	Mat translatedAverageBackImg, part2, mask;
+	Mat translatedAverageBackImg, currentFrameStaticPart, mask;
 
 	currentFrame.convertTo(currentFrame, CV_32F);
-	currentFrame.copyTo(translatedAverageBackImg);
 
 	mask = deviationFactor * deviationImg - abs(currentFrame - averageBackImg);
 	mask.convertTo(mask, CV_8U);
@@ -304,13 +303,13 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	currentOffset.x = -currentOffset.x;
 	currentOffset.y = -currentOffset.y;
 
+	currentFrame.copyTo(translatedAverageBackImg);
 	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
 
-	translatedAverageBackImg.copyTo(part2);
-	currentFrame.copyTo(part2, mask);
-	part2 = refreshRate * part2;
+	translatedAverageBackImg.copyTo(currentFrameStaticPart);
+	currentFrame.copyTo(currentFrameStaticPart, mask);
 
-	averageBackImg = (1 - refreshRate) * translatedAverageBackImg + part2;
+	averageBackImg = (1 - refreshRate) * translatedAverageBackImg + refreshRate * currentFrameStaticPart;
 
 	averageBackImg.convertTo(imgToDisplay[2], CV_8U);
 	imgToDisplayInfo[2] = "Average backgroung";
