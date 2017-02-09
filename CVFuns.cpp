@@ -296,9 +296,6 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	matWith255.copyTo(imgToDisplay[3], mask);
 	imgToDisplayInfo[3] = "Mask";
 	
-	currentOffset.x = -currentOffset.x;
-	currentOffset.y = -currentOffset.y;
-
 	currentFrame.copyTo(translatedAverageBackImg);
 	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
 
@@ -311,14 +308,18 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	imgToDisplayInfo[2] = "Average backgroung";
 }
 
-void CVFuns::deviationFromAverageBackImg(Mat currentFrame, float refreshRate)
+void CVFuns::deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate)
 {
-	Mat currentDeviationImg;
-	currentFrame.convertTo(currentDeviationImg, CV_32F);
+	Mat translatedDeviationImg, currentDeviationImg;
 
-	currentDeviationImg = abs(currentDeviationImg - averageBackImg);
-	
-	deviationImg = (1 - refreshRate) * deviationImg + refreshRate * currentDeviationImg;	
+	currentFrame.convertTo(currentFrame, CV_32F);
+
+	currentDeviationImg = abs(currentFrame - averageBackImg);
+
+	currentFrame.copyTo(translatedDeviationImg);
+	translateFrame(deviationImg, translatedDeviationImg, currentOffset);
+
+	deviationImg = (1 - refreshRate) * translatedDeviationImg + refreshRate * currentDeviationImg;	
 }
 
 void CVFuns::brightestScaling(Mat frame, float scalingFactor)

@@ -33,7 +33,9 @@ int main(int argc, char* argv[])
 		//cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
 		//cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
 
-		cvFuns.deviationFromAverageBackImg(grayFrame, refreshRate);
+		currentOffset = -currentOffset;
+
+		cvFuns.deviationFromAverageBackImg(grayFrame, currentOffset, refreshRate);
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
 
 		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate, deviationFactor);
