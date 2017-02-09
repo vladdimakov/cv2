@@ -27,12 +27,6 @@ int main(int argc, char* argv[])
 		}
 
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
-		cvFuns.offset += currentOffset;
-
-		//cvFuns.imgToDisplay[1] = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
-		//cvFuns.translateFrame(grayFrame, cvFuns.imgToDisplay[1], cvFuns.offset);
-		//cvFuns.imgToDisplayInfo[1] = "Stabilized frame";
-
 		currentOffset = -currentOffset;
 
 		cvFuns.deviationFromAverageBackImg(grayFrame, currentOffset, refreshRate);

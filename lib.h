@@ -41,6 +41,7 @@ public:
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor);
 	void deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
+	void displayMask(Mat mask);
 	void brightestScaling(Mat frame, float scalingFactor);
 
 	VideoCapture cap;

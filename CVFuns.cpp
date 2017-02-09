@@ -282,6 +282,14 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	return frameOffset;
 }
 
+void CVFuns::displayMask(Mat mask)
+{
+	Mat matWith255 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
+	imgToDisplay[3].setTo(Scalar(0));
+	matWith255.copyTo(imgToDisplay[3], mask);
+	imgToDisplayInfo[3] = "Mask";
+}
+
 void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor)
 {
 	Mat translatedAverageBackImg, currentFrameStaticPart, mask;
@@ -291,11 +299,8 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	mask = deviationFactor * deviationImg - abs(currentFrame - averageBackImg);
 	mask.convertTo(mask, CV_8U);
 
-	Mat matWith255 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
-	imgToDisplay[3].setTo(Scalar(0));
-	matWith255.copyTo(imgToDisplay[3], mask);
-	imgToDisplayInfo[3] = "Mask";
-	
+	displayMask(mask);
+
 	currentFrame.copyTo(translatedAverageBackImg);
 	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
 
