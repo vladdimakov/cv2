@@ -37,19 +37,15 @@ void CVFuns::displayWindow()
 	imshow("Display window", imageToDisplay); 
 }
 
-bool CVFuns::startCapture()
+bool CVFuns::startCapture(int argc, char* argv[])
 {
-	string fileName = "example.mp4";
-	int choice;
-
-	cout << "Выберите источник видео:\n1.Камера\n2.Файл " << fileName << "\nВаш выбор: ";
-	cin >> choice;
-
-	if (choice == 2)
-		cap.open(fileName);
-	else
+	if (argc == 1)
 		cap.open(0); // 0 - камера по умолчанию
-	
+	else if (argc == 2)
+		cap.open(argv[1]);
+	else
+		cout << "Неверное число аргументов командной строки" << endl;
+
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, CAP_FRAME_WIDTH); // Установка параметров захватываемой картинки
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, CAP_FRAME_HEIGHT);
 	cap.set(CV_CAP_PROP_FPS, CAP_FPS);

@@ -31,7 +31,7 @@ class CVFuns
 public:
 	CVFuns();
 	void displayWindow();
-	bool startCapture();
+	bool startCapture(int argc, char* argv[]);
 	vector<Point2f> findCorners(Mat grayFrame, int maxCornersNum);
 	void calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status);
 	void translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset);

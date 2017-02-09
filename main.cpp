@@ -1,12 +1,12 @@
 #include "lib.h"
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "Russian");
 	CVFuns cvFuns;
 	Mat colorFrame, grayFrame;
 
-	if (!cvFuns.startCapture()) 
+	if (!cvFuns.startCapture(argc, argv)) 
 		return -1;
 
 	Point2f currentOffset;
