@@ -22,7 +22,8 @@ int main(int argc, char* argv[])
 
 		if (grayFrame.empty())
 		{
-			return -1;
+			cvFuns.startCapture(argc, argv);
+			continue;
 		}
 
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
