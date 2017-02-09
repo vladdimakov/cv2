@@ -40,7 +40,7 @@ public:
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor);
-	void deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
+	void deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor);
 	void displayMask(Mat mask);
 	void brightestScaling(Mat frame, float scalingFactor);
 
@@ -55,4 +55,5 @@ private:
 	Mat prevGrayFrame;
 	vector<Point2f> prevPoints, currentPoints;
 	FPSCounter FPScounter;
+	Mat mask;
 };

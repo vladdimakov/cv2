@@ -12,8 +12,9 @@ int main(int argc, char* argv[])
 	Point2f currentOffset;
 
     const float refreshRate = 0.05f;
-    const float deviationFactor = 2.0f;
-	const float scalingFactor = 2.0f;
+	const float deviationFactor1 = 5.0f;
+	const float deviationFactor2 = 2.0f;
+	const float scalingFactor = 20.0f;
 
 	while (true)
 	{
@@ -29,10 +30,10 @@ int main(int argc, char* argv[])
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		currentOffset = -currentOffset;
 
-		cvFuns.deviationFromAverageBackImg(grayFrame, currentOffset, refreshRate);
+		cvFuns.deviationFromAverageBackImg(grayFrame, currentOffset, refreshRate, deviationFactor1);
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
 
-		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate, deviationFactor);
+		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate, deviationFactor2);
 
 		cvFuns.displayWindow();
 

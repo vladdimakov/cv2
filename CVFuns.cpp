@@ -224,8 +224,9 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 	offset = Point2f(0, 0);
 
 	prevGrayFrame.convertTo(averageBackImg, CV_32F);
-
-	deviationImg = Mat::zeros(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F);
+	
+	//prevGrayFrame.convertTo(deviationImg, CV_32F);
+	deviationImg = Mat::ones(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F);
 
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
 	/*
@@ -292,14 +293,14 @@ void CVFuns::displayMask(Mat mask)
 
 void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor)
 {
-	Mat translatedAverageBackImg, currentFrameStaticPart, mask;
+	Mat translatedAverageBackImg, currentFrameStaticPart;
 
 	currentFrame.convertTo(currentFrame, CV_32F);
 
 	mask = deviationFactor * deviationImg - abs(currentFrame - averageBackImg);
 	mask.convertTo(mask, CV_8U);
 
-	displayMask(mask);
+	//displayMask(mask);
 
 	currentFrame.copyTo(translatedAverageBackImg);
 	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
@@ -313,9 +314,9 @@ void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float r
 	imgToDisplayInfo[2] = "Average backgroung";
 }
 
-void CVFuns::deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate)
+void CVFuns::deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor)
 {
-	Mat translatedDeviationImg, currentDeviationImg;
+	Mat translatedDeviationImg, currentDeviationImg, currentDeviationImgStaticPart, mask2;
 
 	currentFrame.convertTo(currentFrame, CV_32F);
 
@@ -324,7 +325,15 @@ void CVFuns::deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset
 	currentFrame.copyTo(translatedDeviationImg);
 	translateFrame(deviationImg, translatedDeviationImg, currentOffset);
 
-	deviationImg = (1 - refreshRate) * translatedDeviationImg + refreshRate * currentDeviationImg;	
+	mask2 = deviationFactor * deviationImg - abs(currentFrame - averageBackImg);
+	mask2.convertTo(mask2, CV_8U);
+
+	displayMask(mask2);
+
+	translatedDeviationImg.copyTo(currentDeviationImgStaticPart);
+	currentDeviationImg.copyTo(currentDeviationImgStaticPart, mask2);
+
+	deviationImg = (1 - refreshRate) * translatedDeviationImg + refreshRate * currentDeviationImgStaticPart;	
 }
 
 void CVFuns::brightestScaling(Mat frame, float scalingFactor)
