@@ -39,9 +39,9 @@ public:
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
-	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor);
-	void deviationFromAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate, float deviationFactor);
-	void displayMask(Mat mask);
+	Mat makeFrameStaticPartMask(Mat currentFrame, float deviationFactor);
+	void calcAverageBackImg(Mat currentFrame, Mat currentFrameStaticPartMask, Point2f currentOffset, float refreshRate);
+	void deviationFromAverageBackImg(Mat currentFrame, Mat currentFrameStaticPartMask, Point2f currentOffset, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
 
 	VideoCapture cap;
@@ -55,5 +55,4 @@ private:
 	Mat prevGrayFrame;
 	vector<Point2f> prevPoints, currentPoints;
 	FPSCounter FPScounter;
-	Mat mask;
 };
