@@ -39,15 +39,17 @@ public:
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
-	Mat makeFrameStaticPartMask(Mat currentFrame, float deviationFactor);
-	void calcAverageBackImg(Mat currentFrame, Mat currentFrameStaticPartMask, Point2f currentOffset, float refreshRate);
-	void deviationFromAverageBackImg(Mat currentFrame, Mat currentFrameStaticPartMask, Point2f currentOffset, float refreshRate);
+	void translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset);
+	void calcFrameStaticPartMask(Mat currentFrame, float deviationFactor);
+	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
+	void calcAverageDeviationImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
+	
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
-	Mat averageBackImg, deviationImg;
+	Mat frameStaticPartMask, averageBackImg, deviationImg;
 	bool needToInit;
 	Point2f offset;
 

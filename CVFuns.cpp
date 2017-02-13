@@ -283,10 +283,25 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	return frameOffset;
 }
 
-Mat CVFuns::makeFrameStaticPartMask(Mat currentFrame, float deviationFactor)
+void CVFuns::translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset)
 {
-	Mat frameStaticPartMask;
+	Mat translatedAverageBackImg, translatedDeviationImg;
 
+	currentFrame.convertTo(currentFrame, CV_32F);
+
+	currentFrame.copyTo(translatedAverageBackImg);
+	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
+
+	//currentFrame.copyTo(translatedDeviationImg);
+	translatedDeviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(255));
+	translateFrame(deviationImg, translatedDeviationImg, currentOffset);
+
+	translatedAverageBackImg.copyTo(averageBackImg);
+	translatedDeviationImg.copyTo(deviationImg);
+}
+
+void CVFuns::calcFrameStaticPartMask(Mat currentFrame, float deviationFactor)
+{
 	currentFrame.convertTo(currentFrame, CV_32F);
 
 	frameStaticPartMask = deviationFactor * deviationImg - abs(currentFrame - averageBackImg);
@@ -296,44 +311,35 @@ Mat CVFuns::makeFrameStaticPartMask(Mat currentFrame, float deviationFactor)
 	imgToDisplay[3].setTo(Scalar(0));
 	matWith255.copyTo(imgToDisplay[3], frameStaticPartMask);
 	imgToDisplayInfo[3] = "Mask";
-
-	return frameStaticPartMask;
 }
 
-void CVFuns::calcAverageBackImg(Mat currentFrame, Mat currentFrameStaticPartMask, Point2f currentOffset, float refreshRate)
+void CVFuns::calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate)
 {
-	Mat translatedAverageBackImg, currentFrameStaticPart;
+	Mat currentFrameStaticPart;
 
 	currentFrame.convertTo(currentFrame, CV_32F);
 
-	currentFrame.copyTo(translatedAverageBackImg);
-	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
+	averageBackImg.copyTo(currentFrameStaticPart);
+	currentFrame.copyTo(currentFrameStaticPart, frameStaticPartMask);
 
-	translatedAverageBackImg.copyTo(currentFrameStaticPart);
-	currentFrame.copyTo(currentFrameStaticPart, currentFrameStaticPartMask);
-
-	averageBackImg = (1 - refreshRate) * translatedAverageBackImg + refreshRate * currentFrameStaticPart;
+	averageBackImg = (1 - refreshRate) * averageBackImg + refreshRate * currentFrameStaticPart;
 
 	averageBackImg.convertTo(imgToDisplay[2], CV_8U);
 	imgToDisplayInfo[2] = "Average backgroung";
 }
 
-void CVFuns::deviationFromAverageBackImg(Mat currentFrame, Mat currentFrameStaticPartMask, Point2f currentOffset, float refreshRate)
+void CVFuns::calcAverageDeviationImg(Mat currentFrame, Point2f currentOffset, float refreshRate)
 {
-	Mat translatedDeviationImg, currentDeviationImg, currentDeviationImgStaticPart;
+	Mat currentDeviationImg, currentDeviationImgStaticPart;
 
 	currentFrame.convertTo(currentFrame, CV_32F);
 
-	//currentFrame.copyTo(translatedDeviationImg);
-	translatedDeviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(255));
-	translateFrame(deviationImg, translatedDeviationImg, currentOffset);
-
 	currentDeviationImg = abs(currentFrame - averageBackImg);
 
-	translatedDeviationImg.copyTo(currentDeviationImgStaticPart);
-	currentDeviationImg.copyTo(currentDeviationImgStaticPart, currentFrameStaticPartMask);
+	deviationImg.copyTo(currentDeviationImgStaticPart);
+	currentDeviationImg.copyTo(currentDeviationImgStaticPart, frameStaticPartMask);
 
-	deviationImg = (1 - refreshRate) * translatedDeviationImg + refreshRate * currentDeviationImgStaticPart;	
+	deviationImg = (1 - refreshRate) * deviationImg + refreshRate * currentDeviationImgStaticPart;	
 }
 
 void CVFuns::brightestScaling(Mat frame, float scalingFactor)

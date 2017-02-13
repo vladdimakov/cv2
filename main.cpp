@@ -30,12 +30,14 @@ int main(int argc, char* argv[])
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
 		currentOffset = -currentOffset;
 
-		cvFuns.deviationFromAverageBackImg(grayFrame, grayFrameStaticPartMask, currentOffset, refreshRate);
+		cvFuns.translateAverageBackAndDeviationImg(grayFrame, currentOffset);
+
+		cvFuns.calcFrameStaticPartMask(grayFrame, deviationFactor);
+
+		cvFuns.calcAverageBackImg(grayFrame, currentOffset, refreshRate);
+
+		cvFuns.calcAverageDeviationImg(grayFrame, currentOffset, refreshRate);
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-
-		cvFuns.calcAverageBackImg(grayFrame, grayFrameStaticPartMask, currentOffset, refreshRate);
-
-		grayFrameStaticPartMask = cvFuns.makeFrameStaticPartMask(grayFrame, deviationFactor);
 
 		cvFuns.displayWindow();
 
