@@ -48,9 +48,10 @@ public:
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
+	Point2f offset;
 	Mat frameStaticPartMask, averageBackImg, deviationImg;
 	bool needToInit;
-	Point2f offset;
+	float deviationImgFillValue;
 
 private:
 	Mat prevGrayFrame;

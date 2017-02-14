@@ -226,7 +226,7 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 	prevGrayFrame.convertTo(averageBackImg, CV_32F);
 	
 	//prevGrayFrame.convertTo(deviationImg, CV_32F);
-	deviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(255));
+	deviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(deviationImgFillValue));
 
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
 	/*
@@ -293,7 +293,7 @@ void CVFuns::translateAverageBackAndDeviationImg(Mat currentFrame, Point2f curre
 	translateFrame(averageBackImg, translatedAverageBackImg, currentOffset);
 
 	//currentFrame.copyTo(translatedDeviationImg);
-	translatedDeviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(255));
+	translatedDeviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(deviationImgFillValue));
 	translateFrame(deviationImg, translatedDeviationImg, currentOffset);
 
 	translatedAverageBackImg.copyTo(averageBackImg);
