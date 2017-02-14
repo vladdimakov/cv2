@@ -43,7 +43,7 @@ public:
 	void calcFrameStaticPartMask(Mat currentFrame, float deviationFactor);
 	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
-	
+	void displayMovingTarget(Mat currentFrame, float movingTargetFactor);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;

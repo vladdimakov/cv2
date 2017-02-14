@@ -306,11 +306,12 @@ void CVFuns::calcFrameStaticPartMask(Mat currentFrame, float deviationFactor)
 
 	frameStaticPartMask = deviationFactor * deviationImg - abs(currentFrame - averageBackImg);
 	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
-
+	/*
 	Mat matWith255 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
 	imgToDisplay[3].setTo(Scalar(0));
 	matWith255.copyTo(imgToDisplay[3], frameStaticPartMask);
 	imgToDisplayInfo[3] = "Mask";
+	*/
 }
 
 void CVFuns::calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate)
@@ -343,4 +344,17 @@ void CVFuns::brightestScaling(Mat frame, float scalingFactor)
 
 	scaledFrame.convertTo(imgToDisplay[1], CV_8U);
 	imgToDisplayInfo[1] = "Deviation image";
+}
+
+void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
+{
+	currentFrame.convertTo(currentFrame, CV_32F);
+
+	frameStaticPartMask = movingTargetFactor * deviationImg - abs(currentFrame - averageBackImg);
+	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
+
+	Mat frameWithZeros = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(0));
+	imgToDisplay[3].setTo(Scalar(255));
+	frameWithZeros.copyTo(imgToDisplay[3], frameStaticPartMask);
+	imgToDisplayInfo[3] = "Moving target";
 }
