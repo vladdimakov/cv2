@@ -41,8 +41,7 @@ public:
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset);
 	void calcFrameStaticPartMask(Mat currentFrame, float deviationFactor);
-	void calcAverageBackImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
-	void calcAverageDeviationImg(Mat currentFrame, Point2f currentOffset, float refreshRate);
+	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
 	
 
