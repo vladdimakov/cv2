@@ -112,26 +112,14 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 			intOffset.y += 1;
 		}
 
+		
 		Point2f center;
 		center.x = (float)CAP_FRAME_WIDTH / 2 - 0.5f - subPixOffset.x;
 		center.y = (float)CAP_FRAME_HEIGHT / 2 - 0.5f - subPixOffset.y;
-
+		
 		getRectSubPix(inputFrame, Size(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT), center, inputFrame);
-
-		/*
-		Mat newFrame = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U);
-		for (int y = 0; y < CAP_FRAME_HEIGHT - 1; y++)
-		{
-			for (int x = 0; x < CAP_FRAME_WIDTH - 1; x++)
-			{
-				newFrame.at<uchar>(y, x) = inputFrame.at<uchar>(y, x) * (1 - subPixOffset.x) * (1 - subPixOffset.y) + 
-					inputFrame.at<uchar>(y, x + 1) * subPixOffset.x * (1 - subPixOffset.y) +
-					inputFrame.at<uchar>(y + 1, x) * (1 - subPixOffset.x) * subPixOffset.y + 
-					inputFrame.at<uchar>(y + 1, x + 1) * subPixOffset.x * subPixOffset.y;
-			}
-		}
-		newFrame.copyTo(inputFrame);
-		*/
+		
+		//inputFrame = subPixTranslateFrame(inputFrame, -subPixOffset);
 	}
 
 	if (intOffset.x != 0 || intOffset.y != 0)
@@ -168,6 +156,63 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 	else
 	{
 		inputFrame.copyTo(outputFrame);
+	}
+}
+
+Mat CVFuns::subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset)
+{
+	if (subPixOffset.x == 0.0f && subPixOffset.y == 0.0f)
+		return inputFrame;
+
+	Mat outputFrame, translatedFrame1, translatedFrame2, translatedFrame3;
+
+	inputFrame.copyTo(translatedFrame1);
+	inputFrame.copyTo(translatedFrame2);
+	inputFrame.copyTo(translatedFrame3);
+
+	if (subPixOffset.x >= 0.0f && subPixOffset.y >= 0.0f)
+	{
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y, x + 1
+		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH)); // y + 1, x
+		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame3.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH - 1)); // y + 1, x + 1
+
+		outputFrame = inputFrame * (1 - subPixOffset.x) * (1 - subPixOffset.y) + translatedFrame1 * subPixOffset.x * (1 - subPixOffset.y) +
+			translatedFrame2 * (1 - subPixOffset.x) * subPixOffset.y + translatedFrame3 * subPixOffset.x * subPixOffset.y;
+
+		return outputFrame;
+	}
+	else if (subPixOffset.x < 0.0f && subPixOffset.y > 0.0f)
+	{
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y, x - 1
+		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH)); // y + 1, x
+		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame3.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(1, CAP_FRAME_WIDTH)); // y + 1, x - 1
+
+		outputFrame = inputFrame * (1 + subPixOffset.x) * (1 - subPixOffset.y) + translatedFrame1 * (-subPixOffset.x) * (1 - subPixOffset.y) +
+			translatedFrame2 * (1 + subPixOffset.x) * subPixOffset.y + translatedFrame3 * (-subPixOffset.x) * subPixOffset.y;
+
+		return outputFrame;
+	}
+	else if (subPixOffset.x > 0.0f && subPixOffset.y < 0.0f)
+	{
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y, x + 1
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH)); // y - 1, x
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame3.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y - 1, x + 1
+
+		outputFrame = inputFrame * (-1 + subPixOffset.x) * (-1 - subPixOffset.y) + translatedFrame1 * (-subPixOffset.x) * (-1 - subPixOffset.y) +
+			translatedFrame2 * (-1 + subPixOffset.x) * subPixOffset.y + translatedFrame3 * (-subPixOffset.x) * subPixOffset.y;
+
+		return outputFrame;
+	}
+	else if (subPixOffset.x <= 0.0f && subPixOffset.y <= 0.0f)
+	{
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y, x - 1
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH)); // y - 1, x
+		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame3.rowRange(1, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y - 1, x - 1
+
+		outputFrame = inputFrame * (1 + subPixOffset.x) * (1 + subPixOffset.y) + translatedFrame1 * subPixOffset.x * (-1 - subPixOffset.y) +
+			translatedFrame2 * (-1 - subPixOffset.x) * subPixOffset.y + translatedFrame3 * subPixOffset.x * subPixOffset.y;
+
+		return outputFrame;
 	}
 }
 

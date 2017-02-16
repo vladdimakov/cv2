@@ -40,6 +40,7 @@ public:
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset);
+	Mat subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset);
 	void calcFrameStaticPartMask(Mat currentFrame, float deviationFactor);
 	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
