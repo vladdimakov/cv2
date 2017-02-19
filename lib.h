@@ -43,9 +43,10 @@ public:
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset);
 	void calcFrameStaticPartMask(Mat currentFrame, float deviationFactor);
+	void displayMovingTarget(Mat currentFrame, float movingTargetFactor);
+	void showFrameStaticPartMask();
 	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
-	void displayMovingTarget(Mat currentFrame, float movingTargetFactor);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
@@ -56,7 +57,7 @@ public:
 	float deviationImgFillValue;
 
 private:
-	Mat prevGrayFrame;
+	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;
 	vector<Point2f> prevPoints, currentPoints;
 	FPSCounter FPScounter;
 };

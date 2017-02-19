@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 	const float scalingFactor = 20.0f;
 	cvFuns.deviationImgFillValue = 256.0f / movingTargetFactor;
 
-	Mat colorFrame, grayFrame;
+	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
 
 	if (!cvFuns.startCapture(argc, argv)) 
@@ -20,25 +20,26 @@ int main(int argc, char* argv[])
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;
-		cvtColor(colorFrame, grayFrame, CV_RGB2GRAY);
+		cvtColor(colorFrame, grayFrame8U, CV_RGB2GRAY);
+		grayFrame8U.convertTo(grayFrame32F, CV_32F);
 
-		if (grayFrame.empty())
+		if (grayFrame8U.empty())
 		{
 			cvFuns.startCapture(argc, argv);
 			continue;
 		}
 
-		currentOffset = cvFuns.calcFrameOffset(grayFrame);
+		currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
 		
-		cvFuns.translateAverageBackAndDeviationImg(grayFrame, currentOffset);
+		cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
 
-		cvFuns.calcFrameStaticPartMask(grayFrame, deviationFactor);
+		cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
 
-		cvFuns.calcAverageBackAndDeviationImg(grayFrame, refreshRate);
+		cvFuns.displayMovingTarget(grayFrame32F, movingTargetFactor);
+
+		cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
 
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-
-		cvFuns.displayMovingTarget(grayFrame, movingTargetFactor);
 
 		cvFuns.displayWindow();
 
