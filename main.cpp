@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
 
 	const float refreshRate = 0.02f;
 	const float deviationFactor = 3.5f;
-	const float movingTargetFactor = 40.0f;
+	const float movingTargetFactor = 15.0f;
 	const float scalingFactor = 20.0f;
 	cvFuns.deviationImgFillValue = 256.0f / movingTargetFactor;
 

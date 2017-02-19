@@ -389,8 +389,6 @@ void CVFuns::brightestScaling(Mat frame, float scalingFactor)
 
 int CVFuns::getBackgroundBound(Mat frame)
 {
-	frame.convertTo(frame, CV_8U);
-
 	int histogram[256];
 
 	for (int i = 0; i < 256; i++)
@@ -430,9 +428,24 @@ int CVFuns::getBackgroundBound(Mat frame)
 
 void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
 {
-	frameStaticPartMask = movingTargetFactor * deviationImg - abs(currentFrame - averageBackImg);
-	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
+	currentDeviationImg = abs(currentFrame - averageBackImg);
 
+	frameStaticPartMask = movingTargetFactor * deviationImg - currentDeviationImg;
+	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
+	
+	currentDeviationImg.convertTo(currentDeviationImg, CV_8U);
+
+	int backgroundBound = getBackgroundBound(currentDeviationImg);
+	
+	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
+	{
+		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
+		{
+			if (currentDeviationImg.at<uchar>(i, j) < backgroundBound)
+				frameStaticPartMask.at<uchar>(i, j) = 255;
+		}
+	}
+	
 	imgToDisplay[3].setTo(Scalar(255));
 	frameWith0.copyTo(imgToDisplay[3], frameStaticPartMask);
 
