@@ -352,19 +352,6 @@ void CVFuns::calcFrameStaticPartMask(Mat currentFrame, float deviationFactor)
 	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
 }
 
-void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
-{
-	Mat movingTargetMask;
-
-	movingTargetMask = movingTargetFactor * deviationImg - currentDeviationImg;
-	movingTargetMask.convertTo(movingTargetMask, CV_8U);
-
-	imgToDisplay[3].setTo(Scalar(255));
-	frameWith0.copyTo(imgToDisplay[3], movingTargetMask);
-
-	imgToDisplayInfo[3] = "Moving target";
-}
-
 void CVFuns::showFrameStaticPartMask()
 {
 	imgToDisplay[3].setTo(Scalar(0));
@@ -398,4 +385,56 @@ void CVFuns::brightestScaling(Mat frame, float scalingFactor)
 
 	scaledFrame.convertTo(imgToDisplay[1], CV_8U);
 	imgToDisplayInfo[1] = "Deviation image";
+}
+
+int CVFuns::getBackgroundBound(Mat frame)
+{
+	frame.convertTo(frame, CV_8U);
+
+	int histogram[256];
+
+	for (int i = 0; i < 256; i++)
+		histogram[i] = 0;
+
+	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
+	{
+		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
+		{
+			histogram[frame.at<uchar>(i, j)]++;
+		}
+	}
+
+	int startInd = 1;
+	if (histogram[0] <= histogram[1])
+	{
+		for (startInd = 1; startInd < 256; startInd++)
+		{
+			if (histogram[startInd + 1] < histogram[startInd])
+			{
+				break;
+			}
+		}
+	}
+
+	int endInd = 1;
+	for (endInd = startInd; endInd < 256; endInd++)
+	{
+		if (histogram[endInd + 1] >= histogram[endInd])
+		{
+			break;
+		}
+	}
+
+	return endInd;
+}
+
+void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
+{
+	frameStaticPartMask = movingTargetFactor * deviationImg - abs(currentFrame - averageBackImg);
+	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
+
+	imgToDisplay[3].setTo(Scalar(255));
+	frameWith0.copyTo(imgToDisplay[3], frameStaticPartMask);
+
+	imgToDisplayInfo[3] = "Moving target";
 }

@@ -35,11 +35,11 @@ int main(int argc, char* argv[])
 
 		cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
 
-		cvFuns.displayMovingTarget(grayFrame32F, movingTargetFactor);
-
 		cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
 
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
+
+		cvFuns.displayMovingTarget(grayFrame32F, movingTargetFactor);
 
 		cvFuns.displayWindow();
 
