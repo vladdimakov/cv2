@@ -29,8 +29,7 @@ int main(int argc, char* argv[])
 		}
 
 		currentOffset = cvFuns.calcFrameOffset(grayFrame);
-		currentOffset = -currentOffset;
-
+		
 		cvFuns.translateAverageBackAndDeviationImg(grayFrame, currentOffset);
 
 		cvFuns.calcFrameStaticPartMask(grayFrame, deviationFactor);

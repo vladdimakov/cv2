@@ -35,12 +35,13 @@ public:
 	vector<Point2f> findCorners(Mat grayFrame, int maxCornersNum);
 	void calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status);
 	void translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset);
+	Mat subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset);
+	Mat subPixTranslateFrameOpenCV(Mat inputFrame, Point2f subPixOffset);
 	float findMedian(vector<float> value);
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
 	void makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints);
 	Point2f calcFrameOffset(Mat& currentGrayFrame);
 	void translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset);
-	Mat subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset);
 	void calcFrameStaticPartMask(Mat currentFrame, float deviationFactor);
 	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);

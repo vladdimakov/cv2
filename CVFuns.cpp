@@ -96,8 +96,8 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 	intOffset.y = (int)offset.y;
 
 	Point2f subPixOffset;
-	subPixOffset.x = offset.x - intOffset.x;
-	subPixOffset.y = offset.y - intOffset.y;
+	subPixOffset.x = offset.x - (float)intOffset.x;
+	subPixOffset.y = offset.y - (float)intOffset.y;
 
 	if (subPixOffset.x != 0.0f || subPixOffset.y != 0.0f)
 	{
@@ -106,20 +106,24 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 			subPixOffset.x -= 1.0f;
 			intOffset.x += 1;
 		}
+		else if (subPixOffset.x < -0.5f)
+		{
+			subPixOffset.x += 1.0f;
+			intOffset.x -= 1;
+		}
 		if (subPixOffset.y > 0.5f)
 		{
 			subPixOffset.y -= 1.0f;
 			intOffset.y += 1;
 		}
-
-		
-		Point2f center;
-		center.x = (float)CAP_FRAME_WIDTH / 2 - 0.5f - subPixOffset.x;
-		center.y = (float)CAP_FRAME_HEIGHT / 2 - 0.5f - subPixOffset.y;
-		
-		getRectSubPix(inputFrame, Size(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT), center, inputFrame);
-		
-		//inputFrame = subPixTranslateFrame(inputFrame, -subPixOffset);
+		else if (subPixOffset.y < -0.5f)
+		{
+			subPixOffset.y += 1.0f;
+			intOffset.y -= 1;
+		}
+				
+		//inputFrame = subPixTranslateFrameOpenCV(inputFrame, subPixOffset);		
+		inputFrame = subPixTranslateFrame(inputFrame, subPixOffset);
 	}
 
 	if (intOffset.x != 0 || intOffset.y != 0)
@@ -129,26 +133,26 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 		int xNew[2] = { 0, CAP_FRAME_WIDTH };
 		int yNew[2] = { 0, CAP_FRAME_HEIGHT };
 
-		if (intOffset.x < 0)
+		if (intOffset.x > 0)
 		{
-			xOld[0] = -intOffset.x;
-			xNew[1] = CAP_FRAME_WIDTH + intOffset.x;
+			xOld[0] = intOffset.x;
+			xNew[1] = CAP_FRAME_WIDTH - intOffset.x;
 		}
-		else if (intOffset.x > 0)
+		else if (intOffset.x < 0)
 		{
-			xOld[1] = CAP_FRAME_WIDTH - intOffset.x;
-			xNew[0] = intOffset.x;
+			xOld[1] = CAP_FRAME_WIDTH + intOffset.x;
+			xNew[0] = -intOffset.x;
 		}
 
-		if (intOffset.y < 0)
+		if (intOffset.y > 0)
 		{
-			yOld[0] = -intOffset.y;
-			yNew[1] = CAP_FRAME_HEIGHT + intOffset.y;
+			yOld[0] = intOffset.y;
+			yNew[1] = CAP_FRAME_HEIGHT - intOffset.y;
 		}
-		else if (intOffset.y > 0)
+		else if (intOffset.y < 0)
 		{
-			yOld[1] = CAP_FRAME_HEIGHT - intOffset.y;
-			yNew[0] = intOffset.y;
+			yOld[1] = CAP_FRAME_HEIGHT + intOffset.y;
+			yNew[0] = -intOffset.y;
 		}
 
 		inputFrame.rowRange(yOld[0], yOld[1]).colRange(xOld[0], xOld[1]).copyTo(outputFrame.rowRange(yNew[0], yNew[1]).colRange(xNew[0], xNew[1]));
@@ -175,45 +179,49 @@ Mat CVFuns::subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset)
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y, x + 1
 		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH)); // y + 1, x
 		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame3.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH - 1)); // y + 1, x + 1
-
-		outputFrame = inputFrame * (1 - subPixOffset.x) * (1 - subPixOffset.y) + translatedFrame1 * subPixOffset.x * (1 - subPixOffset.y) +
-			translatedFrame2 * (1 - subPixOffset.x) * subPixOffset.y + translatedFrame3 * subPixOffset.x * subPixOffset.y;
-
-		return outputFrame;
 	}
 	else if (subPixOffset.x < 0.0f && subPixOffset.y > 0.0f)
 	{
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y, x - 1
 		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH)); // y + 1, x
 		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame3.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(1, CAP_FRAME_WIDTH)); // y + 1, x - 1
-
-		outputFrame = inputFrame * (1 + subPixOffset.x) * (1 - subPixOffset.y) + translatedFrame1 * (-subPixOffset.x) * (1 - subPixOffset.y) +
-			translatedFrame2 * (1 + subPixOffset.x) * subPixOffset.y + translatedFrame3 * (-subPixOffset.x) * subPixOffset.y;
-
-		return outputFrame;
 	}
 	else if (subPixOffset.x > 0.0f && subPixOffset.y < 0.0f)
 	{
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y, x + 1
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH)); // y - 1, x
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame3.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y - 1, x + 1
-
-		outputFrame = inputFrame * (-1 + subPixOffset.x) * (-1 - subPixOffset.y) + translatedFrame1 * (-subPixOffset.x) * (-1 - subPixOffset.y) +
-			translatedFrame2 * (-1 + subPixOffset.x) * subPixOffset.y + translatedFrame3 * (-subPixOffset.x) * subPixOffset.y;
-
-		return outputFrame;
 	}
 	else if (subPixOffset.x <= 0.0f && subPixOffset.y <= 0.0f)
 	{
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y, x - 1
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH)); // y - 1, x
 		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame3.rowRange(1, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y - 1, x - 1
-
-		outputFrame = inputFrame * (1 + subPixOffset.x) * (1 + subPixOffset.y) + translatedFrame1 * subPixOffset.x * (-1 - subPixOffset.y) +
-			translatedFrame2 * (-1 - subPixOffset.x) * subPixOffset.y + translatedFrame3 * subPixOffset.x * subPixOffset.y;
-
-		return outputFrame;
 	}
+
+	subPixOffset.x = abs(subPixOffset.x);
+	subPixOffset.y = abs(subPixOffset.y);
+
+	outputFrame = inputFrame * (1 - subPixOffset.x) * (1 - subPixOffset.y) + translatedFrame1 * subPixOffset.x * (1 - subPixOffset.y) +
+		translatedFrame2 * (1 - subPixOffset.x) * subPixOffset.y + translatedFrame3 * subPixOffset.x * subPixOffset.y;
+
+	return outputFrame;
+}
+
+Mat CVFuns::subPixTranslateFrameOpenCV(Mat inputFrame, Point2f subPixOffset)
+{
+	if (subPixOffset.x == 0.0f && subPixOffset.y == 0.0f)
+		return inputFrame;
+
+	Mat outputFrame;
+	Point2f center;
+
+	center.x = (float)CAP_FRAME_WIDTH / 2 - 0.5f + subPixOffset.x;
+	center.y = (float)CAP_FRAME_HEIGHT / 2 - 0.5f + subPixOffset.y;
+
+	getRectSubPix(inputFrame, Size(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT), center, outputFrame);
+
+	return outputFrame;
 }
 
 float CVFuns::findMedian(vector<float> value)
