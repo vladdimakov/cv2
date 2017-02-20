@@ -125,8 +125,8 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 			intOffset.y -= 1;
 		}
 				
-		//inputFrame = subPixTranslateFrameOpenCV(inputFrame, subPixOffset);		
-		inputFrame = subPixTranslateFrame(inputFrame, subPixOffset);
+		inputFrame = subPixTranslateFrameOpenCV(inputFrame, subPixOffset);		
+		//inputFrame = subPixTranslateFrame(inputFrame, subPixOffset);
 	}
 
 	if (intOffset.x != 0 || intOffset.y != 0)
@@ -426,17 +426,56 @@ int CVFuns::getBackgroundBound(Mat frame)
 	return endInd;
 }
 
+int CVFuns::getBackgroundBoundOpenCV(Mat frame)
+{
+	Mat histogram;
+
+	int histSize = 256;
+	float range[] = { 0, 256};
+	const float* histRange = { range };
+	
+	calcHist(&frame, 1, 0, Mat(), histogram, 1, &histSize, &histRange);
+	
+	int startInd = 1;
+	if (histogram.at<float>(0) <= histogram.at<float>(1))
+	{
+		for (startInd = 1; startInd < 256; startInd++)
+		{
+			if (histogram.at<float>(startInd + 1) < histogram.at<float>(startInd))
+			{
+				break;
+			}
+		}
+	}
+
+	int endInd = 1;
+	for (endInd = startInd; endInd < 256; endInd++)
+	{
+		if (histogram.at<float>(endInd + 1) >= histogram.at<float>(endInd))
+		{
+			break;
+		}
+	}
+
+	return endInd;
+}
+
 void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
 {
+	Mat backgroundBoundMask = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
+
 	currentDeviationImg = abs(currentFrame - averageBackImg);
 
 	frameStaticPartMask = movingTargetFactor * deviationImg - currentDeviationImg;
 	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
 	
 	currentDeviationImg.convertTo(currentDeviationImg, CV_8U);
+	int backgroundBound = getBackgroundBoundOpenCV(currentDeviationImg);
+	//int backgroundBound = getBackgroundBound(currentDeviationImg);
 
-	int backgroundBound = getBackgroundBound(currentDeviationImg);
-	
+	frameWith0.copyTo(backgroundBoundMask, currentDeviationImg - backgroundBound);
+	frameWith255.copyTo(frameStaticPartMask, backgroundBoundMask);
+	/*
 	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
 	{
 		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
@@ -445,7 +484,8 @@ void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
 				frameStaticPartMask.at<uchar>(i, j) = 255;
 		}
 	}
-	
+	*/
+
 	imgToDisplay[3].setTo(Scalar(255));
 	frameWith0.copyTo(imgToDisplay[3], frameStaticPartMask);
 

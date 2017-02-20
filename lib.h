@@ -47,6 +47,7 @@ public:
 	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
 	int getBackgroundBound(Mat frame);
+	int getBackgroundBoundOpenCV(Mat frame);
 	void displayMovingTarget(Mat currentFrame, float movingTargetFactor);
 
 	VideoCapture cap;
