@@ -27,6 +27,7 @@ void CVFuns::displayWindow()
 
 	namedWindow("Display window", CV_WINDOW_NORMAL);
 	resizeWindow("Display window", WINDOW_WIDTH, WINDOW_HEIGHT);
+	//namedWindow("Display window", CV_WINDOW_AUTOSIZE);
 
 	for (int i = 1; i < 5; i++)
 		putText(imgToDisplay[i-1], to_string(i), Point(10, 30), 1, 1.5, Scalar(255), 2);
@@ -313,7 +314,7 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 			prevPoints[k] = prevPoints[i];
 			k++;
 
-			circle(imgToDisplay[0], currentPoints[i], 3, Scalar(255), -1, 8);
+//			circle(imgToDisplay[0], currentPoints[i], 3, Scalar(255), -1, 8);
 		}
 	}
 	currentPoints.resize(k);
@@ -460,6 +461,123 @@ int CVFuns::getBackgroundBoundOpenCV(Mat frame)
 	return endInd;
 }
 
+void makeOkr(Mat &frame, int j, int i, vector<Point2i> &points)
+{
+	frame.at<uchar>(j, i) = 0;
+	points.push_back(Point2i(j, i));
+
+	if (j + 1 < CAP_FRAME_HEIGHT)
+	{
+		if (frame.at<uchar>(j+1,i) == 255)
+			makeOkr(frame, j+1,i, points);
+	}
+
+	if (i+1 < CAP_FRAME_WIDTH)
+	{
+		if (frame.at<uchar>(j,i+1) == 255)
+			makeOkr(frame, j,i+1, points);
+	}
+
+	if (j-1 >= 0)
+	{
+		if (frame.at<uchar>(j-1,i) == 255)
+			makeOkr(frame, j-1,i, points);
+	}
+	
+	if (i -1 >=0)
+	{
+		if (frame.at<uchar>(j, i-1) == 255)
+			makeOkr(frame, j,i-1, points);
+	}
+
+}
+
+vector<Point2i> some(Mat &frame, int j, int i)
+{
+	vector<Point2i> points;
+	makeOkr(frame, j, i, points);
+
+	return points;
+}
+
+void CVFuns::drawRect(vector<vector<Point2i>> points)
+{
+	vector<target> targets;
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (points[i].size() > 10)
+		{
+			int xMin = CAP_FRAME_WIDTH, yMin = CAP_FRAME_HEIGHT, xMax = 0, yMax = 0;
+			for (int j = 0; j < points[i].size(); j++)
+			{
+				int xCurrent = (points[i])[j].y;
+				int yCurrent = (points[i])[j].x;
+
+				if (xCurrent < xMin)
+					xMin = xCurrent;
+
+				if (yCurrent < yMin)
+					yMin = yCurrent;
+
+				if (xCurrent > xMax)
+					xMax = xCurrent;
+
+				if (yCurrent > yMax)
+					yMax = yCurrent;
+			}
+			Point2f center;
+			center.x = xMax - (float)(xMax - xMin) / 2;
+			center.y = yMax - (float)(yMax - yMin) / 2;
+			target tmp = { Point2i(xMin, yMin), Point2i(xMax, yMax), center, true };
+			targets.push_back(tmp);
+			//rectangle(imgToDisplay[0], tmp.min, tmp.max, Scalar(255), 2);
+			//rectangle(imgToDisplay[0], Point2i(xMin, yMin), Point2i(xMax, yMax), Scalar(255), 2);
+			//	circle(imgToDisplay[0], tmp.center, 3, Scalar(255), -1, 8);
+		}
+	}
+
+	
+	float dist = 100;
+	for (int i = 0; i < targets.size(); i++)
+	{
+		for (int j = 1; j < targets.size(); j++)
+		{
+			if (targets[i].flag != false && targets[j].flag != false && i != j)
+			{
+				if (sqrt((targets[i].center.x - targets[j].center.x) * (targets[i].center.x - targets[j].center.x) + (targets[i].center.y - targets[j].center.y) * (targets[i].center.y - targets[j].center.y)) < dist)
+				{
+					targets[j].flag = false;
+
+					if (targets[i].min.x > targets[j].min.x)
+						targets[i].min.x = targets[j].min.x;
+
+					if (targets[i].max.x < targets[j].max.x)
+						targets[i].max.x = targets[j].max.x;
+
+					if (targets[i].min.y > targets[j].min.y)
+						targets[i].min.y = targets[j].min.y;
+
+					if (targets[i].max.y < targets[j].max.y)
+						targets[i].max.y = targets[j].max.y;
+				}
+			}
+		}
+	}
+
+	
+	int cnt = 0;
+	for (int i = 0; i < targets.size(); i++)
+	{
+		if (targets[i].flag != false)
+		{
+			rectangle(imgToDisplay[0], targets[i].min, targets[i].max, Scalar(255), 2);
+			cnt++;
+		}
+	}
+
+	cout << cnt << endl;
+}
+
 void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
 {
 	Mat backgroundBoundMask = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
@@ -486,8 +604,65 @@ void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
 	}
 	*/
 
-	imgToDisplay[3].setTo(Scalar(255));
-	frameWith0.copyTo(imgToDisplay[3], frameStaticPartMask);
+	Mat targetFrame = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
+	frameWith0.copyTo(targetFrame, frameStaticPartMask);
+	//targetFrame.copyTo(imgToDisplay[3]);
 
 	imgToDisplayInfo[3] = "Moving target";
+	/*
+	int cnt1 = 0;
+	for (int j = 0; j < CAP_FRAME_HEIGHT; j++)
+	{
+		for (int i = 0; i < CAP_FRAME_WIDTH; i++)
+		{
+			if (targetFrame.at<uchar>(j, i) == 255)
+			{
+				cnt1++;
+			}
+		}
+	}
+	*/
+	targetFrame.copyTo(imgToDisplay[3]);
+	vector<vector<Point2i>> targetPoints;
+	for (int j = 0; j < CAP_FRAME_HEIGHT; j++)
+	{
+		for (int i = 0; i < CAP_FRAME_WIDTH; i++)
+		{
+			if (targetFrame.at<uchar>(j, i) == 255)
+			{
+				vector<Point2i> tmp = some(targetFrame, j, i); 
+				targetPoints.push_back(tmp);
+			}
+		}
+	}
+	
+
+	/*
+	targetFrame.copyTo(imgToDisplay[3]);
+	int cnt = 0;
+	Mat fff = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
+	for (int i = 0; i < targetPoints.size(); i++)
+	{
+		for (int j = 0; j < targetPoints[i].size(); j++)
+		{
+			Point2i pt = (targetPoints[i])[j];
+			fff.at<uchar>(pt.x, pt.y) = cnt;
+			
+		}
+		cnt += 10;
+	}
+	fff.copyTo(imgToDisplay[0]);
+	*/
+	/*
+	int cnt2 = 0;
+	for (int i = 0; i < targetPoints.size(); i++)
+	{
+		cnt2 += targetPoints[i].size();
+	}
+
+	cout << cnt2 - cnt1 << endl;
+	*/
+
+	drawRect(targetPoints);
+
 }

@@ -16,6 +16,13 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
+struct target
+{
+	Point2i min, max;
+	Point2f center;
+	bool flag;
+};
+
 class FPSCounter
 {
 public:
@@ -49,6 +56,7 @@ public:
 	int getBackgroundBound(Mat frame);
 	int getBackgroundBoundOpenCV(Mat frame);
 	void displayMovingTarget(Mat currentFrame, float movingTargetFactor);
+	void drawRect(vector<vector<Point2i>> points);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
