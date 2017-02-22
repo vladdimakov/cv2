@@ -55,14 +55,15 @@ public:
 	void brightestScaling(Mat frame, float scalingFactor);
 	int getBackgroundBound(Mat frame);
 	int getBackgroundBoundOpenCV(Mat frame);
-	void displayMovingTarget(Mat currentFrame, float movingTargetFactor);
-	void drawRect(vector<vector<Point2i>> points);
+	void calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor);
+	void find—onnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints);
+	void makeSegmentation();
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
 	Point2f offset;
-	Mat frameStaticPartMask, averageBackImg, deviationImg;
+	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame;
 	bool needToInit;
 	float deviationImgFillValue;
 

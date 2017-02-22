@@ -7,9 +7,9 @@ int main(int argc, char* argv[])
 
 	const float refreshRate = 0.02f;
     const float deviationFactor = 5.5f;
-	const float movingTargetFactor = 15.0f;
+	const float targetsFactor = 15.0f;
 	const float scalingFactor = 20.0f;
-	cvFuns.deviationImgFillValue = 256.0f / movingTargetFactor;
+	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
 
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
@@ -39,7 +39,9 @@ int main(int argc, char* argv[])
 
 		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
 
-		cvFuns.displayMovingTarget(grayFrame32F, movingTargetFactor);
+		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
+
+		cvFuns.makeSegmentation();
 
 		cvFuns.displayWindow();
 

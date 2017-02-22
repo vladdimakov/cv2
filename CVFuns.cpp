@@ -461,57 +461,103 @@ int CVFuns::getBackgroundBoundOpenCV(Mat frame)
 	return endInd;
 }
 
-void makeOkr(Mat &frame, int j, int i, vector<Point2i> &points)
+void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 {
-	frame.at<uchar>(j, i) = 0;
-	points.push_back(Point2i(j, i));
+	Mat backgroundBoundMask = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
 
-	if (j + 1 < CAP_FRAME_HEIGHT)
-	{
-		if (frame.at<uchar>(j+1,i) == 255)
-			makeOkr(frame, j+1,i, points);
-	}
+	currentDeviationImg = abs(currentFrame - averageBackImg);
 
-	if (i+1 < CAP_FRAME_WIDTH)
-	{
-		if (frame.at<uchar>(j,i+1) == 255)
-			makeOkr(frame, j,i+1, points);
-	}
-
-	if (j-1 >= 0)
-	{
-		if (frame.at<uchar>(j-1,i) == 255)
-			makeOkr(frame, j-1,i, points);
-	}
+	frameStaticPartMask = targetsFactor * deviationImg - currentDeviationImg;
+	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
 	
-	if (i -1 >=0)
+	currentDeviationImg.convertTo(currentDeviationImg, CV_8U);
+	int backgroundBound = getBackgroundBoundOpenCV(currentDeviationImg);
+	//int backgroundBound = getBackgroundBound(currentDeviationImg);
+
+	frameWith0.copyTo(backgroundBoundMask, currentDeviationImg - backgroundBound);
+	frameWith255.copyTo(frameStaticPartMask, backgroundBoundMask);
+	/*
+	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
 	{
-		if (frame.at<uchar>(j, i-1) == 255)
-			makeOkr(frame, j,i-1, points);
+		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
+		{
+			if (currentDeviationImg.at<uchar>(i, j) < backgroundBound)
+				frameStaticPartMask.at<uchar>(i, j) = 255;
+		}
+	}
+	*/
+
+	targetsBinaryFrame.setTo(Scalar(255));
+	frameWith0.copyTo(targetsBinaryFrame, frameStaticPartMask);
+	
+	targetsBinaryFrame.copyTo(imgToDisplay[3]);
+	imgToDisplayInfo[3] = "Moving target";
+}
+
+void CVFuns::find—onnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints)
+{
+	connectedPoints.push_back(currentPoint);
+	targetsBinaryFrame.at<uchar>(currentPoint) = 0;
+
+	Point2i connectedPoint1 = currentPoint + Point2i(1, 0);
+	Point2i connectedPoint2 = currentPoint - Point2i(1, 0);
+	Point2i connectedPoint3 = currentPoint + Point2i(0, 1);
+	Point2i connectedPoint4 = currentPoint - Point2i(0, 1);
+
+	if (connectedPoint1.x < CAP_FRAME_WIDTH)
+	{
+		if (targetsBinaryFrame.at<uchar>(connectedPoint1) == 255)
+			find—onnectedPoints(connectedPoint1, connectedPoints);
 	}
 
-}
-
-vector<Point2i> some(Mat &frame, int j, int i)
-{
-	vector<Point2i> points;
-	makeOkr(frame, j, i, points);
-
-	return points;
-}
-
-void CVFuns::drawRect(vector<vector<Point2i>> points)
-{
-	vector<target> targets;
-	for (int i = 0; i < points.size(); i++)
+	if (connectedPoint2.x >= 0)
 	{
-		if (points[i].size() > 10)
+		if (targetsBinaryFrame.at<uchar>(connectedPoint2) == 255)
+			find—onnectedPoints(connectedPoint2, connectedPoints);
+	}
+
+	if (connectedPoint3.y < CAP_FRAME_HEIGHT)
+	{
+		if (targetsBinaryFrame.at<uchar>(connectedPoint3) == 255)
+			find—onnectedPoints(connectedPoint3, connectedPoints);
+	}
+
+	if (connectedPoint4.y >= 0)
+	{
+		if (targetsBinaryFrame.at<uchar>(connectedPoint4) == 255)
+			find—onnectedPoints(connectedPoint4, connectedPoints);
+	}
+}
+
+void CVFuns::makeSegmentation()
+{
+	vector<Point2i> connectedPoints;
+	vector<vector<Point2i>> connectedPointsRegions;
+	
+	Point2i currentPoint;
+	for (currentPoint.x = 0; currentPoint.x < CAP_FRAME_WIDTH; currentPoint.x++)
+	{
+		for (currentPoint.y = 0; currentPoint.y < CAP_FRAME_HEIGHT; currentPoint.y++)
+		{
+			if (targetsBinaryFrame.at<uchar>(currentPoint) == 255)
+			{
+				find—onnectedPoints(currentPoint, connectedPoints);
+				connectedPointsRegions.push_back(connectedPoints);
+				connectedPoints.clear();
+			}
+		}
+	}
+		
+	vector<target> targets;
+	for (int i = 0; i < connectedPointsRegions.size(); i++)
+	{
+		if (connectedPointsRegions[i].size() > 10)
 		{
 			int xMin = CAP_FRAME_WIDTH, yMin = CAP_FRAME_HEIGHT, xMax = 0, yMax = 0;
-			for (int j = 0; j < points[i].size(); j++)
+			for (int j = 0; j < connectedPointsRegions[i].size(); j++)
 			{
-				int xCurrent = (points[i])[j].y;
-				int yCurrent = (points[i])[j].x;
+				int xCurrent = (connectedPointsRegions[i])[j].x;
+				int yCurrent = (connectedPointsRegions[i])[j].y;
 
 				if (xCurrent < xMin)
 					xMin = xCurrent;
@@ -536,7 +582,7 @@ void CVFuns::drawRect(vector<vector<Point2i>> points)
 		}
 	}
 
-	
+
 	float dist = 100;
 	for (int i = 0; i < targets.size(); i++)
 	{
@@ -564,7 +610,7 @@ void CVFuns::drawRect(vector<vector<Point2i>> points)
 		}
 	}
 
-	
+
 	int cnt = 0;
 	for (int i = 0; i < targets.size(); i++)
 	{
@@ -576,93 +622,4 @@ void CVFuns::drawRect(vector<vector<Point2i>> points)
 	}
 
 	cout << cnt << endl;
-}
-
-void CVFuns::displayMovingTarget(Mat currentFrame, float movingTargetFactor)
-{
-	Mat backgroundBoundMask = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
-
-	currentDeviationImg = abs(currentFrame - averageBackImg);
-
-	frameStaticPartMask = movingTargetFactor * deviationImg - currentDeviationImg;
-	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
-	
-	currentDeviationImg.convertTo(currentDeviationImg, CV_8U);
-	int backgroundBound = getBackgroundBoundOpenCV(currentDeviationImg);
-	//int backgroundBound = getBackgroundBound(currentDeviationImg);
-
-	frameWith0.copyTo(backgroundBoundMask, currentDeviationImg - backgroundBound);
-	frameWith255.copyTo(frameStaticPartMask, backgroundBoundMask);
-	/*
-	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
-	{
-		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
-		{
-			if (currentDeviationImg.at<uchar>(i, j) < backgroundBound)
-				frameStaticPartMask.at<uchar>(i, j) = 255;
-		}
-	}
-	*/
-
-	Mat targetFrame = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
-	frameWith0.copyTo(targetFrame, frameStaticPartMask);
-	//targetFrame.copyTo(imgToDisplay[3]);
-
-	imgToDisplayInfo[3] = "Moving target";
-	/*
-	int cnt1 = 0;
-	for (int j = 0; j < CAP_FRAME_HEIGHT; j++)
-	{
-		for (int i = 0; i < CAP_FRAME_WIDTH; i++)
-		{
-			if (targetFrame.at<uchar>(j, i) == 255)
-			{
-				cnt1++;
-			}
-		}
-	}
-	*/
-	targetFrame.copyTo(imgToDisplay[3]);
-	vector<vector<Point2i>> targetPoints;
-	for (int j = 0; j < CAP_FRAME_HEIGHT; j++)
-	{
-		for (int i = 0; i < CAP_FRAME_WIDTH; i++)
-		{
-			if (targetFrame.at<uchar>(j, i) == 255)
-			{
-				vector<Point2i> tmp = some(targetFrame, j, i); 
-				targetPoints.push_back(tmp);
-			}
-		}
-	}
-	
-
-	/*
-	targetFrame.copyTo(imgToDisplay[3]);
-	int cnt = 0;
-	Mat fff = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
-	for (int i = 0; i < targetPoints.size(); i++)
-	{
-		for (int j = 0; j < targetPoints[i].size(); j++)
-		{
-			Point2i pt = (targetPoints[i])[j];
-			fff.at<uchar>(pt.x, pt.y) = cnt;
-			
-		}
-		cnt += 10;
-	}
-	fff.copyTo(imgToDisplay[0]);
-	*/
-	/*
-	int cnt2 = 0;
-	for (int i = 0; i < targetPoints.size(); i++)
-	{
-		cnt2 += targetPoints[i].size();
-	}
-
-	cout << cnt2 - cnt1 << endl;
-	*/
-
-	drawRect(targetPoints);
-
 }
