@@ -16,11 +16,11 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
-struct target
+struct Target
 {
-	Point2i min, max;
+	Point2i minPoint, maxPoint;
 	Point2f center;
-	bool flag;
+	bool exist;
 };
 
 class FPSCounter

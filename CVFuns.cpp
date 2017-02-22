@@ -533,7 +533,8 @@ void CVFuns::makeSegmentation()
 {
 	vector<Point2i> connectedPoints;
 	vector<vector<Point2i>> connectedPointsRegions;
-	
+	vector<Target> targets;
+
 	Point2i currentPoint;
 	for (currentPoint.x = 0; currentPoint.x < CAP_FRAME_WIDTH; currentPoint.x++)
 	{
@@ -546,65 +547,64 @@ void CVFuns::makeSegmentation()
 				connectedPoints.clear();
 			}
 		}
-	}
-		
-	vector<target> targets;
+	}		
+	
+	Point2i minPoint, maxPoint;
+	Point2f center;
+
 	for (int i = 0; i < connectedPointsRegions.size(); i++)
 	{
-		if (connectedPointsRegions[i].size() > 10)
+		minPoint = Point2i(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT);
+		maxPoint = Point2i(0, 0);
+
+		for (int j = 0; j < connectedPointsRegions[i].size(); j++)
 		{
-			int xMin = CAP_FRAME_WIDTH, yMin = CAP_FRAME_HEIGHT, xMax = 0, yMax = 0;
-			for (int j = 0; j < connectedPointsRegions[i].size(); j++)
-			{
-				int xCurrent = (connectedPointsRegions[i])[j].x;
-				int yCurrent = (connectedPointsRegions[i])[j].y;
+			if (connectedPointsRegions[i][j].x < minPoint.x)
+				minPoint.x = connectedPointsRegions[i][j].x;
 
-				if (xCurrent < xMin)
-					xMin = xCurrent;
+			if (connectedPointsRegions[i][j].y < minPoint.y)
+				minPoint.y = connectedPointsRegions[i][j].y;
 
-				if (yCurrent < yMin)
-					yMin = yCurrent;
+			if (connectedPointsRegions[i][j].x > maxPoint.x)
+				maxPoint.x = connectedPointsRegions[i][j].x;
 
-				if (xCurrent > xMax)
-					xMax = xCurrent;
-
-				if (yCurrent > yMax)
-					yMax = yCurrent;
-			}
-			Point2f center;
-			center.x = xMax - (float)(xMax - xMin) / 2;
-			center.y = yMax - (float)(yMax - yMin) / 2;
-			target tmp = { Point2i(xMin, yMin), Point2i(xMax, yMax), center, true };
-			targets.push_back(tmp);
-			//rectangle(imgToDisplay[0], tmp.min, tmp.max, Scalar(255), 2);
-			//rectangle(imgToDisplay[0], Point2i(xMin, yMin), Point2i(xMax, yMax), Scalar(255), 2);
-			//	circle(imgToDisplay[0], tmp.center, 3, Scalar(255), -1, 8);
+			if (connectedPointsRegions[i][j].y > maxPoint.y)
+				maxPoint.y = connectedPointsRegions[i][j].y;
 		}
+
+		center.x = (float)(minPoint.x + maxPoint.x) / 2;
+		center.y = (float)(minPoint.y + maxPoint.y) / 2;
+		
+		Target target = { minPoint, maxPoint, center, true };
+		targets.push_back(target);
+
+		//rectangle(imgToDisplay[0], target.minPoint, target.maxPoint, Scalar(255), 2);
+		//circle(imgToDisplay[0], target.center, 3, Scalar(255), -1, 8);
 	}
 
-
+	
 	float dist = 100;
 	for (int i = 0; i < targets.size(); i++)
 	{
-		for (int j = 1; j < targets.size(); j++)
+		for (int j = 0; j < targets.size(); j++)
 		{
-			if (targets[i].flag != false && targets[j].flag != false && i != j)
+			if (targets[i].exist && targets[j].exist && i != j)
 			{
 				if (sqrt((targets[i].center.x - targets[j].center.x) * (targets[i].center.x - targets[j].center.x) + (targets[i].center.y - targets[j].center.y) * (targets[i].center.y - targets[j].center.y)) < dist)
 				{
-					targets[j].flag = false;
+					targets[j].exist = false;
 
-					if (targets[i].min.x > targets[j].min.x)
-						targets[i].min.x = targets[j].min.x;
+					if (targets[i].minPoint.x > targets[j].minPoint.x)
+						targets[i].minPoint.x = targets[j].minPoint.x;
 
-					if (targets[i].max.x < targets[j].max.x)
-						targets[i].max.x = targets[j].max.x;
+					if (targets[i].maxPoint.x < targets[j].maxPoint.x)
+						targets[i].maxPoint.x = targets[j].maxPoint.x;
 
-					if (targets[i].min.y > targets[j].min.y)
-						targets[i].min.y = targets[j].min.y;
+					if (targets[i].minPoint.y > targets[j].minPoint.y)
+						targets[i].minPoint.y = targets[j].minPoint.y;
 
-					if (targets[i].max.y < targets[j].max.y)
-						targets[i].max.y = targets[j].max.y;
+					if (targets[i].maxPoint.y < targets[j].maxPoint.y)
+						targets[i].maxPoint.y = targets[j].maxPoint.y;
 				}
 			}
 		}
@@ -614,9 +614,9 @@ void CVFuns::makeSegmentation()
 	int cnt = 0;
 	for (int i = 0; i < targets.size(); i++)
 	{
-		if (targets[i].flag != false)
+		if (targets[i].exist)
 		{
-			rectangle(imgToDisplay[0], targets[i].min, targets[i].max, Scalar(255), 2);
+			rectangle(imgToDisplay[0], targets[i].minPoint, targets[i].maxPoint, Scalar(255), 2);
 			cnt++;
 		}
 	}
