@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
 	const float targetsFactor = 15.0f;
 	const float scalingFactor = 20.0f;
 	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
+	const float distanceBetweenTargets = 50;
 
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
@@ -41,7 +42,7 @@ int main(int argc, char* argv[])
 
 		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 
-		cvFuns.makeSegmentation();
+		cvFuns.makeSegmentation(distanceBetweenTargets);
 
 		cvFuns.displayWindow();
 

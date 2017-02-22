@@ -503,7 +503,7 @@ void CVFuns::findConnectedPoints(Point2i currentPoint, vector<Point2i>& connecte
 	Point2i connectedPoint2 = currentPoint - Point2i(1, 0);
 	Point2i connectedPoint3 = currentPoint + Point2i(0, 1);
 	Point2i connectedPoint4 = currentPoint - Point2i(0, 1);
-
+	
 	if (connectedPoint1.x < CAP_FRAME_WIDTH)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint1) == 255)
@@ -515,13 +515,13 @@ void CVFuns::findConnectedPoints(Point2i currentPoint, vector<Point2i>& connecte
 		if (targetsBinaryFrame.at<uchar>(connectedPoint2) == 255)
 			findConnectedPoints(connectedPoint2, connectedPoints);
 	}
-
+	
 	if (connectedPoint3.y < CAP_FRAME_HEIGHT)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint3) == 255)
 			findConnectedPoints(connectedPoint3, connectedPoints);
 	}
-
+	
 	if (connectedPoint4.y >= 0)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint4) == 255)
@@ -529,7 +529,48 @@ void CVFuns::findConnectedPoints(Point2i currentPoint, vector<Point2i>& connecte
 	}
 }
 
-void CVFuns::makeSegmentation()
+bool isInside(Target baseTarget, Target insideTarget)
+{
+	if (insideTarget.left >= baseTarget.left && insideTarget.top >= baseTarget.top
+		&& insideTarget.right <= baseTarget.right && insideTarget.bottom <= baseTarget.bottom)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool isIntersect(Target baseTarget, Target intersectingTarget)
+{
+	if (intersectingTarget.right >= baseTarget.left && intersectingTarget.left <= baseTarget.right
+		&& intersectingTarget.bottom >= baseTarget.top && intersectingTarget.top <= baseTarget.bottom)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool isNear(Target baseTarget, Target nearTarget, float distanceBetweenTargets)
+{
+	float currentDistance = (baseTarget.center.x - nearTarget.center.x) * (baseTarget.center.x - nearTarget.center.x) +
+							(baseTarget.center.y - nearTarget.center.y) * (baseTarget.center.y - nearTarget.center.y);
+	
+	if (sqrt(currentDistance) <= distanceBetweenTargets)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void CVFuns::makeSegmentation(float distanceBetweenTargets)
 {
 	vector<Point2i> connectedPoints;
 	vector<vector<Point2i>> connectedPointsRegions;
@@ -548,78 +589,69 @@ void CVFuns::makeSegmentation()
 			}
 		}
 	}		
-	
-	Point2i minPoint, maxPoint;
-	Point2f center;
 
+	int left, right, top, bottom;
 	for (int i = 0; i < connectedPointsRegions.size(); i++)
 	{
-		minPoint = Point2i(CAP_FRAME_WIDTH, CAP_FRAME_HEIGHT);
-		maxPoint = Point2i(0, 0);
+		left = CAP_FRAME_WIDTH;
+		top = CAP_FRAME_HEIGHT;
+		right = 0;
+		bottom = 0;
 
 		for (int j = 0; j < connectedPointsRegions[i].size(); j++)
 		{
-			if (connectedPointsRegions[i][j].x < minPoint.x)
-				minPoint.x = connectedPointsRegions[i][j].x;
+			if (connectedPointsRegions[i][j].x < left)
+				left = connectedPointsRegions[i][j].x;
 
-			if (connectedPointsRegions[i][j].y < minPoint.y)
-				minPoint.y = connectedPointsRegions[i][j].y;
+			if (connectedPointsRegions[i][j].y < top)
+				top = connectedPointsRegions[i][j].y;
 
-			if (connectedPointsRegions[i][j].x > maxPoint.x)
-				maxPoint.x = connectedPointsRegions[i][j].x;
+			if (connectedPointsRegions[i][j].x > right)
+				right = connectedPointsRegions[i][j].x;
 
-			if (connectedPointsRegions[i][j].y > maxPoint.y)
-				maxPoint.y = connectedPointsRegions[i][j].y;
+			if (connectedPointsRegions[i][j].y > bottom)
+				bottom = connectedPointsRegions[i][j].y;
 		}
 
-		center.x = (float)(minPoint.x + maxPoint.x) / 2;
-		center.y = (float)(minPoint.y + maxPoint.y) / 2;
-		
-		Target target = { minPoint, maxPoint, center, true };
-		targets.push_back(target);
+		Point2f center;
+		center.x = (float)(left + right) / 2;
+		center.y = (float)(top + bottom) / 2;
 
-		//rectangle(imgToDisplay[0], target.minPoint, target.maxPoint, Scalar(255), 2);
-		//circle(imgToDisplay[0], target.center, 3, Scalar(255), -1, 8);
+		Target target = { left, right, top, bottom, center, true };
+		targets.push_back(target);
 	}
 
-	
-	float dist = 100;
 	for (int i = 0; i < targets.size(); i++)
 	{
 		for (int j = 0; j < targets.size(); j++)
 		{
-			if (targets[i].exist && targets[j].exist && i != j)
+			if (i != j && targets[i].exist && targets[j].exist)
 			{
-				if (sqrt((targets[i].center.x - targets[j].center.x) * (targets[i].center.x - targets[j].center.x) + (targets[i].center.y - targets[j].center.y) * (targets[i].center.y - targets[j].center.y)) < dist)
+				if (isInside(targets[i], targets[j]) || isIntersect(targets[i], targets[j]) || isNear(targets[i], targets[j], distanceBetweenTargets))
 				{
+					if (targets[i].left > targets[j].left)
+						targets[i].left = targets[j].left;
+
+					if (targets[i].right < targets[j].right)
+						targets[i].right = targets[j].right;
+
+					if (targets[i].top > targets[j].top)
+						targets[i].top = targets[j].top;
+
+					if (targets[i].bottom < targets[j].bottom)
+						targets[i].bottom = targets[j].bottom;
+
 					targets[j].exist = false;
-
-					if (targets[i].minPoint.x > targets[j].minPoint.x)
-						targets[i].minPoint.x = targets[j].minPoint.x;
-
-					if (targets[i].maxPoint.x < targets[j].maxPoint.x)
-						targets[i].maxPoint.x = targets[j].maxPoint.x;
-
-					if (targets[i].minPoint.y > targets[j].minPoint.y)
-						targets[i].minPoint.y = targets[j].minPoint.y;
-
-					if (targets[i].maxPoint.y < targets[j].maxPoint.y)
-						targets[i].maxPoint.y = targets[j].maxPoint.y;
 				}
 			}
 		}
 	}
-
-
-	int cnt = 0;
+		
 	for (int i = 0; i < targets.size(); i++)
 	{
 		if (targets[i].exist)
 		{
-			rectangle(imgToDisplay[0], targets[i].minPoint, targets[i].maxPoint, Scalar(255), 2);
-			cnt++;
+			rectangle(imgToDisplay[0], Point2i(targets[i].left, targets[i].top), Point2i(targets[i].right, targets[i].bottom), Scalar(255), 2);
 		}
 	}
-
-	cout << cnt << endl;
 }

@@ -18,7 +18,7 @@ const int WINDOW_HEIGHT = 660;
 
 struct Target
 {
-	Point2i minPoint, maxPoint;
+	int left, right, top, bottom;
 	Point2f center;
 	bool exist;
 };
@@ -57,7 +57,7 @@ public:
 	int getBackgroundBoundOpenCV(Mat frame);
 	void calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor);
 	void findConnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints);
-	void makeSegmentation();
+	void makeSegmentation(float distanceBetweenTargets);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
