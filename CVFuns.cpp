@@ -494,38 +494,33 @@ void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 	imgToDisplayInfo[3] = "Moving target";
 }
 
-void CVFuns::findConnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints)
+void CVFuns::findConnectedPoints(int x, int y, vector<Point2i> &connectedPoints)
 {
-	connectedPoints.push_back(currentPoint);
-	targetsBinaryFrame.at<uchar>(currentPoint) = 0;
-
-	Point2i connectedPoint1 = currentPoint + Point2i(1, 0);
-	Point2i connectedPoint2 = currentPoint - Point2i(1, 0);
-	Point2i connectedPoint3 = currentPoint + Point2i(0, 1);
-	Point2i connectedPoint4 = currentPoint - Point2i(0, 1);
+	connectedPoints.push_back(Point2i(x, y));
+	targetsBinaryFrame.at<uchar>(y, x) = 0;
 	
-	if (connectedPoint1.x < CAP_FRAME_WIDTH)
+	if (x + 1 < CAP_FRAME_WIDTH)
 	{
-		if (targetsBinaryFrame.at<uchar>(connectedPoint1) == 255)
-			findConnectedPoints(connectedPoint1, connectedPoints);
+		if (targetsBinaryFrame.at<uchar>(y, x + 1) == 255)
+			findConnectedPoints(x + 1, y, connectedPoints);
+	}
+	
+	if (x - 1 >= 0)
+	{
+		if (targetsBinaryFrame.at<uchar>(y, x - 1) == 255)
+			findConnectedPoints(x - 1, y, connectedPoints);
 	}
 
-	if (connectedPoint2.x >= 0)
+	if (y + 1 < CAP_FRAME_HEIGHT)
 	{
-		if (targetsBinaryFrame.at<uchar>(connectedPoint2) == 255)
-			findConnectedPoints(connectedPoint2, connectedPoints);
+		if (targetsBinaryFrame.at<uchar>(y + 1, x) == 255)
+			findConnectedPoints(x, y + 1, connectedPoints);
 	}
 	
-	if (connectedPoint3.y < CAP_FRAME_HEIGHT)
+	if (y - 1 >= 0)
 	{
-		if (targetsBinaryFrame.at<uchar>(connectedPoint3) == 255)
-			findConnectedPoints(connectedPoint3, connectedPoints);
-	}
-	
-	if (connectedPoint4.y >= 0)
-	{
-		if (targetsBinaryFrame.at<uchar>(connectedPoint4) == 255)
-			findConnectedPoints(connectedPoint4, connectedPoints);
+		if (targetsBinaryFrame.at<uchar>(y - 1, x) == 255)
+			findConnectedPoints(x, y - 1, connectedPoints);
 	}
 }
 
@@ -576,14 +571,13 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 	vector<vector<Point2i>> connectedPointsRegions;
 	vector<Target> targets;
 
-	Point2i currentPoint;
-	for (currentPoint.x = 0; currentPoint.x < CAP_FRAME_WIDTH; currentPoint.x++)
+	for (int x = 0; x < CAP_FRAME_WIDTH; x++)
 	{
-		for (currentPoint.y = 0; currentPoint.y < CAP_FRAME_HEIGHT; currentPoint.y++)
+		for (int y = 0; y < CAP_FRAME_HEIGHT; y++)
 		{
-			if (targetsBinaryFrame.at<uchar>(currentPoint) == 255)
+			if (targetsBinaryFrame.at<uchar>(y, x) == 255)
 			{
-				findConnectedPoints(currentPoint, connectedPoints);
+				findConnectedPoints(x, y, connectedPoints);
 				connectedPointsRegions.push_back(connectedPoints);
 				connectedPoints.clear();
 			}

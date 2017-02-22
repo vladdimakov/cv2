@@ -56,7 +56,7 @@ public:
 	int getBackgroundBound(Mat frame);
 	int getBackgroundBoundOpenCV(Mat frame);
 	void calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor);
-	void findConnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints);
+	void findConnectedPoints(int x, int y, vector<Point2i>& connectedPoints);
 	void makeSegmentation(float distanceBetweenTargets);
 
 	VideoCapture cap;
