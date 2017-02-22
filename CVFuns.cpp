@@ -494,7 +494,7 @@ void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 	imgToDisplayInfo[3] = "Moving target";
 }
 
-void CVFuns::find—onnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints)
+void CVFuns::findConnectedPoints(Point2i currentPoint, vector<Point2i>& connectedPoints)
 {
 	connectedPoints.push_back(currentPoint);
 	targetsBinaryFrame.at<uchar>(currentPoint) = 0;
@@ -507,25 +507,25 @@ void CVFuns::find—onnectedPoints(Point2i currentPoint, vector<Point2i>& connecte
 	if (connectedPoint1.x < CAP_FRAME_WIDTH)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint1) == 255)
-			find—onnectedPoints(connectedPoint1, connectedPoints);
+			findConnectedPoints(connectedPoint1, connectedPoints);
 	}
 
 	if (connectedPoint2.x >= 0)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint2) == 255)
-			find—onnectedPoints(connectedPoint2, connectedPoints);
+			findConnectedPoints(connectedPoint2, connectedPoints);
 	}
 
 	if (connectedPoint3.y < CAP_FRAME_HEIGHT)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint3) == 255)
-			find—onnectedPoints(connectedPoint3, connectedPoints);
+			findConnectedPoints(connectedPoint3, connectedPoints);
 	}
 
 	if (connectedPoint4.y >= 0)
 	{
 		if (targetsBinaryFrame.at<uchar>(connectedPoint4) == 255)
-			find—onnectedPoints(connectedPoint4, connectedPoints);
+			findConnectedPoints(connectedPoint4, connectedPoints);
 	}
 }
 
@@ -541,7 +541,7 @@ void CVFuns::makeSegmentation()
 		{
 			if (targetsBinaryFrame.at<uchar>(currentPoint) == 255)
 			{
-				find—onnectedPoints(currentPoint, connectedPoints);
+				findConnectedPoints(currentPoint, connectedPoints);
 				connectedPointsRegions.push_back(connectedPoints);
 				connectedPoints.clear();
 			}
