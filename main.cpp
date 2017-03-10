@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
 	if (!cvFuns.startCapture(argc, argv)) 
 		return -1;
-
+	
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;
@@ -43,6 +43,8 @@ int main(int argc, char* argv[])
 		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 
 		cvFuns.makeSegmentation(distanceBetweenTargets);
+		
+		cvFuns.makeIntegralImg(grayFrame8U);
 
 		cvFuns.displayWindow();
 

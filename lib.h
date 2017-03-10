@@ -16,6 +16,11 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
+struct Rectangle
+{
+	int left, right, top, bottom;
+};
+
 struct Target
 {
 	int left, right, top, bottom;
@@ -58,12 +63,14 @@ public:
 	void calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor);
 	void findConnectedPoints(int x, int y, vector<Point2i>& connectedPoints);
 	void makeSegmentation(float distanceBetweenTargets);
+	void makeIntegralImg(Mat currentFrame);
+	int calcIntegralSumForRectangle(Rectangle rectangle);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
 	Point2f offset;
-	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame;
+	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame, integralImg;
 	bool needToInit;
 	float deviationImgFillValue;
 

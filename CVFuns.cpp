@@ -9,6 +9,7 @@ CVFuns::CVFuns()
 
 	frameWith0 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(0));
 	frameWith255 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
+	integralImg = Mat(CAP_FRAME_HEIGHT + 1, CAP_FRAME_WIDTH + 1, CV_32S);
 }
 
 void CVFuns::displayWindow()
@@ -648,4 +649,17 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 			rectangle(imgToDisplay[0], Point2i(targets[i].left, targets[i].top), Point2i(targets[i].right, targets[i].bottom), Scalar(255), 2);
 		}
 	}
+}
+
+void CVFuns::makeIntegralImg(Mat currentFrame)
+{
+	integral(currentFrame, integralImg);
+}
+
+int CVFuns::calcIntegralSumForRectangle(Rectangle rectangle)
+{
+	return integralImg.at<int>(rectangle.bottom + 1, rectangle.right + 1) - 
+			integralImg.at<int>(rectangle.top, rectangle.right + 1) - 
+			integralImg.at<int>(rectangle.bottom + 1, rectangle.left) + 
+			integralImg.at<int>(rectangle.top, rectangle.left);
 }
