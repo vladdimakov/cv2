@@ -666,8 +666,8 @@ int CVFuns::calcIntegralSumForRectangle(Rectangle rectangle)
 
 bool CVFuns::haarFeature1(Rectangle rectangle)
 {
-	Rectangle halfA = rectangle,
-			  halfB = rectangle;
+	Rectangle halfA = rectangle;
+	Rectangle halfB = rectangle;
 	
 	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
 	
@@ -679,8 +679,8 @@ bool CVFuns::haarFeature1(Rectangle rectangle)
 
 bool CVFuns::haarFeature2(Rectangle rectangle)
 {
-	Rectangle halfA = rectangle,
-		      halfB = rectangle;
+	Rectangle halfA = rectangle;
+	Rectangle halfB = rectangle;
 
 	int halfWidth = (rectangle.right - rectangle.left) / 2;
 
@@ -688,4 +688,80 @@ bool CVFuns::haarFeature2(Rectangle rectangle)
 	halfB.left = rectangle.left + halfWidth + 1;
 
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
+}
+
+void CVFuns::calcFeatures()
+{
+	for (int i = 0; i < 50; i++)
+	{
+		//features[i] = 
+	}
+}
+
+float calcGiniCoefficient(Child child)
+{
+	float giniCoefficient = 0;
+
+	for (int i = 0; i < 2; i++)
+	{
+		giniCoefficient += (float)(child.nodes[0].data[i] * child.nodes[0].data[i] + child.nodes[1].data[i] * child.nodes[1].data[i]) / 
+							child.nodes[0].data[i] + child.nodes[1].data[i];
+	}
+
+	return giniCoefficient;
+}
+
+void CVFuns::makeChildsForNode()
+{
+	const int featuresNum = 50;
+	const int statisticsNum = 100;
+
+	Feature features[featuresNum];
+	Child childs[featuresNum];
+	Node node;
+
+	while (node.data[0] + node.data[1] <= statisticsNum)
+	{
+		//node.data[0]++;
+		//node.data[1]++;
+
+		for (int i = 0; i < featuresNum; i++)
+		{
+			if (features[i].value == false && features[i].isTarget == false)
+			{
+				childs[i].nodes[0].data[0]++;
+			}
+			else if (features[i].value == false && features[i].isTarget == true)
+			{
+				childs[i].nodes[0].data[1]++;
+			}
+			else if (features[i].value == true && features[i].isTarget == false)
+			{
+				childs[i].nodes[1].data[0]++;
+			}
+			else
+			{
+				childs[i].nodes[1].data[1]++;
+			}
+		}
+	}
+
+	float giniCoefficients[featuresNum];
+	for (int i = 0; i < featuresNum; i++)
+	{
+		giniCoefficients[i] = calcGiniCoefficient(childs[i]);
+	}
+
+	float maxGiniCoefficient = 0;
+	int childWithMaxGiniCoefficient;
+	for (int i = 0; i < featuresNum; i++)
+	{
+		if (giniCoefficients[i] >= maxGiniCoefficient)
+		{
+			maxGiniCoefficient = giniCoefficients[i];
+			childWithMaxGiniCoefficient = i;
+		}
+	}
+
+
 }

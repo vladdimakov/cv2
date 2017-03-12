@@ -28,6 +28,22 @@ struct Target
 	bool exist;
 };
 
+struct Node
+{
+	int data[2] = { 0, 0 };
+};
+
+struct Child
+{
+	Node nodes[2];
+};
+
+struct Feature
+{
+	bool value;
+	bool isTarget;
+};
+
 class FPSCounter
 {
 public:
@@ -69,6 +85,11 @@ public:
 	bool haarFeature1(Rectangle rectangle);
 	bool haarFeature2(Rectangle rectangle);
 
+	void calcFeatures();
+
+	void makeChildsForNode();
+
+	Feature features[50];
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
