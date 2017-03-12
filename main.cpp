@@ -65,12 +65,71 @@ void binaryTreeTest()
 		binaryTree.buildTree(feature);
 	}
 
-	cout << binaryTree.root->left->statistics[0] << " " << binaryTree.root->left->statistics[1] << " " << binaryTree.root->right->statistics[0] << " " << binaryTree.root->right->statistics[1] << endl;
+	// Разделил корень по 0 признаку
+	
+	for (int i = 0; i < 10; i++)
+	{
+		feature.num = 0;
+		feature.value = false;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 20; i++)
+	{
+		feature.num = 0;
+		feature.value = false;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 9; i++)
+	{
+		feature.num = 0;
+		feature.value = true;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 21; i++)
+	{
+		feature.num = 0;
+		feature.value = true;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		feature.num = 1;
+		feature.value = false;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		feature.num = 1;
+		feature.value = false;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		feature.num = 1;
+		feature.value = true;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		feature.num = 1;
+		feature.value = true;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
 
+	// Разделил вершины по 1 признаку
+	
+	Node* currentNode = binaryTree.root->left;
 
-	//cout << binaryTree.root->childs[0].M[0] << " " << binaryTree.root->childs[0].M[1] << " " << binaryTree.root->childs[0].T[0] << " " << binaryTree.root->childs[0].T[1] << endl;
-
-	//cout << binaryTree.root->childs[1].M[0] << " " << binaryTree.root->childs[1].M[1] << " " << binaryTree.root->childs[1].T[0] << " " << binaryTree.root->childs[1].T[1] << endl;
+	cout << currentNode->left->usedFeatures[0] << endl;
+	cout << currentNode->left->statistics[0] << " " << currentNode->left->statistics[1] << "        " << currentNode->right->statistics[0] << " " << currentNode->right->statistics[1] << endl;
 }
 
 int main(int argc, char* argv[])

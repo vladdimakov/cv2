@@ -29,7 +29,7 @@ BinaryTree::BinaryTree(int featuresNum, int statisticsNum)
 	root = new Node(_featuresNum);	
 }
 
-void BinaryTree::fillData(Node* node, Feature feature)
+void BinaryTree::buildLeafsForCurrentNode(Node* node, Feature feature)
 {
 	if (!feature.isTarget)
 		node->statistics[0]++;
@@ -71,36 +71,54 @@ float BinaryTree::calcGiniCoefficient(Child child)
 	return giniCoefficient;
 }
 
+bool BinaryTree::isUsedFeature(int featureNum, vector<int> usedFeatures)
+{
+	for (int i = 0; i < usedFeatures.size(); i++)
+	{
+		if (featureNum == usedFeatures[i])
+			return true;
+	}
+
+	return false;
+}
+
 void BinaryTree::divideNode(Node* node)
 {
 	float *giniCoefficients = new float[_featuresNum];
 	for (int i = 0; i < _featuresNum; i++)
 	{
-		giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
-		//cout << giniCoefficients[i] << " ";
+		if (isUsedFeature(i, node->usedFeatures))
+			giniCoefficients[i] = 0;
+		else 
+			giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
 	}
 
 	float maxGiniCoefficient = 0;
-	int childWithMaxGiniCoefficient;
+	int maxGiniCoefficientNum;
 	for (int i = 0; i < _featuresNum; i++)
 	{
 		if (giniCoefficients[i] >= maxGiniCoefficient)
 		{
 			maxGiniCoefficient = giniCoefficients[i];
-			childWithMaxGiniCoefficient = i;
+			maxGiniCoefficientNum = i;
 		}
 	}
 
 	delete[] giniCoefficients;
 
+	cout << node->childs[maxGiniCoefficientNum].leftStatistics[0] << " " << node->childs[maxGiniCoefficientNum].leftStatistics[1] <<
+		"     " << node->childs[maxGiniCoefficientNum].rightStatistics[0] << " " << node->childs[maxGiniCoefficientNum].rightStatistics[1] << endl;
+
 	node->left = new Node(_featuresNum);
-	node->left->statistics[0] = node->childs[childWithMaxGiniCoefficient].leftStatistics[0];
-	node->left->statistics[1] = node->childs[childWithMaxGiniCoefficient].leftStatistics[1];
+	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].leftStatistics[0];
+	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].leftStatistics[1];
+	node->left->usedFeatures.push_back(maxGiniCoefficientNum);
 
 	
 	node->right = new Node(_featuresNum);
-	node->right->statistics[0] = node->childs[childWithMaxGiniCoefficient].rightStatistics[0];
-	node->right->statistics[1] = node->childs[childWithMaxGiniCoefficient].rightStatistics[1];
+	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].rightStatistics[0];
+	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].rightStatistics[1];
+	node->right->usedFeatures.push_back(maxGiniCoefficientNum);
 
 	node->removeChilds();
 }
@@ -109,7 +127,7 @@ void BinaryTree::buildLeafs(Node* node, Feature feature)
 {
 	if (node->left == NULL && node->right == NULL)
 	{
-		fillData(node, feature);
+		buildLeafsForCurrentNode(node, feature);
 	}
 	else
 	{
