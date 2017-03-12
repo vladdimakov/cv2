@@ -1,5 +1,82 @@
 #include "lib.h"
 
+void binaryTreeTest()
+{
+	BinaryTree binaryTree;
+	Feature feature;
+
+	if (binaryTree.root->left == NULL && binaryTree.root->right == NULL)
+		cout << "NULL" << endl;
+
+	for (int i = 0; i < 10; i++)
+	{
+		feature.num = 0;
+		feature.value = false;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 20; i++)
+	{
+		feature.num = 0;
+		feature.value = false;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 9; i++)
+	{
+		feature.num = 0;
+		feature.value = true;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 21; i++)
+	{
+		feature.num = 0;
+		feature.value = true;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 10; i++)
+	{
+		feature.num = 1;
+		feature.value = false;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 10; i++)
+	{
+		feature.num = 1;
+		feature.value = false;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 10; i++)
+	{
+		feature.num = 1;
+		feature.value = true;
+		feature.isTarget = false;
+		binaryTree.buildTree(feature);
+	}
+	for (int i = 0; i < 10; i++)
+	{
+		feature.num = 1;
+		feature.value = true;
+		feature.isTarget = true;
+		binaryTree.buildTree(feature);
+	}
+
+
+	if (binaryTree.root->left != NULL && binaryTree.root->right != NULL)
+		cout << "NOT NULL" << endl;
+
+	cout << binaryTree.root->left->data[0] << " " << binaryTree.root->left->data[1] << " " << binaryTree.root->right->data[0] << " " << binaryTree.root->right->data[1] << endl;
+
+
+	//cout << binaryTree.root->childs[0].M[0] << " " << binaryTree.root->childs[0].M[1] << " " << binaryTree.root->childs[0].T[0] << " " << binaryTree.root->childs[0].T[1] << endl;
+
+	//cout << binaryTree.root->childs[1].M[0] << " " << binaryTree.root->childs[1].M[1] << " " << binaryTree.root->childs[1].T[0] << " " << binaryTree.root->childs[1].T[1] << endl;
+}
+
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "Russian");
@@ -14,6 +91,8 @@ int main(int argc, char* argv[])
 
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
+
+	binaryTreeTest();
 
 	if (!cvFuns.startCapture(argc, argv)) 
 		return -1;

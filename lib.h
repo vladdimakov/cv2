@@ -16,6 +16,16 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
+class FPSCounter
+{
+public:
+	FPSCounter();
+	size_t value();
+private:
+	clock_t oldTime;
+	size_t FPSCnt, oldFPS;
+};
+
 struct Rectangle
 {
 	int left, right, top, bottom;
@@ -28,30 +38,11 @@ struct Target
 	bool exist;
 };
 
-struct Node
-{
-	int data[2] = { 0, 0 };
-};
-
-struct Child
-{
-	Node nodes[2];
-};
-
 struct Feature
 {
 	bool value;
+	int num;
 	bool isTarget;
-};
-
-class FPSCounter
-{
-public:
-	FPSCounter();
-	size_t value();
-private:
-	clock_t oldTime;
-	size_t FPSCnt, oldFPS;
 };
 
 class CVFuns
@@ -87,8 +78,6 @@ public:
 
 	void calcFeatures();
 
-	void makeChildsForNode();
-
 	Feature features[50];
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
@@ -102,4 +91,34 @@ private:
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;
 	vector<Point2f> prevPoints, currentPoints;
 	FPSCounter FPScounter;
+};
+
+const int featuresNum = 50;
+const int statisticsNum = 100;
+
+struct Child
+{
+	int M[2], T[2];
+};
+
+struct Node
+{
+	int data[2];
+	bool dataFilled = false;
+	Node* left = NULL;
+	Node* right = NULL;
+	Child childs[featuresNum];
+};
+
+class BinaryTree
+{
+public:
+	BinaryTree();
+	void fillData(Node* node, Feature feature);
+	float calcGiniCoefficient(Child child);
+	void divideNode(Node* node);
+	void buildLeafs(Node* node, Feature feature);
+	void buildTree(Feature feature);
+
+	Node *root;
 };
