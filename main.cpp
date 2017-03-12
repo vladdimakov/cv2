@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
 	if (!cvFuns.startCapture(argc, argv)) 
 		return -1;
-	
+
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;

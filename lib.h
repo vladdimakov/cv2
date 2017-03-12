@@ -66,6 +66,9 @@ public:
 	void makeIntegralImg(Mat currentFrame);
 	int calcIntegralSumForRectangle(Rectangle rectangle);
 
+	bool haarFeature1(Rectangle rectangle);
+	bool haarFeature2(Rectangle rectangle);
+
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];

@@ -663,3 +663,29 @@ int CVFuns::calcIntegralSumForRectangle(Rectangle rectangle)
 			integralImg.at<int>(rectangle.bottom + 1, rectangle.left) + 
 			integralImg.at<int>(rectangle.top, rectangle.left);
 }
+
+bool CVFuns::haarFeature1(Rectangle rectangle)
+{
+	Rectangle halfA = rectangle,
+			  halfB = rectangle;
+	
+	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
+	
+	halfA.bottom = rectangle.top + halfHeight;
+	halfB.top = rectangle.top + halfHeight + 1;
+	
+	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
+}
+
+bool CVFuns::haarFeature2(Rectangle rectangle)
+{
+	Rectangle halfA = rectangle,
+		      halfB = rectangle;
+
+	int halfWidth = (rectangle.right - rectangle.left) / 2;
+
+	halfA.right = rectangle.left + halfWidth;
+	halfB.left = rectangle.left + halfWidth + 1;
+
+	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
+}
