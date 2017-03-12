@@ -1,44 +1,57 @@
 #include "lib.h"
 
-BinaryTree::BinaryTree()
+Child::Child()
 {
-	root = new Node;
+	memset(leftStatistics, 0, sizeof(leftStatistics));
+	memset(rightStatistics, 0, sizeof(rightStatistics));
+}
 
-	root->data[0] = 0;
-	root->data[1] = 0;
+Node::Node(int childsNum)
+{
+	left = NULL;
+	right = NULL;
+	childs = new Child[childsNum];
 
-	for (int i = 0; i < featuresNum; i++)
-	{
-		root->childs[i].M[0] = 0;
-		root->childs[i].M[1] = 0;
-		root->childs[i].T[0] = 0;
-		root->childs[i].T[1] = 0;
-	}
+	memset(statistics, 0, sizeof(statistics));	
+}
+
+void Node::removeChilds()
+{
+	delete[] childs;
+	childs = NULL;
+}
+
+BinaryTree::BinaryTree(int featuresNum, int statisticsNum)
+{
+	_featuresNum = featuresNum;
+	_statisticsNum = statisticsNum;
+
+	root = new Node(_featuresNum);	
 }
 
 void BinaryTree::fillData(Node* node, Feature feature)
 {
 	if (!feature.isTarget)
-		node->data[0]++;
+		node->statistics[0]++;
 	else
-		node->data[1]++;
+		node->statistics[1]++;
 
 	if (feature.value == false)
 	{
 		if (feature.isTarget == false)
-			node->childs[feature.num].M[0]++;
+			node->childs[feature.num].leftStatistics[0]++;
 		else
-			node->childs[feature.num].M[1]++;
+			node->childs[feature.num].leftStatistics[1]++;
 	}
 	else
 	{
 		if (feature.isTarget == false)
-			node->childs[feature.num].T[0]++;
+			node->childs[feature.num].rightStatistics[0]++;
 		else
-			node->childs[feature.num].T[1]++;
+			node->childs[feature.num].rightStatistics[1]++;
 	}
 
-	if (node->data[0] + node->data[1] >= statisticsNum)
+	if (node->statistics[0] + node->statistics[1] >= _statisticsNum)
 		divideNode(node);
 }
 
@@ -48,8 +61,11 @@ float BinaryTree::calcGiniCoefficient(Child child)
 
 	for (int j = 0; j < 2; j++)
 	{
-		if (child.M[j] + child.T[j] != 0)
-			giniCoefficient += (float)(child.M[j] * child.M[j] + child.T[j] * child.T[j]) / (child.M[j] + child.T[j]); // Может быть бесконечность
+		if (child.leftStatistics[j] + child.rightStatistics[j] != 0)
+		{
+			giniCoefficient += (float)(child.leftStatistics[j] * child.leftStatistics[j] + child.rightStatistics[j] * child.rightStatistics[j]) /
+								(child.leftStatistics[j] + child.rightStatistics[j]);
+		}
 	}
 
 	return giniCoefficient;
@@ -57,15 +73,16 @@ float BinaryTree::calcGiniCoefficient(Child child)
 
 void BinaryTree::divideNode(Node* node)
 {
-	float giniCoefficients[featuresNum];
-	for (int i = 0; i < featuresNum; i++)
+	float *giniCoefficients = new float[_featuresNum];
+	for (int i = 0; i < _featuresNum; i++)
 	{
 		giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
+		//cout << giniCoefficients[i] << " ";
 	}
 
 	float maxGiniCoefficient = 0;
 	int childWithMaxGiniCoefficient;
-	for (int i = 0; i < featuresNum; i++)
+	for (int i = 0; i < _featuresNum; i++)
 	{
 		if (giniCoefficients[i] >= maxGiniCoefficient)
 		{
@@ -74,29 +91,18 @@ void BinaryTree::divideNode(Node* node)
 		}
 	}
 
-	node->left = new Node;
-	node->left->data[0] = node->childs[childWithMaxGiniCoefficient].M[0];
-	node->left->data[1] = node->childs[childWithMaxGiniCoefficient].M[1];
+	delete[] giniCoefficients;
 
-	for (int i = 0; i < featuresNum; i++)
-	{
-		node->left->childs[i].M[0] = 0;
-		node->left->childs[i].M[1] = 0;
-		node->left->childs[i].T[0] = 0;
-		node->left->childs[i].T[1] = 0;
-	}
+	node->left = new Node(_featuresNum);
+	node->left->statistics[0] = node->childs[childWithMaxGiniCoefficient].leftStatistics[0];
+	node->left->statistics[1] = node->childs[childWithMaxGiniCoefficient].leftStatistics[1];
 
-	node->right = new Node;
-	node->right->data[0] = node->childs[childWithMaxGiniCoefficient].T[0];
-	node->right->data[1] = node->childs[childWithMaxGiniCoefficient].T[1];
+	
+	node->right = new Node(_featuresNum);
+	node->right->statistics[0] = node->childs[childWithMaxGiniCoefficient].rightStatistics[0];
+	node->right->statistics[1] = node->childs[childWithMaxGiniCoefficient].rightStatistics[1];
 
-	for (int i = 0; i < featuresNum; i++)
-	{
-		node->right->childs[i].M[0] = 0;
-		node->right->childs[i].M[1] = 0;
-		node->right->childs[i].T[0] = 0;
-		node->right->childs[i].T[1] = 0;
-	}
+	node->removeChilds();
 }
 
 void BinaryTree::buildLeafs(Node* node, Feature feature)

@@ -93,27 +93,29 @@ private:
 	FPSCounter FPScounter;
 };
 
-const int featuresNum = 50;
-const int statisticsNum = 100;
-
-struct Child
+class Child
 {
-	int M[2], T[2];
+public:
+	Child();
+
+	int leftStatistics[2], rightStatistics[2];
 };
 
-struct Node
+class Node
 {
-	int data[2];
-	bool dataFilled = false;
-	Node* left = NULL;
-	Node* right = NULL;
-	Child childs[featuresNum];
+public:
+	Node(int childsNum);
+	void removeChilds();
+
+	int statistics[2];
+	Node *left, *right;
+	Child *childs;
 };
 
 class BinaryTree
 {
 public:
-	BinaryTree();
+	BinaryTree(int featuresNum, int statisticsNum);
 	void fillData(Node* node, Feature feature);
 	float calcGiniCoefficient(Child child);
 	void divideNode(Node* node);
@@ -121,4 +123,5 @@ public:
 	void buildTree(Feature feature);
 
 	Node *root;
+	int _featuresNum, _statisticsNum;
 };

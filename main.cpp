@@ -2,11 +2,11 @@
 
 void binaryTreeTest()
 {
-	BinaryTree binaryTree;
-	Feature feature;
+	const int featuresNum = 50;
+	const int statisticsNum = 100;
 
-	if (binaryTree.root->left == NULL && binaryTree.root->right == NULL)
-		cout << "NULL" << endl;
+	BinaryTree binaryTree(featuresNum, statisticsNum);
+	Feature feature;
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -65,11 +65,7 @@ void binaryTreeTest()
 		binaryTree.buildTree(feature);
 	}
 
-
-	if (binaryTree.root->left != NULL && binaryTree.root->right != NULL)
-		cout << "NOT NULL" << endl;
-
-	cout << binaryTree.root->left->data[0] << " " << binaryTree.root->left->data[1] << " " << binaryTree.root->right->data[0] << " " << binaryTree.root->right->data[1] << endl;
+	cout << binaryTree.root->left->statistics[0] << " " << binaryTree.root->left->statistics[1] << " " << binaryTree.root->right->statistics[0] << " " << binaryTree.root->right->statistics[1] << endl;
 
 
 	//cout << binaryTree.root->childs[0].M[0] << " " << binaryTree.root->childs[0].M[1] << " " << binaryTree.root->childs[0].T[0] << " " << binaryTree.root->childs[0].T[1] << endl;
