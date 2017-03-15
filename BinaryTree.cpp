@@ -2,7 +2,7 @@
 
 Features::Features(int featuresNum)
 {
-	values = new bool[featuresNum];
+	values = new int[featuresNum];
 }
 
 Features::~Features()
@@ -18,6 +18,7 @@ Child::Child()
 
 Node::Node(int childsNum)
 {
+	featureNumToDivide = -1;
 	left = NULL;
 	right = NULL;
 	childs = new Child[childsNum];
@@ -55,7 +56,7 @@ void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
 			else
 				node->childs[i].leftStatistics[1]++;
 		}
-		else
+		if (features.values[i] == true)
 		{
 			if (features.isTarget == false)
 				node->childs[i].rightStatistics[0]++;
@@ -111,10 +112,11 @@ void BinaryTree::divideNode(Node* node)
 
 	node->featureNumToDivide = maxGiniCoefficientNum;
 
-	node->left = new Node(_featuresNum);
+	node->left = new Node(_featuresNum);	
+
 	node->right = new Node(_featuresNum);
 
-	node->removeChilds();
+//	node->removeChilds();
 }
 
 void BinaryTree::buildLeafs(Node* node, Features features)
@@ -125,8 +127,24 @@ void BinaryTree::buildLeafs(Node* node, Features features)
 	}
 	else
 	{
-		buildLeafs(node->left, features);
-		buildLeafs(node->right, features);
+		if (node->featureNumToDivide == -1)
+		{
+			buildLeafs(node->left, features);
+			buildLeafs(node->right, features);
+		}
+		else
+		{
+			if (features.values[node->featureNumToDivide] == false)
+			{
+				features.values[node->featureNumToDivide] = -1;
+				buildLeafs(node->left, features);
+			}
+			else
+			{
+				features.values[node->featureNumToDivide] = -1;
+				buildLeafs(node->right, features);
+			}
+		}
 	}
 }
 

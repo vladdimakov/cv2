@@ -85,25 +85,117 @@ void binaryTreeTest()
 		{
 			features.values[i] = false;
 		}
-		features.values[1] = 1;
-		features.isTarget = 1;
+		features.values[1] = true;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
+	}
+
+
+
+
+
+
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[0] = false;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 20; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[0] = false;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 9; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[0] = true;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 21; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[0] = true;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
+	}
+
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[1] = false;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[1] = false;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[1] = true;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[49] = true;
+		features.values[1] = true;
+		features.isTarget = true;
 		binaryTree.buildTree(features);
 	}
 
 	//cout << binaryTree.root->childs[0].leftStatistics[0] << " " << binaryTree.root->childs[0].leftStatistics[1] << " " << binaryTree.root->childs[0].rightStatistics[0] << " " << binaryTree.root->childs[0].rightStatistics[1] << endl;
 	//cout << binaryTree.root->childs[1].leftStatistics[0] << " " << binaryTree.root->childs[1].leftStatistics[1] << " " << binaryTree.root->childs[1].rightStatistics[0] << " " << binaryTree.root->childs[1].rightStatistics[1] << endl;
 	
-	for (int i = 0; i < featuresNum; i++)
-	{
-		features.values[i] = false;
-	}
-	features.values[49] = true;
-	features.isTarget = true;
-	binaryTree.buildTree(features);
-
-	Node* currentNode = binaryTree.root;
+	Node* currentNode = binaryTree.root->right;
+	//cout << currentNode->statistics[0] << " " << currentNode->statistics[1] << endl;
+	
+	//cout << currentNode->childs[49].leftStatistics[0] << " " << currentNode->childs[49].leftStatistics[1] << " " << currentNode->childs[49].rightStatistics[0] << " " << binaryTree.root->childs[49].rightStatistics[1] << endl;
+	
 	cout << currentNode->featureNumToDivide << endl;
 	cout << currentNode->left->statistics[0] << " " << currentNode->left->statistics[1] << "        " << currentNode->right->statistics[0] << " " << currentNode->right->statistics[1] << endl;
+	//cout << currentNode->right->childs[49].rightStatistics[1] << endl;
 }
 
 int main(int argc, char* argv[])

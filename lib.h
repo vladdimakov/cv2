@@ -43,7 +43,8 @@ class Features
 public:
 	Features(int featuresNum);
 	~Features();
-	bool *values, isTarget;
+	int *values;
+	bool isTarget;
 };
 
 class CVFuns
