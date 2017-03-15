@@ -43,8 +43,7 @@ class Features
 public:
 	Features(int featuresNum);
 	~Features();
-	int *values;
-	bool isTarget;
+	int *values, isTarget;
 };
 
 class CVFuns
@@ -99,7 +98,7 @@ class Child
 public:
 	Child();
 
-	int leftStatistics[2], rightStatistics[2];
+	int statistics[2][2];
 };
 
 class Node
