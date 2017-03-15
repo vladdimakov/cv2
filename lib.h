@@ -38,11 +38,12 @@ struct Target
 	bool exist;
 };
 
-struct Feature
+class Features
 {
-	bool value;
-	int num;
-	bool isTarget;
+public:
+	Features(int featuresNum);
+	~Features();
+	bool *values, isTarget;
 };
 
 class CVFuns
@@ -78,7 +79,6 @@ public:
 
 	void calcFeatures();
 
-	Feature features[50];
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
@@ -108,21 +108,21 @@ public:
 	void removeChilds();
 
 	int statistics[2];
+	int level, featureNumToDivide;
 	Node *left, *right;
 	Child *childs;
-	vector<int> usedFeatures;
 };
 
 class BinaryTree
 {
 public:
 	BinaryTree(int featuresNum, int statisticsNum);
-	void buildLeafsForCurrentNode(Node* node, Feature feature);
+	void buildLeafsForCurrentNode(Node* node, Features features);
 	float calcGiniCoefficient(Child child);
 	bool isUsedFeature(int featureNum, vector<int> usedFeatures);
 	void divideNode(Node* node);
-	void buildLeafs(Node* node, Feature feature);
-	void buildTree(Feature feature);
+	void buildLeafs(Node* node, Features features);
+	void buildTree(Features features);
 
 	Node *root;
 	int _featuresNum, _statisticsNum;

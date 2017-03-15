@@ -6,129 +6,103 @@ void binaryTreeTest()
 	const int statisticsNum = 100;
 
 	BinaryTree binaryTree(featuresNum, statisticsNum);
-	Feature feature;
-
-	for (int i = 0; i < 10; i++)
-	{
-		feature.num = 0;
-		feature.value = false;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 20; i++)
-	{
-		feature.num = 0;
-		feature.value = false;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 9; i++)
-	{
-		feature.num = 0;
-		feature.value = true;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 21; i++)
-	{
-		feature.num = 0;
-		feature.value = true;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 10; i++)
-	{
-		feature.num = 1;
-		feature.value = false;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 10; i++)
-	{
-		feature.num = 1;
-		feature.value = false;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 10; i++)
-	{
-		feature.num = 1;
-		feature.value = true;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 10; i++)
-	{
-		feature.num = 1;
-		feature.value = true;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
-	}
-
-	// Разделил корень по 0 признаку
+	Features features(featuresNum);
 	
-	for (int i = 0; i < 10; i++)
+	for (int k = 0; k < 10; k++)
 	{
-		feature.num = 0;
-		feature.value = false;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[0] = false;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
 	}
-	for (int i = 0; i < 20; i++)
+	for (int k = 0; k < 20; k++)
 	{
-		feature.num = 0;
-		feature.value = false;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[0] = false;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
 	}
-	for (int i = 0; i < 9; i++)
+	for (int k = 0; k < 9; k++)
 	{
-		feature.num = 0;
-		feature.value = true;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[0] = true;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
 	}
-	for (int i = 0; i < 21; i++)
+	for (int k = 0; k < 21; k++)
 	{
-		feature.num = 0;
-		feature.value = true;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 2; i++)
-	{
-		feature.num = 1;
-		feature.value = false;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 2; i++)
-	{
-		feature.num = 1;
-		feature.value = false;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 4; i++)
-	{
-		feature.num = 1;
-		feature.value = true;
-		feature.isTarget = false;
-		binaryTree.buildTree(feature);
-	}
-	for (int i = 0; i < 4; i++)
-	{
-		feature.num = 1;
-		feature.value = true;
-		feature.isTarget = true;
-		binaryTree.buildTree(feature);
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[0] = true;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
 	}
 
-	// Разделил вершины по 1 признаку
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[1] = false;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[1] = false;
+		features.isTarget = true;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[1] = true;
+		features.isTarget = false;
+		binaryTree.buildTree(features);
+	}
+	for (int k = 0; k < 10; k++)
+	{
+		for (int i = 0; i < featuresNum; i++)
+		{
+			features.values[i] = false;
+		}
+		features.values[1] = 1;
+		features.isTarget = 1;
+		binaryTree.buildTree(features);
+	}
+
+	//cout << binaryTree.root->childs[0].leftStatistics[0] << " " << binaryTree.root->childs[0].leftStatistics[1] << " " << binaryTree.root->childs[0].rightStatistics[0] << " " << binaryTree.root->childs[0].rightStatistics[1] << endl;
+	//cout << binaryTree.root->childs[1].leftStatistics[0] << " " << binaryTree.root->childs[1].leftStatistics[1] << " " << binaryTree.root->childs[1].rightStatistics[0] << " " << binaryTree.root->childs[1].rightStatistics[1] << endl;
 	
-	Node* currentNode = binaryTree.root->left;
+	for (int i = 0; i < featuresNum; i++)
+	{
+		features.values[i] = false;
+	}
+	features.values[49] = true;
+	features.isTarget = true;
+	binaryTree.buildTree(features);
 
-	cout << currentNode->left->usedFeatures[0] << endl;
+	Node* currentNode = binaryTree.root;
+	cout << currentNode->featureNumToDivide << endl;
 	cout << currentNode->left->statistics[0] << " " << currentNode->left->statistics[1] << "        " << currentNode->right->statistics[0] << " " << currentNode->right->statistics[1] << endl;
 }
 

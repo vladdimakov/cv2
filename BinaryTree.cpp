@@ -1,5 +1,15 @@
 #include "lib.h"
 
+Features::Features(int featuresNum)
+{
+	values = new bool[featuresNum];
+}
+
+Features::~Features()
+{
+	//delete[] values; // TODO!!!!
+}
+
 Child::Child()
 {
 	memset(leftStatistics, 0, sizeof(leftStatistics));
@@ -29,30 +39,35 @@ BinaryTree::BinaryTree(int featuresNum, int statisticsNum)
 	root = new Node(_featuresNum);	
 }
 
-void BinaryTree::buildLeafsForCurrentNode(Node* node, Feature feature)
-{
-	if (!feature.isTarget)
+void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
+{	
+	if (!features.isTarget)
 		node->statistics[0]++;
 	else
 		node->statistics[1]++;
 
-	if (feature.value == false)
+	for (int i = 0; i < _featuresNum; i++)
 	{
-		if (feature.isTarget == false)
-			node->childs[feature.num].leftStatistics[0]++;
+		if (features.values[i] == false)
+		{
+			if (features.isTarget == false)
+				node->childs[i].leftStatistics[0]++;
+			else
+				node->childs[i].leftStatistics[1]++;
+		}
 		else
-			node->childs[feature.num].leftStatistics[1]++;
-	}
-	else
-	{
-		if (feature.isTarget == false)
-			node->childs[feature.num].rightStatistics[0]++;
-		else
-			node->childs[feature.num].rightStatistics[1]++;
+		{
+			if (features.isTarget == false)
+				node->childs[i].rightStatistics[0]++;
+			else
+				node->childs[i].rightStatistics[1]++;
+		}
 	}
 
 	if (node->statistics[0] + node->statistics[1] >= _statisticsNum)
+	{
 		divideNode(node);
+	}
 }
 
 float BinaryTree::calcGiniCoefficient(Child child)
@@ -71,26 +86,12 @@ float BinaryTree::calcGiniCoefficient(Child child)
 	return giniCoefficient;
 }
 
-bool BinaryTree::isUsedFeature(int featureNum, vector<int> usedFeatures)
-{
-	for (int i = 0; i < usedFeatures.size(); i++)
-	{
-		if (featureNum == usedFeatures[i])
-			return true;
-	}
-
-	return false;
-}
-
 void BinaryTree::divideNode(Node* node)
 {
 	float *giniCoefficients = new float[_featuresNum];
 	for (int i = 0; i < _featuresNum; i++)
 	{
-		if (isUsedFeature(i, node->usedFeatures))
-			giniCoefficients[i] = 0;
-		else 
-			giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
+		giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
 	}
 
 	float maxGiniCoefficient = 0;
@@ -104,39 +105,32 @@ void BinaryTree::divideNode(Node* node)
 		}
 	}
 
+	//cout << maxGiniCoefficientNum << endl;
+
 	delete[] giniCoefficients;
 
-	cout << node->childs[maxGiniCoefficientNum].leftStatistics[0] << " " << node->childs[maxGiniCoefficientNum].leftStatistics[1] <<
-		"     " << node->childs[maxGiniCoefficientNum].rightStatistics[0] << " " << node->childs[maxGiniCoefficientNum].rightStatistics[1] << endl;
+	node->featureNumToDivide = maxGiniCoefficientNum;
 
 	node->left = new Node(_featuresNum);
-	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].leftStatistics[0];
-	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].leftStatistics[1];
-	node->left->usedFeatures.push_back(maxGiniCoefficientNum);
-
-	
 	node->right = new Node(_featuresNum);
-	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].rightStatistics[0];
-	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].rightStatistics[1];
-	node->right->usedFeatures.push_back(maxGiniCoefficientNum);
 
 	node->removeChilds();
 }
 
-void BinaryTree::buildLeafs(Node* node, Feature feature)
+void BinaryTree::buildLeafs(Node* node, Features features)
 {
 	if (node->left == NULL && node->right == NULL)
 	{
-		buildLeafsForCurrentNode(node, feature);
+		buildLeafsForCurrentNode(node, features);
 	}
 	else
 	{
-		buildLeafs(node->left, feature);
-		buildLeafs(node->right, feature);
+		buildLeafs(node->left, features);
+		buildLeafs(node->right, features);
 	}
 }
 
-void BinaryTree::buildTree(Feature feature)
+void BinaryTree::buildTree(Features features)
 {
-	buildLeafs(root, feature);
+	buildLeafs(root, features);
 }
