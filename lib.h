@@ -116,14 +116,18 @@ public:
 class BinaryTree
 {
 public:
-	BinaryTree(int featuresNum, int statisticsNum);
+	BinaryTree(int featuresNum, int statisticsNum, int depthOfTree);
 	void buildLeafsForCurrentNode(Node* node, Features features);
 	float calcGiniCoefficient(Child child);
 	bool isUsedFeature(int featureNum, vector<int> usedFeatures);
 	void divideNode(Node* node);
 	void buildLeafs(Node* node, Features features);
 	void buildTree(Features features);
+	void test();
 
 	Node *root;
-	int _featuresNum, _statisticsNum;
+	int builtLeafsNum;
+
+private:
+	int _featuresNum, _statisticsNum, _depthOfTree;
 };

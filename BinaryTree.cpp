@@ -31,29 +31,34 @@ void Node::removeChilds()
 	childs = NULL;
 }
 
-BinaryTree::BinaryTree(int featuresNum, int statisticsNum)
+BinaryTree::BinaryTree(int featuresNum, int statisticsNum, int depthOfTree)
 {
 	_featuresNum = featuresNum;
 	_statisticsNum = statisticsNum;
+	_depthOfTree = depthOfTree;
 
 	root = new Node(_featuresNum);	
+	root->level = 0;
 }
 
 void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
 {	
 	node->statistics[features.isTarget]++;
 
-	for (int i = 0; i < _featuresNum; i++)
-	{	
-		if (features.values[i] == -1)
-			continue;
-		
-		node->childs[i].statistics[features.values[i]][features.isTarget]++;
-	}
-
-	if (node->statistics[0] + node->statistics[1] >= _statisticsNum)
+	if (node->level < _depthOfTree)
 	{
-		divideNode(node);
+		for (int i = 0; i < _featuresNum; i++)
+		{
+			if (features.values[i] == -1)
+				continue;
+
+			node->childs[i].statistics[features.values[i]][features.isTarget]++;
+		}
+
+		if (node->statistics[0] + node->statistics[1] >= _statisticsNum)
+		{
+			divideNode(node);
+		}
 	}
 }
 
@@ -92,14 +97,22 @@ void BinaryTree::divideNode(Node* node)
 		}
 	}
 
+	//cout << maxGiniCoefficientNum << endl;
+
 	delete[] giniCoefficients;
 
 	node->featureNumToDivide = maxGiniCoefficientNum;
 
-	node->left = new Node(_featuresNum);	
-	node->right = new Node(_featuresNum);
+	node->left = new Node(_featuresNum);
+	node->left->level = node->level + 1;
 
-//	node->removeChilds();
+	node->right = new Node(_featuresNum);
+	node->right->level = node->level + 1;
+	
+	cout << node->level + 1 << endl; ///
+	cout << node->level + 1 << endl;
+
+	node->removeChilds();
 }
 
 void BinaryTree::buildLeafs(Node* node, Features features)
