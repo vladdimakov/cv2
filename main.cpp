@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
 
-	binaryTreeTest();
+	//binaryTreeTest();
 
 	if (!cvFuns.startCapture(argc, argv)) 
 		return -1;

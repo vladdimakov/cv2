@@ -37,6 +37,8 @@ BinaryTree::BinaryTree(int featuresNum, int statisticsNum, int depthOfTree)
 	_statisticsNum = statisticsNum;
 	_depthOfTree = depthOfTree;
 
+	_features = new Object[_featuresNum];
+
 	root = new Node(_featuresNum);	
 	root->level = 0;
 }

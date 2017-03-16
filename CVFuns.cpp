@@ -4,6 +4,8 @@ CVFuns::CVFuns()
 {
 	needToInit = true;
 	isTargetSelected = false;
+
+	tree = new BinaryTree(FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
 	
 	for (int i = 0; i < 4; i++)
 		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
@@ -732,6 +734,21 @@ bool CVFuns::haarFeature2(Object rectangle)
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
 }
 
+void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
+{
+	/*
+	Features features(tree->_featuresNum);
+	features.isTarget = isTarget;
+
+	for (int i = 0; i < tree->_featuresNum; i++)
+	{
+		features.values[i] = haarFeature1(tree->_features[i]);  // Сделать признак привязанным к tree, масштабировать tree->_features[i]
+	}
+
+	tree->buildTree(features);
+	*/
+}
+
 void CVFuns::calcFeatures()
 {
 	int maxWindowWidth = 200;
@@ -759,8 +776,8 @@ void CVFuns::calcFeatures()
 		} while (isInside(selectedTarget, featuresWindow) || isIntersect(selectedTarget, featuresWindow));
 
 		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
-		// Находим значения признаков для featuresWindow и кладем в дерево
+		makeFeaturesForWindow(featuresWindow, 0);
 	}
 
-	// Находим значения признаков для selectedTarget и кладем в дерево
+	makeFeaturesForWindow(selectedTarget, 1);
 }
