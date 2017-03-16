@@ -71,12 +71,14 @@ public:
 	void calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor);
 	void findConnectedPoints(int x, int y, vector<Point2i>& connectedPoints);
 	void makeSegmentation(float distanceBetweenTargets);
+	void selectTarget(Point2i clickedPoint);
+	void findSelectedTarget(float distanceBetweenTargetsOnTwoFrames);
+	void displaySelectedTarget();
+
 	void makeIntegralImg(Mat currentFrame);
 	int calcIntegralSumForRectangle(Rectangle rectangle);
-
 	bool haarFeature1(Rectangle rectangle);
 	bool haarFeature2(Rectangle rectangle);
-
 	void calcFeatures();
 
 	VideoCapture cap;
@@ -86,6 +88,10 @@ public:
 	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame, integralImg;
 	bool needToInit;
 	float deviationImgFillValue;
+	
+	vector<Target> targets;
+	bool isTargetSelected;
+	Target selectedTarget;
 
 private:
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;

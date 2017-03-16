@@ -1,5 +1,17 @@
 #include "lib.h"
 
+Point2i clickedPoint;
+bool isClicked = false;
+
+void mouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
+{
+	if (event == EVENT_LBUTTONDOWN && x < CAP_FRAME_WIDTH && y < CAP_FRAME_HEIGHT)
+	{
+		clickedPoint = Point2i(x, y);
+		isClicked = true;
+	}
+}
+
 void binaryTreeTest()
 {
 	const int featuresNum = 50;
@@ -38,6 +50,8 @@ void binaryTreeTest()
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "Russian");
+	srand(time(NULL));
+
 	CVFuns cvFuns;
 
 	const float refreshRate = 0.02f;
@@ -45,7 +59,8 @@ int main(int argc, char* argv[])
 	const float targetsFactor = 15.0f;
 	const float scalingFactor = 20.0f;
 	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
-	const float distanceBetweenTargets = 50;
+	const float distanceBetweenTargets = 50.0f;
+	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
 
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
@@ -80,10 +95,23 @@ int main(int argc, char* argv[])
 		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 
 		cvFuns.makeSegmentation(distanceBetweenTargets);
+
+		if (cvFuns.isTargetSelected)
+			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
+
+		cvFuns.displaySelectedTarget();
 		
+		cvFuns.displayWindow();
+
 		cvFuns.makeIntegralImg(grayFrame8U);
 
-		cvFuns.displayWindow();
+		setMouseCallback("Display window", mouseCallBackFunc, NULL);
+
+		if (isClicked && !cvFuns.isTargetSelected)
+		{
+			cvFuns.selectTarget(clickedPoint);
+			isClicked = false;
+		}
 
 		char key = (char)waitKey(1); // waitKey ждет событи€ нажати€ клавиши 1 мс
 		if (key == 27) // ≈сли нажат ESC - выходим

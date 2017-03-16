@@ -3,7 +3,8 @@
 CVFuns::CVFuns()
 {
 	needToInit = true;
-
+	isTargetSelected = false;
+	
 	for (int i = 0; i < 4; i++)
 		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
 
@@ -15,7 +16,7 @@ CVFuns::CVFuns()
 void CVFuns::displayWindow()
 {
 	Mat imageToDisplay = Mat(CAP_FRAME_HEIGHT * 2 + 30, CAP_FRAME_WIDTH * 2, CV_8U);
-	
+
 	Mat infoImg = Mat(30, CAP_FRAME_WIDTH * 2, CV_8U);
 	infoImg.setTo(Scalar(255));
 
@@ -31,15 +32,15 @@ void CVFuns::displayWindow()
 	//namedWindow("Display window", CV_WINDOW_AUTOSIZE);
 
 	for (int i = 1; i < 5; i++)
-		putText(imgToDisplay[i-1], to_string(i), Point(10, 30), 1, 1.5, Scalar(255), 2);
-	
+		putText(imgToDisplay[i - 1], to_string(i), Point(10, 30), 1, 1.5, Scalar(255), 2);
+
 	imgToDisplay[0].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH));
 	imgToDisplay[1].copyTo(imageToDisplay.rowRange(0, CAP_FRAME_HEIGHT).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
 	imgToDisplay[2].copyTo(imageToDisplay.rowRange(CAP_FRAME_HEIGHT, CAP_FRAME_HEIGHT * 2).colRange(0, CAP_FRAME_WIDTH));
 	imgToDisplay[3].copyTo(imageToDisplay.rowRange(CAP_FRAME_HEIGHT, CAP_FRAME_HEIGHT * 2).colRange(CAP_FRAME_WIDTH, CAP_FRAME_WIDTH * 2));
 	infoImg.copyTo(imageToDisplay.rowRange(CAP_FRAME_HEIGHT * 2, CAP_FRAME_HEIGHT * 2 + 30).colRange(0, CAP_FRAME_WIDTH * 2));
 
-	imshow("Display window", imageToDisplay); 
+	imshow("Display window", imageToDisplay);
 }
 
 bool CVFuns::startCapture(int argc, char* argv[])
@@ -570,8 +571,7 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 {
 	vector<Point2i> connectedPoints;
 	vector<vector<Point2i>> connectedPointsRegions;
-	vector<Target> targets;
-
+	
 	for (int x = 0; x < CAP_FRAME_WIDTH; x++)
 	{
 		for (int y = 0; y < CAP_FRAME_HEIGHT; y++)
@@ -585,6 +585,7 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 		}
 	}		
 
+	targets.clear();
 	int left, right, top, bottom;
 	for (int i = 0; i < connectedPointsRegions.size(); i++)
 	{
@@ -641,14 +642,56 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 			}
 		}
 	}
-		
+
+	vector<Target> targetsTmp;
 	for (int i = 0; i < targets.size(); i++)
 	{
 		if (targets[i].exist)
 		{
-			rectangle(imgToDisplay[0], Point2i(targets[i].left, targets[i].top), Point2i(targets[i].right, targets[i].bottom), Scalar(255), 2);
+			targetsTmp.push_back(targets[i]);
 		}
 	}
+
+	targets = targetsTmp;
+	targetsTmp.clear();
+	/*
+	for (int i = 0; i < targets.size(); i++)
+	{
+		rectangle(imgToDisplay[0], Point2i(targets[i].left, targets[i].top), Point2i(targets[i].right, targets[i].bottom), Scalar(255), 2);
+	}
+	*/
+	//cout << targets.size() << endl;
+}
+
+void CVFuns::selectTarget(Point2i clickedPoint)
+{
+	for (int i = 0; i < targets.size(); i++)
+	{
+		if (clickedPoint.x >= targets[i].left && clickedPoint.x <= targets[i].right &&
+			clickedPoint.y >= targets[i].top && clickedPoint.y <= targets[i].bottom)
+		{
+			selectedTarget = targets[i];
+			isTargetSelected = true;
+			break;
+		}
+	}
+}
+
+void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames)
+{
+	for (int i = 0; i < targets.size(); i++)
+	{
+		if (isInside(targets[i], selectedTarget) || isIntersect(targets[i], selectedTarget) || isNear(targets[i], selectedTarget, distanceBetweenTargetsOnTwoFrames))
+		{
+			selectedTarget = targets[i];
+			break;
+		}
+	}
+}
+
+void CVFuns::displaySelectedTarget()
+{
+	rectangle(imgToDisplay[0], Point2i(selectedTarget.left, selectedTarget.top), Point2i(selectedTarget.right, selectedTarget.bottom), Scalar(0), 2);
 }
 
 void CVFuns::makeIntegralImg(Mat currentFrame)
@@ -692,5 +735,23 @@ bool CVFuns::haarFeature2(Rectangle rectangle)
 
 void CVFuns::calcFeatures()
 {
-	// TODO
+	int maxWindowWidth = 300;
+	int minWindowWidth = 20;
+	int maxWindowHeight = 400;
+	int minWindowHeight = 20;
+
+	Rectangle window;
+
+	window.top = rand() % (CAP_FRAME_HEIGHT - minWindowHeight);
+	window.left = rand() % (CAP_FRAME_WIDTH - minWindowWidth);
+
+	window.bottom = window.top + minWindowHeight + rand() % (maxWindowHeight - minWindowHeight);
+	if (window.bottom >= CAP_FRAME_HEIGHT)
+		window.bottom = CAP_FRAME_HEIGHT - 1;
+
+	window.right = window.left + minWindowWidth + rand() % (maxWindowWidth - minWindowWidth);
+	if (window.right >= CAP_FRAME_WIDTH)
+		window.right = CAP_FRAME_WIDTH - 1;
+
+	rectangle(imgToDisplay[0], Point2i(window.left, window.top), Point2i(window.right, window.bottom), Scalar(255), 2);
 }
