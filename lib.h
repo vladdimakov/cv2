@@ -26,12 +26,7 @@ private:
 	size_t FPSCnt, oldFPS;
 };
 
-struct Rectangle
-{
-	int left, right, top, bottom;
-};
-
-struct Target
+struct Object
 {
 	int left, right, top, bottom;
 	Point2f center;
@@ -76,9 +71,9 @@ public:
 	void displaySelectedTarget();
 
 	void makeIntegralImg(Mat currentFrame);
-	int calcIntegralSumForRectangle(Rectangle rectangle);
-	bool haarFeature1(Rectangle rectangle);
-	bool haarFeature2(Rectangle rectangle);
+	int calcIntegralSumForRectangle(Object rectangle);
+	bool haarFeature1(Object rectangle);
+	bool haarFeature2(Object rectangle);
 	void calcFeatures();
 
 	VideoCapture cap;
@@ -89,9 +84,9 @@ public:
 	bool needToInit;
 	float deviationImgFillValue;
 	
-	vector<Target> targets;
+	vector<Object> objects;
 	bool isTargetSelected;
-	Target selectedTarget;
+	Object selectedTarget;
 
 private:
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;

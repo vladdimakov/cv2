@@ -97,7 +97,10 @@ int main(int argc, char* argv[])
 		cvFuns.makeSegmentation(distanceBetweenTargets);
 
 		if (cvFuns.isTargetSelected)
+		{
 			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
+			cvFuns.calcFeatures();
+		}
 
 		cvFuns.displaySelectedTarget();
 		

@@ -526,7 +526,7 @@ void CVFuns::findConnectedPoints(int x, int y, vector<Point2i> &connectedPoints)
 	}
 }
 
-bool isInside(Target baseTarget, Target insideTarget)
+bool isInside(Object baseTarget, Object insideTarget)
 {
 	if (insideTarget.left >= baseTarget.left && insideTarget.top >= baseTarget.top
 		&& insideTarget.right <= baseTarget.right && insideTarget.bottom <= baseTarget.bottom)
@@ -539,7 +539,7 @@ bool isInside(Target baseTarget, Target insideTarget)
 	}
 }
 
-bool isIntersect(Target baseTarget, Target intersectingTarget)
+bool isIntersect(Object baseTarget, Object intersectingTarget)
 {
 	if (intersectingTarget.right >= baseTarget.left && intersectingTarget.left <= baseTarget.right
 		&& intersectingTarget.bottom >= baseTarget.top && intersectingTarget.top <= baseTarget.bottom)
@@ -552,7 +552,7 @@ bool isIntersect(Target baseTarget, Target intersectingTarget)
 	}
 }
 
-bool isNear(Target baseTarget, Target nearTarget, float distanceBetweenTargets)
+bool isNear(Object baseTarget, Object nearTarget, float distanceBetweenTargets)
 {
 	float currentDistance = (baseTarget.center.x - nearTarget.center.x) * (baseTarget.center.x - nearTarget.center.x) +
 							(baseTarget.center.y - nearTarget.center.y) * (baseTarget.center.y - nearTarget.center.y);
@@ -585,7 +585,7 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 		}
 	}		
 
-	targets.clear();
+	objects.clear();
 	int left, right, top, bottom;
 	for (int i = 0; i < connectedPointsRegions.size(); i++)
 	{
@@ -613,64 +613,63 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 		center.x = (float)(left + right) / 2;
 		center.y = (float)(top + bottom) / 2;
 
-		Target target = { left, right, top, bottom, center, true };
-		targets.push_back(target);
+		Object target = { left, right, top, bottom, center, true };
+		objects.push_back(target);
 	}
 
-	for (int i = 0; i < targets.size(); i++)
+	for (int i = 0; i < objects.size(); i++)
 	{
-		for (int j = 0; j < targets.size(); j++)
+		for (int j = 0; j < objects.size(); j++)
 		{
-			if (i != j && targets[i].exist && targets[j].exist)
+			if (i != j && objects[i].exist && objects[j].exist)
 			{
-				if (isInside(targets[i], targets[j]) || isIntersect(targets[i], targets[j]) || isNear(targets[i], targets[j], distanceBetweenTargets))
+				if (isInside(objects[i], objects[j]) || isIntersect(objects[i], objects[j]) || isNear(objects[i], objects[j], distanceBetweenTargets))
 				{
-					if (targets[i].left > targets[j].left)
-						targets[i].left = targets[j].left;
+					if (objects[i].left > objects[j].left)
+						objects[i].left = objects[j].left;
 
-					if (targets[i].right < targets[j].right)
-						targets[i].right = targets[j].right;
+					if (objects[i].right < objects[j].right)
+						objects[i].right = objects[j].right;
 
-					if (targets[i].top > targets[j].top)
-						targets[i].top = targets[j].top;
+					if (objects[i].top > objects[j].top)
+						objects[i].top = objects[j].top;
 
-					if (targets[i].bottom < targets[j].bottom)
-						targets[i].bottom = targets[j].bottom;
+					if (objects[i].bottom < objects[j].bottom)
+						objects[i].bottom = objects[j].bottom;
 
-					targets[j].exist = false;
+					objects[j].exist = false;
 				}
 			}
 		}
 	}
 
-	vector<Target> targetsTmp;
-	for (int i = 0; i < targets.size(); i++)
+	vector<Object> targetsTmp;
+	for (int i = 0; i < objects.size(); i++)
 	{
-		if (targets[i].exist)
+		if (objects[i].exist)
 		{
-			targetsTmp.push_back(targets[i]);
+			targetsTmp.push_back(objects[i]);
 		}
 	}
 
-	targets = targetsTmp;
+	objects = targetsTmp;
 	targetsTmp.clear();
 	/*
-	for (int i = 0; i < targets.size(); i++)
+	for (int i = 0; i < objects.size(); i++)
 	{
-		rectangle(imgToDisplay[0], Point2i(targets[i].left, targets[i].top), Point2i(targets[i].right, targets[i].bottom), Scalar(255), 2);
+		rectangle(imgToDisplay[0], Point2i(objects[i].left, objects[i].top), Point2i(objects[i].right, objects[i].bottom), Scalar(255), 2);
 	}
 	*/
-	//cout << targets.size() << endl;
 }
 
 void CVFuns::selectTarget(Point2i clickedPoint)
 {
-	for (int i = 0; i < targets.size(); i++)
+	for (int i = 0; i < objects.size(); i++)
 	{
-		if (clickedPoint.x >= targets[i].left && clickedPoint.x <= targets[i].right &&
-			clickedPoint.y >= targets[i].top && clickedPoint.y <= targets[i].bottom)
+		if (clickedPoint.x >= objects[i].left && clickedPoint.x <= objects[i].right &&
+			clickedPoint.y >= objects[i].top && clickedPoint.y <= objects[i].bottom)
 		{
-			selectedTarget = targets[i];
+			selectedTarget = objects[i];
 			isTargetSelected = true;
 			break;
 		}
@@ -679,11 +678,11 @@ void CVFuns::selectTarget(Point2i clickedPoint)
 
 void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames)
 {
-	for (int i = 0; i < targets.size(); i++)
+	for (int i = 0; i < objects.size(); i++)
 	{
-		if (isInside(targets[i], selectedTarget) || isIntersect(targets[i], selectedTarget) || isNear(targets[i], selectedTarget, distanceBetweenTargetsOnTwoFrames))
+		if (isInside(objects[i], selectedTarget) || isIntersect(objects[i], selectedTarget) || isNear(objects[i], selectedTarget, distanceBetweenTargetsOnTwoFrames))
 		{
-			selectedTarget = targets[i];
+			selectedTarget = objects[i];
 			break;
 		}
 	}
@@ -699,7 +698,7 @@ void CVFuns::makeIntegralImg(Mat currentFrame)
 	integral(currentFrame, integralImg);
 }
 
-int CVFuns::calcIntegralSumForRectangle(Rectangle rectangle)
+int CVFuns::calcIntegralSumForRectangle(Object rectangle)
 {
 	return integralImg.at<int>(rectangle.bottom + 1, rectangle.right + 1) - 
 			integralImg.at<int>(rectangle.top, rectangle.right + 1) - 
@@ -707,10 +706,10 @@ int CVFuns::calcIntegralSumForRectangle(Rectangle rectangle)
 			integralImg.at<int>(rectangle.top, rectangle.left);
 }
 
-bool CVFuns::haarFeature1(Rectangle rectangle)
+bool CVFuns::haarFeature1(Object rectangle)
 {
-	Rectangle halfA = rectangle;
-	Rectangle halfB = rectangle;
+	Object halfA = rectangle;
+	Object halfB = rectangle;
 	
 	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
 	
@@ -720,10 +719,10 @@ bool CVFuns::haarFeature1(Rectangle rectangle)
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
 }
 
-bool CVFuns::haarFeature2(Rectangle rectangle)
+bool CVFuns::haarFeature2(Object rectangle)
 {
-	Rectangle halfA = rectangle;
-	Rectangle halfB = rectangle;
+	Object halfA = rectangle;
+	Object halfB = rectangle;
 
 	int halfWidth = (rectangle.right - rectangle.left) / 2;
 
@@ -735,23 +734,33 @@ bool CVFuns::haarFeature2(Rectangle rectangle)
 
 void CVFuns::calcFeatures()
 {
-	int maxWindowWidth = 300;
-	int minWindowWidth = 20;
-	int maxWindowHeight = 400;
-	int minWindowHeight = 20;
+	int maxWindowWidth = 200;
+	int minWindowWidth = 10;
+	int maxWindowHeight = 300;
+	int minWindowHeight = 10;
+	int featuresWindowsNum = 10;
 
-	Rectangle window;
+	Object featuresWindow;
 
-	window.top = rand() % (CAP_FRAME_HEIGHT - minWindowHeight);
-	window.left = rand() % (CAP_FRAME_WIDTH - minWindowWidth);
+	for (int i = 0; i < featuresWindowsNum; i++)
+	{
+		do
+		{
+			featuresWindow.top = rand() % (CAP_FRAME_HEIGHT - minWindowHeight);
+			featuresWindow.left = rand() % (CAP_FRAME_WIDTH - minWindowWidth);
 
-	window.bottom = window.top + minWindowHeight + rand() % (maxWindowHeight - minWindowHeight);
-	if (window.bottom >= CAP_FRAME_HEIGHT)
-		window.bottom = CAP_FRAME_HEIGHT - 1;
+			featuresWindow.bottom = featuresWindow.top + minWindowHeight + rand() % (maxWindowHeight - minWindowHeight);
+			if (featuresWindow.bottom >= CAP_FRAME_HEIGHT)
+				featuresWindow.bottom = CAP_FRAME_HEIGHT - 1;
 
-	window.right = window.left + minWindowWidth + rand() % (maxWindowWidth - minWindowWidth);
-	if (window.right >= CAP_FRAME_WIDTH)
-		window.right = CAP_FRAME_WIDTH - 1;
+			featuresWindow.right = featuresWindow.left + minWindowWidth + rand() % (maxWindowWidth - minWindowWidth);
+			if (featuresWindow.right >= CAP_FRAME_WIDTH)
+				featuresWindow.right = CAP_FRAME_WIDTH - 1;
+		} while (isInside(selectedTarget, featuresWindow) || isIntersect(selectedTarget, featuresWindow));
 
-	rectangle(imgToDisplay[0], Point2i(window.left, window.top), Point2i(window.right, window.bottom), Scalar(255), 2);
+		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
+		// Ќаходим значени€ признаков дл€ featuresWindow и кладем в дерево
+	}
+
+	// Ќаходим значени€ признаков дл€ selectedTarget и кладем в дерево
 }
