@@ -2,6 +2,7 @@
 
 #include "opencv2/opencv.hpp"
 #include <time.h> 
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -18,7 +19,7 @@ const int WINDOW_HEIGHT = 660;
 
 const int FEATURES_NUM = 10;
 const int STATISTICS_NUM = 100;
-const int DEPTH_OF_TREE = 10;
+const int DEPTH_OF_TREE = 3;
 
 class FPSCounter
 {
@@ -60,7 +61,7 @@ public:
 	void removeChilds();
 
 	int statistics[2];
-	int level, featureNumToDivide;
+	int num, level, featureNumToDivide;
 	Node *left, *right;
 	Child *childs;
 };
@@ -75,12 +76,24 @@ public:
 	void divideNode(Node* node);
 	void buildLeafs(Node* node, Features features);
 	void buildTree(Features features);
-	void test();
+	
+	void writeNode(Node* node, ofstream &file);
+	void writeNodes(ofstream &file);
+	void writeTree(string fileName);
 
+	bool isTrained;
 	Node *root;
 	Object *featuresPositions;
-	int builtLeafsNum;
+	int nodeNum;
 	int featureType, featuresNum, statisticsNum, depthOfTree;
+};
+
+class Forest
+{
+public:
+	Forest();
+	
+	BinaryTree *trees;
 };
 
 class CVFuns

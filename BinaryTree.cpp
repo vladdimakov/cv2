@@ -33,13 +33,18 @@ void Node::removeChilds()
 
 BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree)
 {
+	isTrained = false;
+
 	this->featureType = featureType;
 	this->featuresNum = featuresNum;
 	this->statisticsNum = statisticsNum;
 	this->depthOfTree = depthOfTree;
 
+	nodeNum = 0;
+
 	root = new Node(featuresNum);	
 	root->level = 0;
+	root->num = nodeNum;
 
 	featuresPositions = new Object[featuresNum];
 	
@@ -129,14 +134,18 @@ void BinaryTree::divideNode(Node* node)
 
 	node->featureNumToDivide = maxGiniCoefficientNum;
 
+	nodeNum++;
 	node->left = new Node(featuresNum);
 	node->left->level = node->level + 1;
-
+	node->left->num = nodeNum;
+	
+	nodeNum++;
 	node->right = new Node(featuresNum);
 	node->right->level = node->level + 1;
+	node->right->num = nodeNum;
 	
-	cout << node->level + 1 << endl; ///
-	cout << node->level + 1 << endl;
+	//cout << node->level + 1 << endl; ///
+	//cout << node->level + 1 << endl;
 
 	node->removeChilds();
 }
@@ -165,4 +174,59 @@ void BinaryTree::buildLeafs(Node* node, Features features)
 void BinaryTree::buildTree(Features features)
 {
 	buildLeafs(root, features);
+}
+
+void BinaryTree::writeNode(Node* node, ofstream &file)
+{
+	if (node == root)
+	{
+		file << node->num << " r " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
+		
+		writeNode(node->left, file);
+		writeNode(node->right, file);
+	}
+	else if (node->featureNumToDivide == -1)
+	{
+		int isTarget = 0;
+		if (node->statistics[1] > node->statistics[0])
+			isTarget = 1;
+
+		file << node->num << " l " << isTarget << endl;
+	}
+	else
+	{
+		file << node->num << " n " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
+
+		writeNode(node->left, file);
+		writeNode(node->right, file);
+	}
+}
+
+void BinaryTree::writeNodes(ofstream &file)
+{
+	writeNode(root, file);
+}
+
+void BinaryTree::writeTree(string fileName)
+{
+	ofstream file(fileName);
+
+	file << featuresNum << endl;
+	
+	for (int i = 0; i < featuresNum; i++)
+	{
+		file << featuresPositions[i].left << " " << featuresPositions[i].right << " " << featuresPositions[i].top << " " << featuresPositions[i].bottom << endl;
+	}
+
+	writeNodes(file);
+
+	file.close();
+
+	cout << "Дерево №" << featureType << " записано в файл (" << nodeNum + 1 << " вершин)" << endl;
+}
+
+Forest::Forest()
+{
+	trees[0] = BinaryTree(1, 10, 50, 10);
+	trees[1] = BinaryTree(2, 10, 50, 10);
 }

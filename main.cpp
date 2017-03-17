@@ -79,6 +79,11 @@ int main(int argc, char* argv[])
 		if (grayFrame8U.empty())
 		{
 			cvFuns.startCapture(argc, argv);
+			
+			cvFuns.tree->isTrained = true;
+			cout << "Классификатор обучен, началась запись в файл" << endl;
+			cvFuns.tree->writeTree("1.txt");
+
 			continue;
 		}
 
@@ -96,21 +101,20 @@ int main(int argc, char* argv[])
 
 		cvFuns.makeSegmentation(distanceBetweenTargets);
 
-		if (cvFuns.isTargetSelected)
+		if (cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
 		{
 			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
 			cvFuns.calcFeatures();
+			cvFuns.displaySelectedTarget();
 		}
-
-		cvFuns.displaySelectedTarget();
-		
+				
 		cvFuns.displayWindow();
 
 		cvFuns.makeIntegralImg(grayFrame8U);
 
 		setMouseCallback("Display window", mouseCallBackFunc, NULL);
 
-		if (isClicked && !cvFuns.isTargetSelected)
+		if (isClicked && !cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
 		{
 			cvFuns.selectTarget(clickedPoint);
 			isClicked = false;
