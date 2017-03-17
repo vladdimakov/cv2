@@ -5,7 +5,7 @@ CVFuns::CVFuns()
 	needToInit = true;
 	isTargetSelected = false;
 
-	tree = new BinaryTree(FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
+	tree = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
 	
 	for (int i = 0; i < 4; i++)
 		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
@@ -713,7 +713,7 @@ int CVFuns::calcIntegralSumForRectangle(Object rectangle)
 			integralImg.at<int>(rectangle.top, rectangle.left);
 }
 
-bool CVFuns::haarFeature1(Object rectangle)
+bool CVFuns::calcHaarFeature1(Object rectangle)
 {
 	Object halfA = rectangle;
 	Object halfB = rectangle;
@@ -726,7 +726,7 @@ bool CVFuns::haarFeature1(Object rectangle)
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
 }
 
-bool CVFuns::haarFeature2(Object rectangle)
+bool CVFuns::calcHaarFeature2(Object rectangle)
 {
 	Object halfA = rectangle;
 	Object halfB = rectangle;
@@ -737,6 +737,19 @@ bool CVFuns::haarFeature2(Object rectangle)
 	halfB.left = rectangle.left + halfWidth + 1;
 
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
+}
+
+bool CVFuns::calcHaarFeatures(Object rectangle, int featureType)
+{
+	switch (featureType)
+	{
+	case 1:
+		return calcHaarFeature1(rectangle);
+		break;
+	case 2:
+		return calcHaarFeature2(rectangle);
+		break;
+	}
 }
 
 Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object featuresWindow)
@@ -756,12 +769,12 @@ Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object featuresWin
 
 void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 {
-	Features features(tree->_featuresNum);
+	Features features(tree->featuresNum);
 	features.isTarget = isTarget;
 
-	for (int i = 0; i < tree->_featuresNum; i++)
+	for (int i = 0; i < tree->featuresNum; i++)
 	{
-		features.values[i] = haarFeature1(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow));  // Сделать признак привязанным к tree
+		features.values[i] = calcHaarFeatures(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow), tree->featureType);
 	}
 
 	tree->buildTree(features);

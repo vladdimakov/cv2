@@ -68,7 +68,7 @@ public:
 class BinaryTree
 {
 public:
-	BinaryTree(int featuresNum, int statisticsNum, int depthOfTree);
+	BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree);
 	void buildLeafsForCurrentNode(Node* node, Features features);
 	float calcGiniCoefficient(Child child);
 	bool isUsedFeature(int featureNum, vector<int> usedFeatures);
@@ -80,8 +80,7 @@ public:
 	Node *root;
 	Object *featuresPositions;
 	int builtLeafsNum;
-
-	int _featuresNum, _statisticsNum, _depthOfTree;
+	int featureType, featuresNum, statisticsNum, depthOfTree;
 };
 
 class CVFuns
@@ -115,8 +114,11 @@ public:
 
 	void makeIntegralImg(Mat currentFrame);
 	int calcIntegralSumForRectangle(Object rectangle);
-	bool haarFeature1(Object rectangle);
-	bool haarFeature2(Object rectangle);
+
+	bool calcHaarFeature1(Object rectangle);
+	bool calcHaarFeature2(Object rectangle);
+	bool calcHaarFeatures(Object rectangle, int featureType);
+	
 	Object rescaleFeaturePosition(Object featurePosition, Object featuresWindow);
 	void makeFeaturesForWindow(Object featuresWindow, int isTarget);
 	void calcFeatures();

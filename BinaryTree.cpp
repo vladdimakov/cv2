@@ -31,16 +31,17 @@ void Node::removeChilds()
 	childs = NULL;
 }
 
-BinaryTree::BinaryTree(int featuresNum, int statisticsNum, int depthOfTree)
+BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree)
 {
-	_featuresNum = featuresNum;
-	_statisticsNum = statisticsNum;
-	_depthOfTree = depthOfTree;
+	this->featureType = featureType;
+	this->featuresNum = featuresNum;
+	this->statisticsNum = statisticsNum;
+	this->depthOfTree = depthOfTree;
 
-	root = new Node(_featuresNum);	
+	root = new Node(featuresNum);	
 	root->level = 0;
 
-	featuresPositions = new Object[_featuresNum];
+	featuresPositions = new Object[featuresNum];
 	
 	// ѕусть эталонное окно имеет размер координаты (0,0) (100,100)
 	int windowWidth = 100;
@@ -51,7 +52,7 @@ BinaryTree::BinaryTree(int featuresNum, int statisticsNum, int depthOfTree)
 	int maxFeatureHeight = 80;
 	int minFeatureHeight = 4;
 
-	for (int i = 0; i < _featuresNum; i++)
+	for (int i = 0; i < featuresNum; i++)
 	{
 		featuresPositions[i].top = rand() % (windowHeight - minFeatureHeight);
 		featuresPositions[i].left = rand() % (windowWidth - minFeatureWidth);
@@ -70,9 +71,9 @@ void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
 {	
 	node->statistics[features.isTarget]++;
 
-	if (node->level < _depthOfTree)
+	if (node->level < depthOfTree)
 	{
-		for (int i = 0; i < _featuresNum; i++)
+		for (int i = 0; i < featuresNum; i++)
 		{
 			if (features.values[i] == -1)
 				continue;
@@ -80,7 +81,7 @@ void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
 			node->childs[i].statistics[features.values[i]][features.isTarget]++;
 		}
 
-		if (node->statistics[0] + node->statistics[1] >= _statisticsNum)
+		if (node->statistics[0] + node->statistics[1] >= statisticsNum)
 		{
 			divideNode(node);
 		}
@@ -105,15 +106,15 @@ float BinaryTree::calcGiniCoefficient(Child child)
 
 void BinaryTree::divideNode(Node* node)
 {
-	float *giniCoefficients = new float[_featuresNum];
-	for (int i = 0; i < _featuresNum; i++)
+	float *giniCoefficients = new float[featuresNum];
+	for (int i = 0; i < featuresNum; i++)
 	{
 		giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
 	}
 
 	float maxGiniCoefficient = 0;
 	int maxGiniCoefficientNum;
-	for (int i = 0; i < _featuresNum; i++)
+	for (int i = 0; i < featuresNum; i++)
 	{
 		if (giniCoefficients[i] >= maxGiniCoefficient)
 		{
@@ -128,10 +129,10 @@ void BinaryTree::divideNode(Node* node)
 
 	node->featureNumToDivide = maxGiniCoefficientNum;
 
-	node->left = new Node(_featuresNum);
+	node->left = new Node(featuresNum);
 	node->left->level = node->level + 1;
 
-	node->right = new Node(_featuresNum);
+	node->right = new Node(featuresNum);
 	node->right->level = node->level + 1;
 	
 	cout << node->level + 1 << endl; ///

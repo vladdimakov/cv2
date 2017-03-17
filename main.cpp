@@ -18,7 +18,7 @@ void binaryTreeTest()
 	const int statisticsNum = 100;
 	const int depthOfTree = 3;
 
-	BinaryTree binaryTree(featuresNum, statisticsNum, depthOfTree);
+	BinaryTree binaryTree(1, featuresNum, statisticsNum, depthOfTree);
 	Features features(featuresNum);
 	
 	for (int k = 0; k < 5000; k++)
