@@ -78,7 +78,7 @@ public:
 	void test();
 
 	Node *root;
-	Object *_features;
+	Object *featuresPositions;
 	int builtLeafsNum;
 
 	int _featuresNum, _statisticsNum, _depthOfTree;
@@ -117,6 +117,7 @@ public:
 	int calcIntegralSumForRectangle(Object rectangle);
 	bool haarFeature1(Object rectangle);
 	bool haarFeature2(Object rectangle);
+	Object rescaleFeaturePosition(Object featurePosition, Object featuresWindow);
 	void makeFeaturesForWindow(Object featuresWindow, int isTarget);
 	void calcFeatures();
 

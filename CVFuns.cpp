@@ -676,6 +676,11 @@ void CVFuns::selectTarget(Point2i clickedPoint)
 			break;
 		}
 	}
+
+	if (isTargetSelected)
+	{
+		cout << "Цель выбрана, началось обучение классификатора" << endl;
+	}
 }
 
 void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames)
@@ -734,19 +739,32 @@ bool CVFuns::haarFeature2(Object rectangle)
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
 }
 
+Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object featuresWindow)
+{
+	Object newFeaturePosition;
+	
+	int featuresWindowWidth = featuresWindow.right - featuresWindow.left;
+	int featuresWindowHeight = featuresWindow.bottom - featuresWindow.top;
+
+	newFeaturePosition.left = featuresWindow.left + int(featurePosition.left / 100.0f * featuresWindowWidth);
+	newFeaturePosition.right = featuresWindow.left + int(featurePosition.right / 100.0f * featuresWindowWidth);
+	newFeaturePosition.top = featuresWindow.top + int(featurePosition.top / 100.0f * featuresWindowHeight);
+	newFeaturePosition.bottom = featuresWindow.top + int(featurePosition.bottom / 100.0f * featuresWindowHeight);
+
+	return newFeaturePosition;
+}
+
 void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 {
-	/*
 	Features features(tree->_featuresNum);
 	features.isTarget = isTarget;
 
 	for (int i = 0; i < tree->_featuresNum; i++)
 	{
-		features.values[i] = haarFeature1(tree->_features[i]);  // Сделать признак привязанным к tree, масштабировать tree->_features[i]
+		features.values[i] = haarFeature1(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow));  // Сделать признак привязанным к tree
 	}
 
 	tree->buildTree(features);
-	*/
 }
 
 void CVFuns::calcFeatures()
@@ -772,10 +790,10 @@ void CVFuns::calcFeatures()
 
 			featuresWindow.right = featuresWindow.left + minWindowWidth + rand() % (maxWindowWidth - minWindowWidth);
 			if (featuresWindow.right >= CAP_FRAME_WIDTH)
-				featuresWindow.right = CAP_FRAME_WIDTH - 1;
+				featuresWindow.right = CAP_FRAME_WIDTH - 1; 
 		} while (isInside(selectedTarget, featuresWindow) || isIntersect(selectedTarget, featuresWindow));
 
-		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
+		//rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
 		makeFeaturesForWindow(featuresWindow, 0);
 	}
 

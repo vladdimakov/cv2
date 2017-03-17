@@ -37,10 +37,33 @@ BinaryTree::BinaryTree(int featuresNum, int statisticsNum, int depthOfTree)
 	_statisticsNum = statisticsNum;
 	_depthOfTree = depthOfTree;
 
-	_features = new Object[_featuresNum];
-
 	root = new Node(_featuresNum);	
 	root->level = 0;
+
+	featuresPositions = new Object[_featuresNum];
+	
+	// ѕусть эталонное окно имеет размер координаты (0,0) (100,100)
+	int windowWidth = 100;
+	int windowHeight = 100;
+	
+	int maxFeatureWidth = 80;
+	int minFeatureWidth = 4;
+	int maxFeatureHeight = 80;
+	int minFeatureHeight = 4;
+
+	for (int i = 0; i < _featuresNum; i++)
+	{
+		featuresPositions[i].top = rand() % (windowHeight - minFeatureHeight);
+		featuresPositions[i].left = rand() % (windowWidth - minFeatureWidth);
+
+		featuresPositions[i].bottom = featuresPositions[i].top + minFeatureHeight + rand() % (maxFeatureHeight - minFeatureHeight);
+		if (featuresPositions[i].bottom >= windowHeight)
+			featuresPositions[i].bottom = windowHeight - 1;
+
+		featuresPositions[i].right = featuresPositions[i].left + minFeatureWidth + rand() % (maxFeatureWidth - minFeatureWidth);
+		if (featuresPositions[i].right >= windowWidth)
+			featuresPositions[i].right = windowWidth - 1;
+	}
 }
 
 void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
