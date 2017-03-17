@@ -45,6 +45,7 @@ BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int 
 	root = new Node(featuresNum);	
 	root->level = 0;
 	root->num = nodeNum;
+	root->prevStatisticsNum = 0;
 
 	featuresPositions = new Object[featuresNum];
 	
@@ -86,7 +87,7 @@ void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
 			node->childs[i].statistics[features.values[i]][features.isTarget]++;
 		}
 
-		if (node->statistics[0] + node->statistics[1] >= statisticsNum)
+		if (node->statistics[0] + node->statistics[1] - node->prevStatisticsNum >= statisticsNum)
 		{
 			divideNode(node);
 		}
@@ -95,8 +96,13 @@ void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
 
 float BinaryTree::calcGiniCoefficient(Child child)
 {
+	if (child.statistics[0][0] == 0 && child.statistics[0][1] == 0 || // Нельзя, чтобы M0 = 0 и M1 = 0
+		child.statistics[1][0] == 0 && child.statistics[1][1] == 0) // Нельзя, чтобы T0 = 0 и T1 = 0
+	{
+		return -1.0f;
+	}
+	
 	float giniCoefficient = 0;
-
 	for (int j = 0; j < 2; j++)
 	{
 		if (child.statistics[0][j] + child.statistics[1][j] != 0)
@@ -136,11 +142,17 @@ void BinaryTree::divideNode(Node* node)
 
 	nodeNum++;
 	node->left = new Node(featuresNum);
+	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[0][0];
+	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[0][1];
+	node->left->prevStatisticsNum = node->left->statistics[0] + node->left->statistics[1];
 	node->left->level = node->level + 1;
 	node->left->num = nodeNum;
 	
 	nodeNum++;
 	node->right = new Node(featuresNum);
+	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[1][0];
+	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[1][1];
+	node->right->prevStatisticsNum = node->right->statistics[0] + node->right->statistics[1];
 	node->right->level = node->level + 1;
 	node->right->num = nodeNum;
 	
@@ -187,11 +199,7 @@ void BinaryTree::writeNode(Node* node, ofstream &file)
 	}
 	else if (node->featureNumToDivide == -1)
 	{
-		int isTarget = 0;
-		if (node->statistics[1] > node->statistics[0])
-			isTarget = 1;
-
-		file << node->num << " l " << isTarget << endl;
+		file << node->num << " l " << node->statistics[0] << " " << node->statistics[1] << endl;
 	}
 	else
 	{

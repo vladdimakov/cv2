@@ -18,8 +18,8 @@ const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
 const int FEATURES_NUM = 10;
-const int STATISTICS_NUM = 100;
-const int DEPTH_OF_TREE = 3;
+const int STATISTICS_NUM = 50;
+const int DEPTH_OF_TREE = 10;
 
 class FPSCounter
 {
@@ -61,7 +61,7 @@ public:
 	void removeChilds();
 
 	int statistics[2];
-	int num, level, featureNumToDivide;
+	int num, level, featureNumToDivide, prevStatisticsNum;
 	Node *left, *right;
 	Child *childs;
 };
