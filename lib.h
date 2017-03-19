@@ -70,19 +70,15 @@ class BinaryTree
 {
 public:
 	BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree);
-	void buildLeafsForCurrentNode(Node* node, Features features);
+	void buildNode(Node* node, Features features);
 	float calcGiniCoefficient(Child child);
-	bool isUsedFeature(int featureNum, vector<int> usedFeatures);
 	void divideNode(Node* node);
-	void buildLeafs(Node* node, Features features);
-	void buildTree(Features features);
+	void buildTree(Node* node, Features features);
 	
-	void writeNode(Node* node, ofstream &file);
-	void writeNodes(ofstream &file);
+	void writeNodes(Node* node, ofstream &file);
 	void writeTree(string fileName);
 
-	void buildNodeFromFile(Node* node, int nodesTmp[]);
-	void buildNodesFromFile(int nodesTmp[]);
+	void buildNodesFromFile(Node* node, int nodesTmp[]);
 	void readTree(string fileName);
 
 	bool isTrained;

@@ -73,7 +73,7 @@ BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int 
 	}
 }
 
-void BinaryTree::buildLeafsForCurrentNode(Node* node, Features features)
+void BinaryTree::buildNode(Node* node, Features features)
 {	
 	node->statistics[features.isTarget]++;
 
@@ -162,40 +162,35 @@ void BinaryTree::divideNode(Node* node)
 	node->removeChilds();
 }
 
-void BinaryTree::buildLeafs(Node* node, Features features)
+void BinaryTree::buildTree(Node* node, Features features)
 {
 	if (node->featureNumToDivide != -1)
 	{
 		if (features.values[node->featureNumToDivide] == 0)
 		{
 			features.values[node->featureNumToDivide] = -1;
-			buildLeafs(node->left, features);
+			buildTree(node->left, features);
 		}
 		else
 		{
 			features.values[node->featureNumToDivide] = -1;
-			buildLeafs(node->right, features);
+			buildTree(node->right, features);
 		}		
 	}
 	else
 	{
-		buildLeafsForCurrentNode(node, features);
+		buildNode(node, features);
 	}
 }
 
-void BinaryTree::buildTree(Features features)
-{
-	buildLeafs(root, features);
-}
-
-void BinaryTree::writeNode(Node* node, ofstream &file)
+void BinaryTree::writeNodes(Node* node, ofstream &file)
 {
 	if (node == root)
 	{
 		file << node->num << " 0 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
 		
-		writeNode(node->left, file);
-		writeNode(node->right, file);
+		writeNodes(node->left, file);
+		writeNodes(node->right, file);
 	}
 	else if (node->featureNumToDivide == -1)
 	{
@@ -205,14 +200,9 @@ void BinaryTree::writeNode(Node* node, ofstream &file)
 	{
 		file << node->num << " 1 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
 
-		writeNode(node->left, file);
-		writeNode(node->right, file);
+		writeNodes(node->left, file);
+		writeNodes(node->right, file);
 	}
-}
-
-void BinaryTree::writeNodes(ofstream &file)
-{
-	writeNode(root, file);
 }
 
 void BinaryTree::writeTree(string fileName)
@@ -226,14 +216,14 @@ void BinaryTree::writeTree(string fileName)
 
 	file << nodesNum << endl;
 
-	writeNodes(file);
+	writeNodes(root, file);
 
 	file.close();
 
 	cout << "Дерево №" << featureType << " записано в файл (" << nodesNum << " вершин)" << endl;
 }
 
-void BinaryTree::buildNodeFromFile(Node* node, int nodesTmp[])
+void BinaryTree::buildNodesFromFile(Node* node, int nodesTmp[])
 {
 	for (int i = 0; i < nodesNum; i++)
 	{
@@ -245,11 +235,11 @@ void BinaryTree::buildNodeFromFile(Node* node, int nodesTmp[])
 
 				node->left = new Node(featuresNum);
 				node->left->num = nodesTmp[i + nodesNum * 3];
-				buildNodeFromFile(node->left, nodesTmp);
+				buildNodesFromFile(node->left, nodesTmp);
 
 				node->right = new Node(featuresNum);
 				node->right->num = nodesTmp[i + nodesNum * 4];
-				buildNodeFromFile(node->right, nodesTmp);
+				buildNodesFromFile(node->right, nodesTmp);
 			}
 			else
 			{
@@ -258,11 +248,6 @@ void BinaryTree::buildNodeFromFile(Node* node, int nodesTmp[])
 			}
 		}
 	}
-}
-
-void BinaryTree::buildNodesFromFile(int nodesTmp[])
-{
-	buildNodeFromFile(root, nodesTmp);
 }
 
 void BinaryTree::readTree(string fileName)
@@ -283,7 +268,7 @@ void BinaryTree::readTree(string fileName)
 		file >> nodesTmp[i] >> nodesTmp[i + nodesNum] >> nodesTmp[i + nodesNum * 2] >> nodesTmp[i + nodesNum * 3] >> nodesTmp[i + nodesNum * 4];
 	}
 
-	buildNodesFromFile(nodesTmp);
+	buildNodesFromFile(root, nodesTmp);
 
 	delete[] nodesTmp;
 

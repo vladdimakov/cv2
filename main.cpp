@@ -28,7 +28,7 @@ void binaryTreeTest()
 			features.values[i] = rand() % 2;
 		}
 		features.isTarget = rand() % 2;
-		binaryTree.buildTree(features);
+		binaryTree.buildTree(binaryTree.root, features);
 	}
 	
 	//cout << binaryTree.root->childs[0].statistics[0][0] << " " << binaryTree.root->childs[0].statistics[0][1] << " " << binaryTree.root->childs[0].statistics[1][0] << " " << binaryTree.root->childs[0].statistics[1][1] << endl;

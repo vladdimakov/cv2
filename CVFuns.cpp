@@ -777,7 +777,7 @@ void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 		features.values[i] = calcHaarFeatures(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow), tree->featureType);
 	}
 
-	tree->buildTree(features);
+	tree->buildTree(tree->root, features);
 }
 
 void CVFuns::calcFeatures()
