@@ -83,7 +83,6 @@ public:
 
 	bool classifyFeatures(Node* node, Features features);
 
-	bool isTrained;
 	Node *root;
 	Object *featuresPositions;
 	int nodesNum;
@@ -94,8 +93,14 @@ class Forest
 {
 public:
 	Forest();
-	
-	BinaryTree *trees;
+	void buildForest(Features features[]);
+	void writeForest();
+	void readForest();
+	bool classifyFeatures(Features features[]);
+
+	BinaryTree **trees;
+	int treesNum;
+	bool isTrained;
 };
 
 class CVFuns
@@ -153,7 +158,7 @@ public:
 	bool isTargetSelected;
 	Object selectedTarget;
 
-	BinaryTree *tree;
+	Forest forest;
 
 private:
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;

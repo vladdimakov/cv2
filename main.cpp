@@ -12,41 +12,6 @@ void mouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 	}
 }
 
-void binaryTreeTest()
-{
-	const int featuresNum = 50;
-	const int statisticsNum = 100;
-	const int depthOfTree = 3;
-
-	BinaryTree binaryTree(1, featuresNum, statisticsNum, depthOfTree);
-	Features features(featuresNum);
-	
-	for (int k = 0; k < 5000; k++)
-	{
-		for (int i = 0; i < featuresNum; i++)
-		{
-			features.values[i] = rand() % 2;
-		}
-		features.isTarget = rand() % 2;
-		binaryTree.buildTree(binaryTree.root, features);
-	}
-	
-	//cout << binaryTree.root->childs[0].statistics[0][0] << " " << binaryTree.root->childs[0].statistics[0][1] << " " << binaryTree.root->childs[0].statistics[1][0] << " " << binaryTree.root->childs[0].statistics[1][1] << endl;
-	//cout << binaryTree.root->childs[1].statistics[0][0] << " " << binaryTree.root->childs[1].statistics[0][1] << " " << binaryTree.root->childs[1].statistics[1][0] << " " << binaryTree.root->childs[1].statistics[1][1] << endl;
-	
-	Node* currentNode = binaryTree.root->left->left->left;
-
-	//cout << currentNode->level << endl;
-
-	cout << currentNode->statistics[0] << " " << currentNode->statistics[1] << endl;
-	
-	//cout << currentNode->childs[49].statistics[0][0] << " " << currentNode->childs[49].statistics[0][1] << " " << currentNode->childs[49].statistics[1][0] << " " << binaryTree.root->childs[49].statistics[1][1] << endl;
-	
-	//cout << currentNode->featureNumToDivide << endl;
-	//cout << currentNode->left->statistics[0] << " " << currentNode->left->statistics[1] << "        " << currentNode->right->statistics[0] << " " << currentNode->right->statistics[1] << endl;
-	//cout << currentNode->right->childs[49].statistics[1][1] << endl;
-}
-
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "Russian");
@@ -98,13 +63,11 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	//binaryTreeTest();
-
 	if (!cvFuns.startCapture(videoSource))
 		return -1;
 
 	if (classificatorMode == "c")
-		cvFuns.tree->readTree("1.txt");
+		cvFuns.forest.readForest();
 
 	while (true)
 	{
@@ -116,8 +79,8 @@ int main(int argc, char* argv[])
 		{
 			if (classificatorMode == "t")
 			{
-				cvFuns.tree->isTrained = true;
-				cvFuns.tree->writeTree("1.txt");
+				cvFuns.forest.isTrained = true;
+				cvFuns.forest.writeForest();
 			}
 
 			cvFuns.startCapture(videoSource);
@@ -144,7 +107,7 @@ int main(int argc, char* argv[])
 			cvFuns.calcFeaturesForClassification();
 		}
 
-		if (classificatorMode == "t" && cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
+		if (classificatorMode == "t" && cvFuns.isTargetSelected && !cvFuns.forest.isTrained)
 		{
 			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
 			cvFuns.calcFeaturesForTraining();
@@ -157,7 +120,7 @@ int main(int argc, char* argv[])
 		{
 			setMouseCallback("Display window", mouseCallBackFunc, NULL);
 
-			if (isClicked && !cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
+			if (isClicked && !cvFuns.isTargetSelected && !cvFuns.forest.isTrained)
 			{
 				cvFuns.selectTarget(clickedPoint);
 				isClicked = false;

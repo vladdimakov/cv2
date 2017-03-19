@@ -33,8 +33,6 @@ void Node::removeChilds()
 
 BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree)
 {
-	isTrained = false;
-
 	this->featureType = featureType;
 	this->featuresNum = featuresNum;
 	this->statisticsNum = statisticsNum;
@@ -185,10 +183,10 @@ void BinaryTree::buildTree(Node* node, Features features)
 
 void BinaryTree::writeNodes(Node* node, ofstream &file)
 {
-	if (node == root)
+	if (node == root && node->featureNumToDivide != -1)
 	{
 		file << node->num << " 0 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
-		
+
 		writeNodes(node->left, file);
 		writeNodes(node->right, file);
 	}
@@ -302,6 +300,58 @@ bool BinaryTree::classifyFeatures(Node* node, Features features)
 
 Forest::Forest()
 {
-	trees[0] = BinaryTree(1, 10, 50, 10);
-	trees[1] = BinaryTree(2, 10, 50, 10);
+	treesNum = 1;
+
+	isTrained = false;
+
+	trees = new BinaryTree*[treesNum];
+	trees[0] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
+}
+
+void Forest::buildForest(Features features[])
+{
+	for (int i = 0; i < treesNum; i++)
+	{
+		trees[i]->buildTree(trees[i]->root, features[i]);
+	}
+}
+
+void Forest::writeForest()
+{
+	string fileName;
+	for (int i = 0; i < treesNum; i++)
+	{
+		fileName = to_string(i) + ".txt";
+		trees[i]->writeTree(fileName);
+	}
+}
+
+void Forest::readForest()
+{
+	string fileName;
+	for (int i = 0; i < treesNum; i++)
+	{
+		fileName = to_string(i) + ".txt";
+		trees[i]->readTree(fileName);
+	}
+}
+
+bool Forest::classifyFeatures(Features features[])
+{
+	int voteYesNum = 0;
+	int voteNoNum = 0;
+
+	for (int i = 0; i < treesNum; i++)
+	{
+		if (trees[i]->classifyFeatures(trees[i]->root, features[i]))
+		{
+			voteYesNum++;
+		}
+		else
+		{
+			voteNoNum++;
+		}
+	}
+
+	return voteYesNum > voteNoNum;
 }

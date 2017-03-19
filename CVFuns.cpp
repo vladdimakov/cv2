@@ -5,8 +5,6 @@ CVFuns::CVFuns()
 	needToInit = true;
 	isTargetSelected = false;
 
-	tree = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
-	
 	for (int i = 0; i < 4; i++)
 		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
 
@@ -767,15 +765,21 @@ Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object featuresWin
 
 void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 {
-	Features features(tree->featuresNum);
-	features.isTarget = isTarget;
+	Features **features = new Features*[forest.treesNum];
 
-	for (int i = 0; i < tree->featuresNum; i++)
+	for (int i = 0; i < forest.treesNum; i++)
 	{
-		features.values[i] = calcHaarFeatures(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow), tree->featureType);
+		features[i] = new Features(forest.trees[i]->featuresNum);
+
+		features[i]->isTarget = isTarget;
+
+		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
+		{
+			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], featuresWindow), forest.trees[i]->featureType);
+		}
 	}
 
-	tree->buildTree(tree->root, features);
+	forest.buildForest(*features);
 }
 
 void CVFuns::calcFeaturesForTraining()
@@ -812,18 +816,22 @@ void CVFuns::calcFeaturesForTraining()
 }
 
 void CVFuns::isTargetInWindow(Object featuresWindow)
-{
-	Features features(tree->featuresNum);
+{  
+	Features **features = new Features*[forest.treesNum];
 
-	for (int i = 0; i < tree->featuresNum; i++)
+	for (int i = 0; i < forest.treesNum; i++)
 	{
-		features.values[i] = calcHaarFeatures(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow), tree->featureType);
+		features[i] = new Features(forest.trees[i]->featuresNum);
+
+		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
+		{
+			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], featuresWindow), forest.trees[i]->featureType);
+		}
 	}
 
-	if (tree->classifyFeatures(tree->root, features))
+	if (forest.classifyFeatures(*features))
 	{
 		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
-		//cout << "YES" << endl;
 	}
 }
 
