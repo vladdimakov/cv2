@@ -40,11 +40,11 @@ BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int 
 	this->statisticsNum = statisticsNum;
 	this->depthOfTree = depthOfTree;
 
-	nodeNum = 0;
+	nodesNum = 1;
 
 	root = new Node(featuresNum);	
 	root->level = 0;
-	root->num = nodeNum;
+	root->num = nodesNum;
 	root->prevStatisticsNum = 0;
 
 	featuresPositions = new Object[featuresNum];
@@ -140,21 +140,21 @@ void BinaryTree::divideNode(Node* node)
 
 	node->featureNumToDivide = maxGiniCoefficientNum;
 
-	nodeNum++;
+	nodesNum++;
 	node->left = new Node(featuresNum);
 	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[0][0];
 	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[0][1];
 	node->left->prevStatisticsNum = node->left->statistics[0] + node->left->statistics[1];
 	node->left->level = node->level + 1;
-	node->left->num = nodeNum;
+	node->left->num = nodesNum;
 	
-	nodeNum++;
+	nodesNum++;
 	node->right = new Node(featuresNum);
 	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[1][0];
 	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[1][1];
 	node->right->prevStatisticsNum = node->right->statistics[0] + node->right->statistics[1];
 	node->right->level = node->level + 1;
-	node->right->num = nodeNum;
+	node->right->num = nodesNum;
 	
 	//cout << node->level + 1 << endl; ///
 	//cout << node->level + 1 << endl;
@@ -192,18 +192,18 @@ void BinaryTree::writeNode(Node* node, ofstream &file)
 {
 	if (node == root)
 	{
-		file << node->num << " r " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
+		file << node->num << " 0 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
 		
 		writeNode(node->left, file);
 		writeNode(node->right, file);
 	}
 	else if (node->featureNumToDivide == -1)
 	{
-		file << node->num << " l " << node->statistics[0] << " " << node->statistics[1] << endl;
+		file << node->num << " 2 " << node->statistics[0] << " " << node->statistics[1] << " 0 " << endl;
 	}
 	else
 	{
-		file << node->num << " n " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
+		file << node->num << " 1 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
 
 		writeNode(node->left, file);
 		writeNode(node->right, file);
@@ -219,18 +219,75 @@ void BinaryTree::writeTree(string fileName)
 {
 	ofstream file(fileName);
 
-	file << featuresNum << endl;
-	
 	for (int i = 0; i < featuresNum; i++)
 	{
 		file << featuresPositions[i].left << " " << featuresPositions[i].right << " " << featuresPositions[i].top << " " << featuresPositions[i].bottom << endl;
 	}
 
+	file << nodesNum << endl;
+
 	writeNodes(file);
 
 	file.close();
 
-	cout << "Дерево №" << featureType << " записано в файл (" << nodeNum + 1 << " вершин)" << endl;
+	cout << "Дерево №" << featureType << " записано в файл (" << nodesNum << " вершин)" << endl;
+}
+
+void BinaryTree::buildNodeFromFile(Node* node, int nodesTmp[])
+{
+	for (int i = 0; i < nodesNum; i++)
+	{
+		if (node->num == nodesTmp[i])
+		{
+			if (nodesTmp[i + nodesNum] == 0 || nodesTmp[i + nodesNum] == 1)
+			{
+				node->featureNumToDivide = nodesTmp[i + nodesNum * 2];
+
+				node->left = new Node(featuresNum);
+				node->left->num = nodesTmp[i + nodesNum * 3];
+				buildNodeFromFile(node->left, nodesTmp);
+
+				node->right = new Node(featuresNum);
+				node->right->num = nodesTmp[i + nodesNum * 4];
+				buildNodeFromFile(node->right, nodesTmp);
+			}
+			else
+			{
+				node->statistics[0] = nodesTmp[i + nodesNum * 2];
+				node->statistics[1] = nodesTmp[i + nodesNum * 3];
+			}
+		}
+	}
+}
+
+void BinaryTree::buildNodesFromFile(int nodesTmp[])
+{
+	buildNodeFromFile(root, nodesTmp);
+}
+
+void BinaryTree::readTree(string fileName)
+{
+	ifstream file(fileName);
+
+	for (int i = 0; i < featuresNum; i++)
+	{
+		file >> featuresPositions[i].left >> featuresPositions[i].right >> featuresPositions[i].top >> featuresPositions[i].bottom;
+	}
+	
+	file >> nodesNum;
+	
+	int *nodesTmp = new int[5 * nodesNum];
+	
+	for (int i = 0; i < nodesNum; i++)
+	{
+		file >> nodesTmp[i] >> nodesTmp[i + nodesNum] >> nodesTmp[i + nodesNum * 2] >> nodesTmp[i + nodesNum * 3] >> nodesTmp[i + nodesNum * 4];
+	}
+
+	buildNodesFromFile(nodesTmp);
+
+	delete[] nodesTmp;
+
+	file.close();
 }
 
 Forest::Forest()

@@ -17,9 +17,9 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
-const int FEATURES_NUM = 10;
-const int STATISTICS_NUM = 50;
-const int DEPTH_OF_TREE = 10;
+const int FEATURES_NUM = 3;
+const int STATISTICS_NUM = 10;
+const int DEPTH_OF_TREE = 3;
 
 class FPSCounter
 {
@@ -81,10 +81,14 @@ public:
 	void writeNodes(ofstream &file);
 	void writeTree(string fileName);
 
+	void buildNodeFromFile(Node* node, int nodesTmp[]);
+	void buildNodesFromFile(int nodesTmp[]);
+	void readTree(string fileName);
+
 	bool isTrained;
 	Node *root;
 	Object *featuresPositions;
-	int nodeNum;
+	int nodesNum;
 	int featureType, featuresNum, statisticsNum, depthOfTree;
 };
 

@@ -54,6 +54,9 @@ int main(int argc, char* argv[])
 
 	CVFuns cvFuns;
 
+	cvFuns.tree->readTree("1.txt");
+	cvFuns.tree->writeTree("2.txt");
+
 	const float refreshRate = 0.02f;
     const float deviationFactor = 5.5f;
 	const float targetsFactor = 15.0f;
