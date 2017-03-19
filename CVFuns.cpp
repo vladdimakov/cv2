@@ -45,15 +45,13 @@ void CVFuns::displayWindow()
 	imshow("Display window", imageToDisplay);
 }
 
-bool CVFuns::startCapture(int argc, char* argv[])
+bool CVFuns::startCapture(string videoSource)
 {
-	if (argc == 1)
+	if (videoSource.size() == 0)
 		cap.open(0); // 0 - камера по умолчанию
-	else if (argc == 2)
-		cap.open(argv[1]);
 	else
-		cout << "Неверное число аргументов командной строки" << endl;
-
+		cap.open(videoSource);
+	
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, CAP_FRAME_WIDTH); // Установка параметров захватываемой картинки
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, CAP_FRAME_HEIGHT);
 	cap.set(CV_CAP_PROP_FPS, CAP_FPS);
@@ -780,7 +778,7 @@ void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 	tree->buildTree(tree->root, features);
 }
 
-void CVFuns::calcFeatures()
+void CVFuns::calcFeaturesForTraining()
 {
 	int maxWindowWidth = 200;
 	int minWindowWidth = 10;
@@ -811,4 +809,9 @@ void CVFuns::calcFeatures()
 	}
 
 	makeFeaturesForWindow(selectedTarget, 1);
+}
+
+void CVFuns::calcFeaturesForClassification()
+{
+
 }

@@ -207,6 +207,8 @@ void BinaryTree::writeNodes(Node* node, ofstream &file)
 
 void BinaryTree::writeTree(string fileName)
 {
+	cout << "Началась запись дерева №" << featureType << " в файл" << endl;
+
 	ofstream file(fileName);
 
 	for (int i = 0; i < featuresNum; i++)
@@ -252,6 +254,8 @@ void BinaryTree::buildNodesFromFile(Node* node, int nodesTmp[])
 
 void BinaryTree::readTree(string fileName)
 {
+	cout << "Началось чтение дерева №" << featureType << " из файла" << endl;
+
 	ifstream file(fileName);
 
 	for (int i = 0; i < featuresNum; i++)
@@ -273,6 +277,8 @@ void BinaryTree::readTree(string fileName)
 	delete[] nodesTmp;
 
 	file.close();
+
+	cout << "Дерево №" << featureType << " прочитано из файла (" << nodesNum << " вершин)" << endl;
 }
 
 bool BinaryTree::classifyFeatures(Node* node, Features features)

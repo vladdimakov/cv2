@@ -53,25 +53,58 @@ int main(int argc, char* argv[])
 	srand(time(NULL));
 
 	CVFuns cvFuns;
-
-	cvFuns.tree->readTree("1.txt");
-	cvFuns.tree->writeTree("2.txt");
+	Mat colorFrame, grayFrame8U, grayFrame32F;
+	Point2f currentOffset;
 
 	const float refreshRate = 0.02f;
-    const float deviationFactor = 5.5f;
+	const float deviationFactor = 5.5f;
 	const float targetsFactor = 15.0f;
 	const float scalingFactor = 20.0f;
 	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
 	const float distanceBetweenTargets = 50.0f;
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
+	
+	string videoSource;
+	string classificatorMode;
+	if (argc == 2 || argc == 3)
+	{
+		if (argc == 2)
+		{
+			videoSource = "";
+		}
+		else
+		{
+			videoSource = argv[2];
+		}
 
-	Mat colorFrame, grayFrame8U, grayFrame32F;
-	Point2f currentOffset;
+		classificatorMode = argv[1];
+		if (classificatorMode == "t")
+		{
+			cout << "Режим обучения классификатора" << endl;
+		}
+		else if (classificatorMode == "c")
+		{
+			cout << "Режим классификации" << endl;
+		}
+		else
+		{
+			cout << "Неверный режим работы классификатора" << endl;
+			return -1;
+		}
+	}
+	else
+	{
+		cout << "Неверное число аргументов командной строки" << endl;
+		return -1;
+	}
 
 	//binaryTreeTest();
 
-	if (!cvFuns.startCapture(argc, argv)) 
+	if (!cvFuns.startCapture(videoSource))
 		return -1;
+
+	if (classificatorMode == "c")
+		cvFuns.tree->readTree("1.txt");
 
 	while (true)
 	{
@@ -81,46 +114,54 @@ int main(int argc, char* argv[])
 
 		if (grayFrame8U.empty())
 		{
-			cvFuns.startCapture(argc, argv);
-			
-			cvFuns.tree->isTrained = true;
-			cout << "Классификатор обучен, началась запись в файл" << endl;
-			cvFuns.tree->writeTree("1.txt");
+			if (classificatorMode == "t")
+			{
+				cvFuns.tree->isTrained = true;
+				cvFuns.tree->writeTree("1.txt");
+			}
+
+			cvFuns.startCapture(videoSource);
 
 			continue;
 		}
 
-		currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
-		
-		cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
-
-		cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
-
-		cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
-
-		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-
-		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
-
-		cvFuns.makeSegmentation(distanceBetweenTargets);
-
-		if (cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
+		if (classificatorMode == "t")
 		{
-			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
-			cvFuns.calcFeatures();
-			cvFuns.displaySelectedTarget();
+			currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
+			cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
+			cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
+			cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
+			cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
+			cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
+			cvFuns.makeSegmentation(distanceBetweenTargets);
 		}
-				
-		cvFuns.displayWindow();
 
 		cvFuns.makeIntegralImg(grayFrame8U);
 
-		setMouseCallback("Display window", mouseCallBackFunc, NULL);
-
-		if (isClicked && !cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
+		if (classificatorMode == "c")
 		{
-			cvFuns.selectTarget(clickedPoint);
-			isClicked = false;
+			cvFuns.imgToDisplay[0] = grayFrame8U;
+			cvFuns.calcFeaturesForClassification();
+		}
+
+		if (classificatorMode == "t" && cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
+		{
+			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
+			cvFuns.calcFeaturesForTraining();
+			cvFuns.displaySelectedTarget();
+		}
+		
+		cvFuns.displayWindow();
+
+		if (classificatorMode == "t")
+		{
+			setMouseCallback("Display window", mouseCallBackFunc, NULL);
+
+			if (isClicked && !cvFuns.isTargetSelected && !cvFuns.tree->isTrained)
+			{
+				cvFuns.selectTarget(clickedPoint);
+				isClicked = false;
+			}
 		}
 
 		char key = (char)waitKey(1); // waitKey ждет события нажатия клавиши 1 мс
