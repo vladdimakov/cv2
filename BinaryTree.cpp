@@ -1,36 +1,5 @@
 #include "lib.h"
 
-Features::Features(int featuresNum)
-{
-	values = new int[featuresNum];
-}
-
-Features::~Features()
-{
-	//delete[] values; // TODO!!!!
-}
-
-Child::Child()
-{
-	memset(statistics, 0, sizeof(statistics));
-}
-
-Node::Node(int childsNum)
-{
-	featureNumToDivide = -1;
-	left = NULL;
-	right = NULL;
-	childs = new Child[childsNum];
-
-	memset(statistics, 0, sizeof(statistics));	
-}
-
-void Node::removeChilds()
-{
-	delete[] childs;
-	childs = NULL;
-}
-
 BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree)
 {
 	this->featureType = featureType;
@@ -296,63 +265,4 @@ bool BinaryTree::classifyFeatures(Node* node, Features* features)
 	{
 		return node->statistics[1] > node->statistics[0];
 	}
-}
-
-Forest::Forest()
-{
-	treesNum = 2;
-
-	isTrained = false;
-
-	trees = new BinaryTree*[treesNum];
-	trees[0] = new BinaryTree(0, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
-	trees[1] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM + 20, DEPTH_OF_TREE);
-}
-
-void Forest::buildForest(Features** features)
-{
-	for (int i = 0; i < treesNum; i++)
-	{
-		trees[i]->buildTree(trees[i]->root, features[i]);
-	}
-}
-
-void Forest::writeForest()
-{
-	string fileName;
-	for (int i = 0; i < treesNum; i++)
-	{
-		fileName = to_string(i) + ".txt";
-		trees[i]->writeTree(fileName);
-	}
-}
-
-void Forest::readForest()
-{
-	string fileName;
-	for (int i = 0; i < treesNum; i++)
-	{
-		fileName = to_string(i) + ".txt";
-		trees[i]->readTree(fileName);
-	}
-}
-
-bool Forest::classifyFeatures(Features **features)
-{
-	int voteYesNum = 0;
-	int voteNoNum = 0;
-
-	for (int i = 0; i < treesNum; i++)
-	{
-		if (trees[i]->classifyFeatures(trees[i]->root, features[i]))
-		{
-			voteYesNum++;
-		}
-		else
-		{
-			voteNoNum++;
-		}
-	}
-
-	return voteYesNum > voteNoNum;
 }

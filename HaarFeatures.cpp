@@ -183,30 +183,30 @@ bool CVFuns::calcHaarFeature6(Object rectangle)
 	return A > B + C + D + E + F + G + H + I;
 }
 
-bool CVFuns::calcHaarFeatures(Object rectangle, int featureType)
+int CVFuns::calcHaarFeatures(Object rectangle, int featureType)
 {
 	switch (featureType)
 	{
 	case 0:
-		return calcHaarFeature0(rectangle);
+		return (int)calcHaarFeature0(rectangle);
 		break;
 	case 1:
-		return calcHaarFeature1(rectangle);
+		return (int)calcHaarFeature1(rectangle);
 		break;
 	case 2:
-		return calcHaarFeature2(rectangle);
+		return (int)calcHaarFeature2(rectangle);
 		break;
 	case 3:
-		return calcHaarFeature3(rectangle);
+		return (int)calcHaarFeature3(rectangle);
 		break;
 	case 4:
-		return calcHaarFeature4(rectangle);
+		return (int)calcHaarFeature4(rectangle);
 		break;
 	case 5:
-		return calcHaarFeature5(rectangle);
+		return (int)calcHaarFeature5(rectangle);
 		break;
 	case 6:
-		return calcHaarFeature6(rectangle);
+		return (int)calcHaarFeature6(rectangle);
 		break;
 	}
 }

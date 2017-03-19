@@ -151,9 +151,11 @@
   <ItemGroup>
     <ClCompile Include="BinaryTree.cpp" />
     <ClCompile Include="CVFuns.cpp" />
+    <ClCompile Include="Forest.cpp" />
     <ClCompile Include="FPSCounter.cpp" />
     <ClCompile Include="HaarFeatures.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TreeElements.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib.h" />
