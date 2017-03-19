@@ -53,10 +53,10 @@ BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int 
 	int windowWidth = 100;
 	int windowHeight = 100;
 	
-	int maxFeatureWidth = 80;
-	int minFeatureWidth = 4;
-	int maxFeatureHeight = 80;
-	int minFeatureHeight = 4;
+	int maxFeatureWidth = 100;
+	int minFeatureWidth = 20;
+	int maxFeatureHeight = 100;
+	int minFeatureHeight = 20;
 
 	for (int i = 0; i < featuresNum; i++)
 	{

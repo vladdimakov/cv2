@@ -780,11 +780,11 @@ void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 
 void CVFuns::calcFeaturesForTraining()
 {
-	int maxWindowWidth = 200;
-	int minWindowWidth = 10;
-	int maxWindowHeight = 300;
-	int minWindowHeight = 10;
-	int featuresWindowsNum = 10;
+	int maxWindowWidth = 400;
+	int minWindowWidth = 100;
+	int maxWindowHeight = 400;
+	int minWindowHeight = 100;
+	int featuresWindowsNum = 30;
 
 	Object featuresWindow;
 
@@ -811,7 +811,39 @@ void CVFuns::calcFeaturesForTraining()
 	makeFeaturesForWindow(selectedTarget, 1);
 }
 
+void CVFuns::isTargetInWindow(Object featuresWindow)
+{
+	Features features(tree->featuresNum);
+
+	for (int i = 0; i < tree->featuresNum; i++)
+	{
+		features.values[i] = calcHaarFeatures(rescaleFeaturePosition(tree->featuresPositions[i], featuresWindow), tree->featureType);
+	}
+
+	if (tree->classifyFeatures(tree->root, features))
+	{
+		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
+		//cout << "YES" << endl;
+	}
+}
+
 void CVFuns::calcFeaturesForClassification()
 {
+	int windowWidth = 30;
+	int windowHeight = 30;
 
+	Object featuresWindow;
+	
+	for (int x = 0; x < CAP_FRAME_WIDTH - windowWidth; x+=10)
+	{
+		for (int y = 0; y < CAP_FRAME_HEIGHT - windowHeight; y+=10)
+		{
+			featuresWindow.left = x;
+			featuresWindow.right = x + windowWidth;
+			featuresWindow.top = y;
+			featuresWindow.bottom = y + windowHeight;
+
+			isTargetInWindow(featuresWindow);
+		}
+	}
 }

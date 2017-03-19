@@ -17,9 +17,9 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
-const int FEATURES_NUM = 3;
-const int STATISTICS_NUM = 10;
-const int DEPTH_OF_TREE = 3;
+const int FEATURES_NUM = 20;
+const int STATISTICS_NUM = 100;
+const int DEPTH_OF_TREE = 20;
 
 class FPSCounter
 {
@@ -138,6 +138,7 @@ public:
 	void makeFeaturesForWindow(Object featuresWindow, int isTarget);
 	void calcFeaturesForTraining();
 
+	void isTargetInWindow(Object featuresWindow);
 	void calcFeaturesForClassification();
 
 	VideoCapture cap;
