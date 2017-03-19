@@ -70,10 +70,10 @@ class BinaryTree
 {
 public:
 	BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree);
-	void buildNode(Node* node, Features features);
+	void buildNode(Node* node, Features* features);
 	float calcGiniCoefficient(Child child);
 	void divideNode(Node* node);
-	void buildTree(Node* node, Features features);
+	void buildTree(Node* node, Features* features);
 	
 	void writeNodes(Node* node, ofstream &file);
 	void writeTree(string fileName);
@@ -81,7 +81,7 @@ public:
 	void buildNodesFromFile(Node* node, int nodesTmp[]);
 	void readTree(string fileName);
 
-	bool classifyFeatures(Node* node, Features features);
+	bool classifyFeatures(Node* node, Features* features);
 
 	Node *root;
 	Object *featuresPositions;
@@ -93,10 +93,10 @@ class Forest
 {
 public:
 	Forest();
-	void buildForest(Features features[]);
+	void buildForest(Features** features);
 	void writeForest();
 	void readForest();
-	bool classifyFeatures(Features features[]);
+	bool classifyFeatures(Features** features);
 
 	BinaryTree **trees;
 	int treesNum;
@@ -135,8 +135,8 @@ public:
 	void makeIntegralImg(Mat currentFrame);
 	int calcIntegralSumForRectangle(Object rectangle);
 
+	bool calcHaarFeature0(Object rectangle);
 	bool calcHaarFeature1(Object rectangle);
-	bool calcHaarFeature2(Object rectangle);
 	bool calcHaarFeatures(Object rectangle, int featureType);
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object featuresWindow);

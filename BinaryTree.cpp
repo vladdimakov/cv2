@@ -71,18 +71,18 @@ BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int 
 	}
 }
 
-void BinaryTree::buildNode(Node* node, Features features)
+void BinaryTree::buildNode(Node* node, Features* features)
 {	
-	node->statistics[features.isTarget]++;
+	node->statistics[features->isTarget]++;
 
 	if (node->level < depthOfTree)
 	{
 		for (int i = 0; i < featuresNum; i++)
 		{
-			if (features.values[i] == -1)
+			if (features->values[i] == -1)
 				continue;
 
-			node->childs[i].statistics[features.values[i]][features.isTarget]++;
+			node->childs[i].statistics[features->values[i]][features->isTarget]++;
 		}
 
 		if (node->statistics[0] + node->statistics[1] - node->prevStatisticsNum >= statisticsNum)
@@ -160,18 +160,18 @@ void BinaryTree::divideNode(Node* node)
 	node->removeChilds();
 }
 
-void BinaryTree::buildTree(Node* node, Features features)
+void BinaryTree::buildTree(Node* node, Features* features)
 {
 	if (node->featureNumToDivide != -1)
 	{
-		if (features.values[node->featureNumToDivide] == 0)
+		if (features->values[node->featureNumToDivide] == 0)
 		{
-			features.values[node->featureNumToDivide] = -1;
+			features->values[node->featureNumToDivide] = -1;
 			buildTree(node->left, features);
 		}
 		else
 		{
-			features.values[node->featureNumToDivide] = -1;
+			features->values[node->featureNumToDivide] = -1;
 			buildTree(node->right, features);
 		}		
 	}
@@ -279,11 +279,11 @@ void BinaryTree::readTree(string fileName)
 	cout << "Дерево №" << featureType << " прочитано из файла (" << nodesNum << " вершин)" << endl;
 }
 
-bool BinaryTree::classifyFeatures(Node* node, Features features)
+bool BinaryTree::classifyFeatures(Node* node, Features* features)
 {
 	if (node->featureNumToDivide != -1)
 	{
-		if (features.values[node->featureNumToDivide] == 0)
+		if (features->values[node->featureNumToDivide] == 0)
 		{
 			classifyFeatures(node->left, features);
 		}
@@ -300,15 +300,16 @@ bool BinaryTree::classifyFeatures(Node* node, Features features)
 
 Forest::Forest()
 {
-	treesNum = 1;
+	treesNum = 2;
 
 	isTrained = false;
 
 	trees = new BinaryTree*[treesNum];
-	trees[0] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
+	trees[0] = new BinaryTree(0, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
+	trees[1] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
 }
 
-void Forest::buildForest(Features features[])
+void Forest::buildForest(Features** features)
 {
 	for (int i = 0; i < treesNum; i++)
 	{
@@ -336,7 +337,7 @@ void Forest::readForest()
 	}
 }
 
-bool Forest::classifyFeatures(Features features[])
+bool Forest::classifyFeatures(Features **features)
 {
 	int voteYesNum = 0;
 	int voteNoNum = 0;

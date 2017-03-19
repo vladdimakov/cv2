@@ -709,7 +709,7 @@ int CVFuns::calcIntegralSumForRectangle(Object rectangle)
 			integralImg.at<int>(rectangle.top, rectangle.left);
 }
 
-bool CVFuns::calcHaarFeature1(Object rectangle)
+bool CVFuns::calcHaarFeature0(Object rectangle)
 {
 	Object halfA = rectangle;
 	Object halfB = rectangle;
@@ -722,7 +722,7 @@ bool CVFuns::calcHaarFeature1(Object rectangle)
 	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
 }
 
-bool CVFuns::calcHaarFeature2(Object rectangle)
+bool CVFuns::calcHaarFeature1(Object rectangle)
 {
 	Object halfA = rectangle;
 	Object halfB = rectangle;
@@ -739,11 +739,11 @@ bool CVFuns::calcHaarFeatures(Object rectangle, int featureType)
 {
 	switch (featureType)
 	{
+	case 0:
+		return calcHaarFeature0(rectangle);
+		break;
 	case 1:
 		return calcHaarFeature1(rectangle);
-		break;
-	case 2:
-		return calcHaarFeature2(rectangle);
 		break;
 	}
 }
@@ -779,7 +779,7 @@ void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 		}
 	}
 
-	forest.buildForest(*features);
+	forest.buildForest(features);
 }
 
 void CVFuns::calcFeaturesForTraining()
@@ -829,7 +829,7 @@ void CVFuns::isTargetInWindow(Object featuresWindow)
 		}
 	}
 
-	if (forest.classifyFeatures(*features))
+	if (forest.classifyFeatures(features))
 	{
 		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
 	}
