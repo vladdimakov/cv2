@@ -709,45 +709,6 @@ int CVFuns::calcIntegralSumForRectangle(Object rectangle)
 			integralImg.at<int>(rectangle.top, rectangle.left);
 }
 
-bool CVFuns::calcHaarFeature0(Object rectangle)
-{
-	Object halfA = rectangle;
-	Object halfB = rectangle;
-	
-	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
-	
-	halfA.bottom = rectangle.top + halfHeight;
-	halfB.top = rectangle.top + halfHeight + 1;
-	
-	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
-}
-
-bool CVFuns::calcHaarFeature1(Object rectangle)
-{
-	Object halfA = rectangle;
-	Object halfB = rectangle;
-
-	int halfWidth = (rectangle.right - rectangle.left) / 2;
-
-	halfA.right = rectangle.left + halfWidth;
-	halfB.left = rectangle.left + halfWidth + 1;
-
-	return calcIntegralSumForRectangle(halfA) > calcIntegralSumForRectangle(halfB);
-}
-
-bool CVFuns::calcHaarFeatures(Object rectangle, int featureType)
-{
-	switch (featureType)
-	{
-	case 0:
-		return calcHaarFeature0(rectangle);
-		break;
-	case 1:
-		return calcHaarFeature1(rectangle);
-		break;
-	}
-}
-
 Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object featuresWindow)
 {
 	Object newFeaturePosition;

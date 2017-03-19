@@ -152,6 +152,7 @@
     <ClCompile Include="BinaryTree.cpp" />
     <ClCompile Include="CVFuns.cpp" />
     <ClCompile Include="FPSCounter.cpp" />
+    <ClCompile Include="HaarFeatures.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

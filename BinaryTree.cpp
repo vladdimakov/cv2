@@ -306,7 +306,7 @@ Forest::Forest()
 
 	trees = new BinaryTree*[treesNum];
 	trees[0] = new BinaryTree(0, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
-	trees[1] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
+	trees[1] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM + 20, DEPTH_OF_TREE);
 }
 
 void Forest::buildForest(Features** features)

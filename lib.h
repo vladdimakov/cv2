@@ -137,6 +137,11 @@ public:
 
 	bool calcHaarFeature0(Object rectangle);
 	bool calcHaarFeature1(Object rectangle);
+	bool calcHaarFeature2(Object rectangle);
+	bool calcHaarFeature3(Object rectangle);
+	bool calcHaarFeature4(Object rectangle);
+	bool calcHaarFeature5(Object rectangle);
+	bool calcHaarFeature6(Object rectangle);
 	bool calcHaarFeatures(Object rectangle, int featureType);
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object featuresWindow);
