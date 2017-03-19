@@ -275,6 +275,25 @@ void BinaryTree::readTree(string fileName)
 	file.close();
 }
 
+bool BinaryTree::classifyFeatures(Node* node, Features features)
+{
+	if (node->featureNumToDivide != -1)
+	{
+		if (features.values[node->featureNumToDivide] == 0)
+		{
+			classifyFeatures(node->left, features);
+		}
+		else
+		{
+			classifyFeatures(node->right, features);
+		}
+	}
+	else
+	{
+		return node->statistics[1] > node->statistics[0];
+	}
+}
+
 Forest::Forest()
 {
 	trees[0] = BinaryTree(1, 10, 50, 10);

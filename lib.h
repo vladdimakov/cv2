@@ -81,6 +81,8 @@ public:
 	void buildNodesFromFile(Node* node, int nodesTmp[]);
 	void readTree(string fileName);
 
+	bool classifyFeatures(Node* node, Features features);
+
 	bool isTrained;
 	Node *root;
 	Object *featuresPositions;
