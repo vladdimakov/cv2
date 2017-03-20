@@ -2,13 +2,14 @@
 
 Forest::Forest()
 {
-	treesNum = 2;
+	treesNum = 1;
 
 	isTrained = false;
 
 	trees = new BinaryTree*[treesNum];
-	trees[0] = new BinaryTree(0, FEATURES_NUM, STATISTICS_NUM, DEPTH_OF_TREE);
-	trees[1] = new BinaryTree(1, FEATURES_NUM, STATISTICS_NUM + 20, DEPTH_OF_TREE);
+	//trees[0] = new BinaryTree(0, 20, 100);
+	trees[0] = new BinaryTree(1, 10, 200);
+	//trees[2] = new BinaryTree(3, FEATURES_NUM, STATISTICS_NUM + 20, DEPTH_OF_TREE);
 }
 
 void Forest::buildForest(Features** features)

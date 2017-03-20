@@ -1,18 +1,17 @@
 #include "lib.h"
 
-BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree)
+BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNumForDivideNode)
 {
 	this->featureType = featureType;
 	this->featuresNum = featuresNum;
-	this->statisticsNum = statisticsNum;
-	this->depthOfTree = depthOfTree;
+	this->statisticsNumForDivideNode = statisticsNumForDivideNode;
 
 	nodesNum = 1;
 
 	root = new Node(featuresNum);	
 	root->level = 0;
 	root->num = nodesNum;
-	root->prevStatisticsNum = 0;
+	root->prevStatisticsNumForDivideNode = 0;
 
 	featuresPositions = new Object[featuresNum];
 	
@@ -44,7 +43,7 @@ void BinaryTree::buildNode(Node* node, Features* features)
 {	
 	node->statistics[features->isTarget]++;
 
-	if (node->level < depthOfTree)
+	if (node->level < featuresNum)
 	{
 		for (int i = 0; i < featuresNum; i++)
 		{
@@ -54,7 +53,8 @@ void BinaryTree::buildNode(Node* node, Features* features)
 			node->childs[i].statistics[features->values[i]][features->isTarget]++;
 		}
 
-		if (node->statistics[0] + node->statistics[1] - node->prevStatisticsNum >= statisticsNum)
+
+		if (node->statistics[0] + node->statistics[1] - node->prevStatisticsNumForDivideNode >= statisticsNumForDivideNode)
 		{
 			divideNode(node);
 		}
@@ -63,8 +63,8 @@ void BinaryTree::buildNode(Node* node, Features* features)
 
 float BinaryTree::calcGiniCoefficient(Child child)
 {
-	if (child.statistics[0][0] == 0 && child.statistics[0][1] == 0 || // Нельзя, чтобы M0 = 0 и M1 = 0
-		child.statistics[1][0] == 0 && child.statistics[1][1] == 0) // Нельзя, чтобы T0 = 0 и T1 = 0
+	if (child.statistics[0][0] == 0 && child.statistics[0][1] == 0 || // Нельзя, чтобы M1 = 0 и M2 = 0
+		child.statistics[1][0] == 0 && child.statistics[1][1] == 0)   // Нельзя, чтобы T1 = 0 и T2 = 0
 	{
 		return -1.0f;
 	}
@@ -72,11 +72,8 @@ float BinaryTree::calcGiniCoefficient(Child child)
 	float giniCoefficient = 0;
 	for (int j = 0; j < 2; j++)
 	{
-		if (child.statistics[0][j] + child.statistics[1][j] != 0)
-		{
-			giniCoefficient += (float)(child.statistics[0][j] * child.statistics[0][j] + child.statistics[1][j] * child.statistics[1][j]) /
-								(child.statistics[0][j] + child.statistics[1][j]);
-		}
+		giniCoefficient += (float)(child.statistics[j][0] * child.statistics[j][0] + child.statistics[j][1] * child.statistics[j][1]) /
+							(child.statistics[j][0] + child.statistics[j][1]);
 	}
 
 	return giniCoefficient;
@@ -91,7 +88,7 @@ void BinaryTree::divideNode(Node* node)
 	}
 
 	float maxGiniCoefficient = 0;
-	int maxGiniCoefficientNum;
+	int maxGiniCoefficientNum = -1;
 	for (int i = 0; i < featuresNum; i++)
 	{
 		if (giniCoefficients[i] >= maxGiniCoefficient)
@@ -101,17 +98,18 @@ void BinaryTree::divideNode(Node* node)
 		}
 	}
 
-	//cout << maxGiniCoefficientNum << endl;
-
 	delete[] giniCoefficients;
-
+	
+	if (maxGiniCoefficientNum == -1)
+		return;
+		
 	node->featureNumToDivide = maxGiniCoefficientNum;
 
 	nodesNum++;
 	node->left = new Node(featuresNum);
 	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[0][0];
 	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[0][1];
-	node->left->prevStatisticsNum = node->left->statistics[0] + node->left->statistics[1];
+	node->left->prevStatisticsNumForDivideNode = node->left->statistics[0] + node->left->statistics[1];
 	node->left->level = node->level + 1;
 	node->left->num = nodesNum;
 	
@@ -119,13 +117,10 @@ void BinaryTree::divideNode(Node* node)
 	node->right = new Node(featuresNum);
 	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[1][0];
 	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[1][1];
-	node->right->prevStatisticsNum = node->right->statistics[0] + node->right->statistics[1];
+	node->right->prevStatisticsNumForDivideNode = node->right->statistics[0] + node->right->statistics[1];
 	node->right->level = node->level + 1;
 	node->right->num = nodesNum;
 	
-	//cout << node->level + 1 << endl; ///
-	//cout << node->level + 1 << endl;
-
 	node->removeChilds();
 }
 

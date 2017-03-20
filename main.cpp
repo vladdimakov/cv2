@@ -104,13 +104,13 @@ int main(int argc, char* argv[])
 		if (classificatorMode == "c")
 		{
 			cvFuns.imgToDisplay[0] = grayFrame8U;
-			cvFuns.calcFeaturesForClassification();
+			cvFuns.classify();
 		}
 
 		if (classificatorMode == "t" && cvFuns.isTargetSelected && !cvFuns.forest.isTrained)
 		{
 			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
-			cvFuns.calcFeaturesForTraining();
+			cvFuns.train—lassifier();
 			cvFuns.displaySelectedTarget();
 		}
 		

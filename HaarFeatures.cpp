@@ -1,43 +1,43 @@
 #include "lib.h"
 
-bool CVFuns::calcHaarFeature0(Object rectangle)
+bool CVFuns::calcHaarFeature0(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
+	Object partA = region;
+	Object partB = region;
 
-	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
+	int halfHeight = (region.bottom - region.top) / 2;
 
-	partA.bottom = rectangle.top + halfHeight;
-	partB.top = rectangle.top + halfHeight + 1;
+	partA.bottom = region.top + halfHeight;
+	partB.top = region.top + halfHeight + 1;
 
-	return calcIntegralSumForRectangle(partA) > calcIntegralSumForRectangle(partB);
+	return calcIntegralSumForRegion(partA) > calcIntegralSumForRegion(partB);
 }
 
-bool CVFuns::calcHaarFeature1(Object rectangle)
+bool CVFuns::calcHaarFeature1(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
+	Object partA = region;
+	Object partB = region;
 
-	int halfWidth = (rectangle.right - rectangle.left) / 2;
+	int halfWidth = (region.right - region.left) / 2;
 
-	partA.right = rectangle.left + halfWidth;
-	partB.left = rectangle.left + halfWidth + 1;
+	partA.right = region.left + halfWidth;
+	partB.left = region.left + halfWidth + 1;
 
-	return calcIntegralSumForRectangle(partA) > calcIntegralSumForRectangle(partB);
+	return calcIntegralSumForRegion(partA) > calcIntegralSumForRegion(partB);
 }
 
-bool CVFuns::calcHaarFeature2(Object rectangle)
+bool CVFuns::calcHaarFeature2(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
-	Object partC = rectangle;
-	Object partD = rectangle;
+	Object partA = region;
+	Object partB = region;
+	Object partC = region;
+	Object partD = region;
 
-	int halfWidth = (rectangle.right - rectangle.left) / 2;
-	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
+	int halfWidth = (region.right - region.left) / 2;
+	int halfHeight = (region.bottom - region.top) / 2;
 
-	partA.right = rectangle.left + halfWidth;
-	partA.bottom = rectangle.top + halfHeight;
+	partA.right = region.left + halfWidth;
+	partA.bottom = region.top + halfHeight;
 
 	partB.left = partA.right + 1;
 	partB.bottom = partA.bottom;
@@ -48,26 +48,26 @@ bool CVFuns::calcHaarFeature2(Object rectangle)
 	partD.left = partB.left;
 	partD.top = partC.top;
 
-	int A = calcIntegralSumForRectangle(partA);
-	int B = calcIntegralSumForRectangle(partB);
-	int C = calcIntegralSumForRectangle(partC);
-	int D = calcIntegralSumForRectangle(partD);
+	int A = calcIntegralSumForRegion(partA);
+	int B = calcIntegralSumForRegion(partB);
+	int C = calcIntegralSumForRegion(partC);
+	int D = calcIntegralSumForRegion(partD);
 
 	return A + B > C + D && A > B;
 }
 
-bool CVFuns::calcHaarFeature3(Object rectangle)
+bool CVFuns::calcHaarFeature3(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
-	Object partC = rectangle;
-	Object partD = rectangle;
+	Object partA = region;
+	Object partB = region;
+	Object partC = region;
+	Object partD = region;
 
-	int halfWidth = (rectangle.right - rectangle.left) / 2;
-	int halfHeight = (rectangle.bottom - rectangle.top) / 2;
+	int halfWidth = (region.right - region.left) / 2;
+	int halfHeight = (region.bottom - region.top) / 2;
 
-	partA.right = rectangle.left + halfWidth;
-	partA.bottom = rectangle.top + halfHeight;
+	partA.right = region.left + halfWidth;
+	partA.bottom = region.top + halfHeight;
 
 	partB.left = partA.right + 1;
 	partB.bottom = partA.bottom;
@@ -78,69 +78,69 @@ bool CVFuns::calcHaarFeature3(Object rectangle)
 	partD.left = partB.left;
 	partD.top = partC.top;
 
-	int A = calcIntegralSumForRectangle(partA);
-	int B = calcIntegralSumForRectangle(partB);
-	int C = calcIntegralSumForRectangle(partC);
-	int D = calcIntegralSumForRectangle(partD);
+	int A = calcIntegralSumForRegion(partA);
+	int B = calcIntegralSumForRegion(partB);
+	int C = calcIntegralSumForRegion(partC);
+	int D = calcIntegralSumForRegion(partD);
 
 	return A + D > B + C;
 }
 
-bool CVFuns::calcHaarFeature4(Object rectangle)
+bool CVFuns::calcHaarFeature4(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
-	Object partC = rectangle;
+	Object partA = region;
+	Object partB = region;
+	Object partC = region;
 	
-	int thirdWidth = (rectangle.right - rectangle.left) / 3;
+	int thirdWidth = (region.right - region.left) / 3;
 
-	partA.left = rectangle.left + thirdWidth;
-	partA.right = rectangle.right - thirdWidth;
+	partA.left = region.left + thirdWidth;
+	partA.right = region.right - thirdWidth;
 	
 	partB.right = partA.left - 1;
 
 	partC.left = partA.right + 1;
 
-	return calcIntegralSumForRectangle(partA) > calcIntegralSumForRectangle(partB) + calcIntegralSumForRectangle(partC);
+	return calcIntegralSumForRegion(partA) > calcIntegralSumForRegion(partB) + calcIntegralSumForRegion(partC);
 }
 
-bool CVFuns::calcHaarFeature5(Object rectangle)
+bool CVFuns::calcHaarFeature5(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
-	Object partC = rectangle;
+	Object partA = region;
+	Object partB = region;
+	Object partC = region;
 
-	int thirdHeight = (rectangle.bottom - rectangle.top) / 3;
+	int thirdHeight = (region.bottom - region.top) / 3;
 
-	partA.top = rectangle.top + thirdHeight;
-	partA.bottom = rectangle.bottom - thirdHeight;
+	partA.top = region.top + thirdHeight;
+	partA.bottom = region.bottom - thirdHeight;
 
 	partB.bottom = partA.top - 1;
 
 	partC.top = partA.bottom + 1;
 
-	return calcIntegralSumForRectangle(partA) > calcIntegralSumForRectangle(partB) + calcIntegralSumForRectangle(partC);
+	return calcIntegralSumForRegion(partA) > calcIntegralSumForRegion(partB) + calcIntegralSumForRegion(partC);
 }
 
-bool CVFuns::calcHaarFeature6(Object rectangle)
+bool CVFuns::calcHaarFeature6(Object region)
 {
-	Object partA = rectangle;
-	Object partB = rectangle;
-	Object partC = rectangle;
-	Object partD = rectangle;
-	Object partE = rectangle;
-	Object partF = rectangle;
-	Object partG = rectangle;
-	Object partH = rectangle;
-	Object partI = rectangle;
+	Object partA = region;
+	Object partB = region;
+	Object partC = region;
+	Object partD = region;
+	Object partE = region;
+	Object partF = region;
+	Object partG = region;
+	Object partH = region;
+	Object partI = region;
 
-	int thirdWidth = (rectangle.right - rectangle.left) / 3;
-	int thirdHeight = (rectangle.bottom - rectangle.top) / 3;
+	int thirdWidth = (region.right - region.left) / 3;
+	int thirdHeight = (region.bottom - region.top) / 3;
 
-	partA.left = rectangle.left + thirdWidth;
-	partA.right = rectangle.right - thirdWidth;
-	partA.top = rectangle.top + thirdWidth;
-	partA.bottom = rectangle.bottom - thirdWidth;
+	partA.left = region.left + thirdWidth;
+	partA.right = region.right - thirdWidth;
+	partA.top = region.top + thirdWidth;
+	partA.bottom = region.bottom - thirdWidth;
 
 	partB.right = partA.left - 1;
 	partB.bottom = partA.top - 1;
@@ -170,43 +170,43 @@ bool CVFuns::calcHaarFeature6(Object rectangle)
 	partI.left = partD.left;
 	partI.top = partG.top;
 
-	int A = calcIntegralSumForRectangle(partA);
-	int B = calcIntegralSumForRectangle(partB);
-	int C = calcIntegralSumForRectangle(partC);
-	int D = calcIntegralSumForRectangle(partD);
-	int E = calcIntegralSumForRectangle(partE);
-	int F = calcIntegralSumForRectangle(partF);
-	int G = calcIntegralSumForRectangle(partG);
-	int H = calcIntegralSumForRectangle(partH);
-	int I = calcIntegralSumForRectangle(partI);
+	int A = calcIntegralSumForRegion(partA);
+	int B = calcIntegralSumForRegion(partB);
+	int C = calcIntegralSumForRegion(partC);
+	int D = calcIntegralSumForRegion(partD);
+	int E = calcIntegralSumForRegion(partE);
+	int F = calcIntegralSumForRegion(partF);
+	int G = calcIntegralSumForRegion(partG);
+	int H = calcIntegralSumForRegion(partH);
+	int I = calcIntegralSumForRegion(partI);
 	
 	return A > B + C + D + E + F + G + H + I;
 }
 
-int CVFuns::calcHaarFeatures(Object rectangle, int featureType)
+int CVFuns::calcHaarFeatures(Object region, int featureType)
 {
 	switch (featureType)
 	{
 	case 0:
-		return (int)calcHaarFeature0(rectangle);
+		return (int)calcHaarFeature0(region);
 		break;
 	case 1:
-		return (int)calcHaarFeature1(rectangle);
+		return (int)calcHaarFeature1(region);
 		break;
 	case 2:
-		return (int)calcHaarFeature2(rectangle);
+		return (int)calcHaarFeature2(region);
 		break;
 	case 3:
-		return (int)calcHaarFeature3(rectangle);
+		return (int)calcHaarFeature3(region);
 		break;
 	case 4:
-		return (int)calcHaarFeature4(rectangle);
+		return (int)calcHaarFeature4(region);
 		break;
 	case 5:
-		return (int)calcHaarFeature5(rectangle);
+		return (int)calcHaarFeature5(region);
 		break;
 	case 6:
-		return (int)calcHaarFeature6(rectangle);
+		return (int)calcHaarFeature6(region);
 		break;
 	}
 }

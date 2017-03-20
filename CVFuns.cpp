@@ -701,32 +701,70 @@ void CVFuns::makeIntegralImg(Mat currentFrame)
 	integral(currentFrame, integralImg);
 }
 
-int CVFuns::calcIntegralSumForRectangle(Object rectangle)
+int CVFuns::calcIntegralSumForRegion(Object region)
 {
-	return integralImg.at<int>(rectangle.bottom + 1, rectangle.right + 1) - 
-			integralImg.at<int>(rectangle.top, rectangle.right + 1) - 
-			integralImg.at<int>(rectangle.bottom + 1, rectangle.left) + 
-			integralImg.at<int>(rectangle.top, rectangle.left);
+	return integralImg.at<int>(region.bottom + 1, region.right + 1) - 
+			integralImg.at<int>(region.top, region.right + 1) - 
+			integralImg.at<int>(region.bottom + 1, region.left) + 
+			integralImg.at<int>(region.top, region.left);
 }
 
-Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object featuresWindow)
+Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object region)
 {
 	Object newFeaturePosition;
 	
-	int featuresWindowWidth = featuresWindow.right - featuresWindow.left;
-	int featuresWindowHeight = featuresWindow.bottom - featuresWindow.top;
+	int regionWidth = region.right - region.left;
+	int regionHeight = region.bottom - region.top;
 
-	newFeaturePosition.left = featuresWindow.left + int(featurePosition.left / 100.0f * featuresWindowWidth);
-	newFeaturePosition.right = featuresWindow.left + int(featurePosition.right / 100.0f * featuresWindowWidth);
-	newFeaturePosition.top = featuresWindow.top + int(featurePosition.top / 100.0f * featuresWindowHeight);
-	newFeaturePosition.bottom = featuresWindow.top + int(featurePosition.bottom / 100.0f * featuresWindowHeight);
+	newFeaturePosition.left = region.left + int(featurePosition.left / 100.0f * regionWidth);
+	newFeaturePosition.right = region.left + int(featurePosition.right / 100.0f * regionWidth);
+	newFeaturePosition.top = region.top + int(featurePosition.top / 100.0f * regionHeight);
+	newFeaturePosition.bottom = region.top + int(featurePosition.bottom / 100.0f * regionHeight);
 
 	return newFeaturePosition;
 }
 
-void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
+Object CVFuns::makeBackgroundRegion()
+{
+	int maxRegionWidth = 100;
+	int minRegionWidth = 20;
+	int maxRegionHeight = 100;
+	int minRegionHeight = 20;
+
+	Object backgroundRegion;
+
+	do
+	{
+		backgroundRegion.top = rand() % (CAP_FRAME_HEIGHT - minRegionHeight);
+		backgroundRegion.left = rand() % (CAP_FRAME_WIDTH - minRegionWidth);
+
+		backgroundRegion.bottom = backgroundRegion.top + minRegionHeight + rand() % (maxRegionHeight - minRegionHeight);
+		if (backgroundRegion.bottom >= CAP_FRAME_HEIGHT)
+			backgroundRegion.bottom = CAP_FRAME_HEIGHT - 1;
+
+		backgroundRegion.right = backgroundRegion.left + minRegionWidth + rand() % (maxRegionWidth - minRegionWidth);
+		if (backgroundRegion.right >= CAP_FRAME_WIDTH)
+			backgroundRegion.right = CAP_FRAME_WIDTH - 1;
+
+	} while (isInside(selectedTarget, backgroundRegion) || isIntersect(selectedTarget, backgroundRegion));
+
+	return backgroundRegion;
+}
+
+void CVFuns::train—lassifier()
+{
+	int backgroundRegionsNum = 10;
+
+	for (int i = 0; i < backgroundRegionsNum; i++)
+		train—lassifierByRegion(0);
+
+	train—lassifierByRegion(1);
+}
+
+void CVFuns::train—lassifierByRegion(int isTarget)
 {
 	Features **features = new Features*[forest.treesNum];
+	Object region;
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
@@ -734,49 +772,21 @@ void CVFuns::makeFeaturesForWindow(Object featuresWindow, int isTarget)
 
 		features[i]->isTarget = isTarget;
 
+		if (isTarget == 0)
+			region = makeBackgroundRegion();
+		else
+			region = selectedTarget;
+
 		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
 		{
-			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], featuresWindow), forest.trees[i]->featureType);
+			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featureType);
 		}
 	}
 
 	forest.buildForest(features);
 }
 
-void CVFuns::calcFeaturesForTraining()
-{
-	int maxWindowWidth = 400;
-	int minWindowWidth = 100;
-	int maxWindowHeight = 400;
-	int minWindowHeight = 100;
-	int featuresWindowsNum = 30;
-
-	Object featuresWindow;
-
-	for (int i = 0; i < featuresWindowsNum; i++)
-	{
-		do
-		{
-			featuresWindow.top = rand() % (CAP_FRAME_HEIGHT - minWindowHeight);
-			featuresWindow.left = rand() % (CAP_FRAME_WIDTH - minWindowWidth);
-
-			featuresWindow.bottom = featuresWindow.top + minWindowHeight + rand() % (maxWindowHeight - minWindowHeight);
-			if (featuresWindow.bottom >= CAP_FRAME_HEIGHT)
-				featuresWindow.bottom = CAP_FRAME_HEIGHT - 1;
-
-			featuresWindow.right = featuresWindow.left + minWindowWidth + rand() % (maxWindowWidth - minWindowWidth);
-			if (featuresWindow.right >= CAP_FRAME_WIDTH)
-				featuresWindow.right = CAP_FRAME_WIDTH - 1; 
-		} while (isInside(selectedTarget, featuresWindow) || isIntersect(selectedTarget, featuresWindow));
-
-		//rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
-		makeFeaturesForWindow(featuresWindow, 0);
-	}
-
-	makeFeaturesForWindow(selectedTarget, 1);
-}
-
-void CVFuns::isTargetInWindow(Object featuresWindow)
+void CVFuns::classifyRegion(Object region)
 {  
 	Features **features = new Features*[forest.treesNum];
 
@@ -786,33 +796,33 @@ void CVFuns::isTargetInWindow(Object featuresWindow)
 
 		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
 		{
-			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], featuresWindow), forest.trees[i]->featureType);
+			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featureType);
 		}
 	}
 
 	if (forest.classifyFeatures(features))
 	{
-		rectangle(imgToDisplay[0], Point2i(featuresWindow.left, featuresWindow.top), Point2i(featuresWindow.right, featuresWindow.bottom), Scalar(255), 2);
+		rectangle(imgToDisplay[0], Point2i(region.left, region.top), Point2i(region.right, region.bottom), Scalar(255), 2);
 	}
 }
 
-void CVFuns::calcFeaturesForClassification()
+void CVFuns::classify()
 {
-	int windowWidth = 30;
-	int windowHeight = 30;
+	int regionWidth = 30;
+	int regionHeight = 30;
 
-	Object featuresWindow;
+	Object region;
 	
-	for (int x = 0; x < CAP_FRAME_WIDTH - windowWidth; x+=10)
+	for (int x = 0; x < CAP_FRAME_WIDTH - regionWidth; x += 10)
 	{
-		for (int y = 0; y < CAP_FRAME_HEIGHT - windowHeight; y+=10)
+		for (int y = 0; y < CAP_FRAME_HEIGHT - regionHeight; y += 10)
 		{
-			featuresWindow.left = x;
-			featuresWindow.right = x + windowWidth;
-			featuresWindow.top = y;
-			featuresWindow.bottom = y + windowHeight;
+			region.left = x;
+			region.right = x + regionWidth;
+			region.top = y;
+			region.bottom = y + regionHeight;
 
-			isTargetInWindow(featuresWindow);
+			classifyRegion(region);
 		}
 	}
 }

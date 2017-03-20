@@ -17,10 +17,6 @@ const int MIN_CORNERS_NUM = 16;
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;
 
-const int FEATURES_NUM = 20;
-const int STATISTICS_NUM = 100;
-const int DEPTH_OF_TREE = 20;
-
 class FPSCounter
 {
 public:
@@ -61,7 +57,7 @@ public:
 	void removeChilds();
 
 	int statistics[2];
-	int num, level, featureNumToDivide, prevStatisticsNum;
+	int num, level, featureNumToDivide, prevStatisticsNumForDivideNode;
 	Node *left, *right;
 	Child *childs;
 };
@@ -69,7 +65,7 @@ public:
 class BinaryTree
 {
 public:
-	BinaryTree(int featureType, int featuresNum, int statisticsNum, int depthOfTree);
+	BinaryTree(int featureType, int featuresNum, int statisticsNumForDivideNode);
 	void buildNode(Node* node, Features* features);
 	float calcGiniCoefficient(Child child);
 	void divideNode(Node* node);
@@ -86,7 +82,7 @@ public:
 	Node *root;
 	Object *featuresPositions;
 	int nodesNum;
-	int featureType, featuresNum, statisticsNum, depthOfTree;
+	int featureType, featuresNum, statisticsNumForDivideNode;
 };
 
 class Forest
@@ -133,23 +129,24 @@ public:
 	void displaySelectedTarget();
 
 	void makeIntegralImg(Mat currentFrame);
-	int calcIntegralSumForRectangle(Object rectangle);
+	int calcIntegralSumForRegion(Object region);
 
-	bool calcHaarFeature0(Object rectangle);
-	bool calcHaarFeature1(Object rectangle);
-	bool calcHaarFeature2(Object rectangle);
-	bool calcHaarFeature3(Object rectangle);
-	bool calcHaarFeature4(Object rectangle);
-	bool calcHaarFeature5(Object rectangle);
-	bool calcHaarFeature6(Object rectangle);
-	int calcHaarFeatures(Object rectangle, int featureType);
+	bool calcHaarFeature0(Object region);
+	bool calcHaarFeature1(Object region);
+	bool calcHaarFeature2(Object region);
+	bool calcHaarFeature3(Object region);
+	bool calcHaarFeature4(Object region);
+	bool calcHaarFeature5(Object region);
+	bool calcHaarFeature6(Object region);
+	int calcHaarFeatures(Object region, int featureType);
 	
-	Object rescaleFeaturePosition(Object featurePosition, Object featuresWindow);
-	void makeFeaturesForWindow(Object featuresWindow, int isTarget);
-	void calcFeaturesForTraining();
+	Object rescaleFeaturePosition(Object featurePosition, Object region);
+	Object makeBackgroundRegion();
+	void train—lassifierByRegion(int isTarget);
+	void train—lassifier();
 
-	void isTargetInWindow(Object featuresWindow);
-	void calcFeaturesForClassification();
+	void classifyRegion(Object region);
+	void classify();
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
