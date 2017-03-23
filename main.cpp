@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 		if (classificatorMode == "t" && cvFuns.isTargetSelected && !cvFuns.forest.isTrained)
 		{
 			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
-			cvFuns.train—lassifier();
+            cvFuns.trainClassifier();
 			cvFuns.displaySelectedTarget();
 		}
 		

@@ -142,8 +142,8 @@ public:
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object region);
 	Object makeBackgroundRegion();
-	void train—lassifierByRegion(int isTarget);
-	void train—lassifier();
+    void trainClassifierByRegion(int isTarget);
+    void trainClassifier();
 
 	void classifyRegion(Object region);
 	void classify();

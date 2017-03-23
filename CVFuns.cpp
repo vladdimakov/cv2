@@ -751,17 +751,17 @@ Object CVFuns::makeBackgroundRegion()
 	return backgroundRegion;
 }
 
-void CVFuns::train—lassifier()
+void CVFuns::trainClassifier()
 {
 	int backgroundRegionsNum = 10;
 
 	for (int i = 0; i < backgroundRegionsNum; i++)
-		train—lassifierByRegion(0);
+        trainClassifierByRegion(0);
 
-	train—lassifierByRegion(1);
+    trainClassifierByRegion(1);
 }
 
-void CVFuns::train—lassifierByRegion(int isTarget)
+void CVFuns::trainClassifierByRegion(int isTarget)
 {
 	Features **features = new Features*[forest.treesNum];
 	Object region;
