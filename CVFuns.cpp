@@ -779,14 +779,14 @@ void CVFuns::trainClassifierByRegion(int isTarget)
 
 		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
 		{
-			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featureType);
+			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featuresTypes[j]);
 		}
 	}
 
 	forest.buildForest(features);
 }
 
-void CVFuns::classifyRegion(Object region)
+bool CVFuns::classifyRegion(Object region) // Откатиться к пролому коммиту
 {  
 	Features **features = new Features*[forest.treesNum];
 
@@ -796,33 +796,34 @@ void CVFuns::classifyRegion(Object region)
 
 		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
 		{
-			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featureType);
+			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featuresTypes[j]);
 		}
 	}
 
-	if (forest.classifyFeatures(features))
-	{
-		rectangle(imgToDisplay[0], Point2i(region.left, region.top), Point2i(region.right, region.bottom), Scalar(255), 2);
-	}
+	return forest.classifyFeatures(features);
 }
 
 void CVFuns::classify()
 {
-	int regionWidth = 30;
-	int regionHeight = 30;
+	int regionWidth = 40;
+	int regionHeight = 40;
 
 	Object region;
-	
-	for (int x = 0; x < CAP_FRAME_WIDTH - regionWidth; x += 10)
+
+	for (int x = 0; x < CAP_FRAME_WIDTH - regionWidth; x += 12)
 	{
-		for (int y = 0; y < CAP_FRAME_HEIGHT - regionHeight; y += 10)
+		for (int y = 0; y < CAP_FRAME_HEIGHT - regionHeight; y += 12)
 		{
 			region.left = x;
 			region.right = x + regionWidth;
 			region.top = y;
 			region.bottom = y + regionHeight;
 
-			classifyRegion(region);
+			if (classifyRegion(region))
+			{
+				rectangle(imgToDisplay[0], Point2i(region.left, region.top), Point2i(region.right, region.bottom), Scalar(255), 2);
+			}
 		}
 	}
 }
+

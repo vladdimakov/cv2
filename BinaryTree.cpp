@@ -37,6 +37,13 @@ BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNumForDiv
 		if (featuresPositions[i].right >= windowWidth)
 			featuresPositions[i].right = windowWidth - 1;
 	}
+
+	featuresTypes = new int[featuresNum];
+
+	for (int i = 0; i < featuresNum; i++)
+	{
+		featuresTypes[i] = rand() % 8;
+	}
 }
 
 void BinaryTree::buildNode(Node* node, Features* features)
@@ -169,13 +176,13 @@ void BinaryTree::writeNodes(Node* node, ofstream &file)
 
 void BinaryTree::writeTree(string fileName)
 {
-	cout << "Началась запись дерева №" << featureType << " в файл" << endl;
+	//cout << "Началась запись дерева №" << featureType << " в файл" << endl;
 
 	ofstream file(fileName);
 
 	for (int i = 0; i < featuresNum; i++)
 	{
-		file << featuresPositions[i].left << " " << featuresPositions[i].right << " " << featuresPositions[i].top << " " << featuresPositions[i].bottom << endl;
+		file << featuresPositions[i].left << " " << featuresPositions[i].right << " " << featuresPositions[i].top << " " << featuresPositions[i].bottom << " " << featuresTypes[i] << endl;
 	}
 
 	file << nodesNum << endl;
@@ -216,13 +223,13 @@ void BinaryTree::buildNodesFromFile(Node* node, int nodesTmp[])
 
 void BinaryTree::readTree(string fileName)
 {
-	cout << "Началось чтение дерева №" << featureType << " из файла" << endl;
+	//cout << "Началось чтение дерева №" << featureType << " из файла" << endl;
 
 	ifstream file(fileName);
 
 	for (int i = 0; i < featuresNum; i++)
 	{
-		file >> featuresPositions[i].left >> featuresPositions[i].right >> featuresPositions[i].top >> featuresPositions[i].bottom;
+		file >> featuresPositions[i].left >> featuresPositions[i].right >> featuresPositions[i].top >> featuresPositions[i].bottom >> featuresTypes[i];
 	}
 	
 	file >> nodesNum;

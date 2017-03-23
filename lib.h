@@ -81,6 +81,7 @@ public:
 
 	Node *root;
 	Object *featuresPositions;
+	int *featuresTypes;
 	int nodesNum;
 	int featureType, featuresNum, statisticsNumForDivideNode;
 };
@@ -138,6 +139,7 @@ public:
 	bool calcHaarFeature4(Object region);
 	bool calcHaarFeature5(Object region);
 	bool calcHaarFeature6(Object region);
+	bool calcHaarFeature7(Object region);
 	int calcHaarFeatures(Object region, int featureType);
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object region);
@@ -145,7 +147,7 @@ public:
     void trainClassifierByRegion(int isTarget);
     void trainClassifier();
 
-	void classifyRegion(Object region);
+	bool classifyRegion(Object region);
 	void classify();
 
 	VideoCapture cap;
