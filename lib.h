@@ -143,11 +143,11 @@ public:
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object region);
 	Object makeBackgroundRegion();
-    void trainClassifierByRegion(int isTarget);
+	void trainClassifierByRegion(Object region, int isTarget);
     void trainClassifier();
 
+	void classifyAndTrain();
 	bool classifyRegion(Object region);
-	void classify();
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;

@@ -693,7 +693,10 @@ void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames)
 
 void CVFuns::displaySelectedTarget()
 {
-	rectangle(imgToDisplay[0], Point2i(selectedTarget.left, selectedTarget.top), Point2i(selectedTarget.right, selectedTarget.bottom), Scalar(0), 2);
+	if (selectedTarget.exist)
+	{
+		rectangle(imgToDisplay[0], Point2i(selectedTarget.left, selectedTarget.top), Point2i(selectedTarget.right, selectedTarget.bottom), Scalar(255), 2);
+	}
 }
 
 void CVFuns::makeIntegralImg(Mat currentFrame)
@@ -753,29 +756,32 @@ Object CVFuns::makeBackgroundRegion()
 
 void CVFuns::trainClassifier()
 {
-	int backgroundRegionsNum = 10;
+	const int backgroundRegionsNum = 10;
+	Object backgroundRegion[backgroundRegionsNum];
 
 	for (int i = 0; i < backgroundRegionsNum; i++)
-        trainClassifierByRegion(0);
+		backgroundRegion[i] = makeBackgroundRegion();
 
-    trainClassifierByRegion(1);
+	int k = 1; /// 
+
+	for (int i = 0; i < k; i++)
+	{
+		for (int j = 0; j < backgroundRegionsNum; j++)
+			trainClassifierByRegion(backgroundRegion[j], 0);
+
+		trainClassifierByRegion(selectedTarget, 1);
+	}
 }
 
-void CVFuns::trainClassifierByRegion(int isTarget)
+void CVFuns::trainClassifierByRegion(Object region, int isTarget)
 {
 	Features **features = new Features*[forest.treesNum];
-	Object region;
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
 		features[i] = new Features(forest.trees[i]->featuresNum);
 
 		features[i]->isTarget = isTarget;
-
-		if (isTarget == 0)
-			region = makeBackgroundRegion();
-		else
-			region = selectedTarget;
 
 		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
 		{
@@ -786,7 +792,7 @@ void CVFuns::trainClassifierByRegion(int isTarget)
 	forest.buildForest(features);
 }
 
-bool CVFuns::classifyRegion(Object region) // Откатиться к пролому коммиту
+bool CVFuns::classifyRegion(Object region) 
 {  
 	Features **features = new Features*[forest.treesNum];
 
@@ -803,27 +809,17 @@ bool CVFuns::classifyRegion(Object region) // Откатиться к пролому коммиту
 	return forest.classifyFeatures(features);
 }
 
-void CVFuns::classify()
+void CVFuns::classifyAndTrain()
 {
-	int regionWidth = 40;
-	int regionHeight = 40;
-
-	Object region;
-
-	for (int x = 0; x < CAP_FRAME_WIDTH - regionWidth; x += 12)
+	selectedTarget.exist = false;
+	for (int i = 0; i < objects.size(); i++)
 	{
-		for (int y = 0; y < CAP_FRAME_HEIGHT - regionHeight; y += 12)
+		if (classifyRegion(objects[i]))
 		{
-			region.left = x;
-			region.right = x + regionWidth;
-			region.top = y;
-			region.bottom = y + regionHeight;
+			selectedTarget = objects[i];
+			selectedTarget.exist = true;
 
-			if (classifyRegion(region))
-			{
-				rectangle(imgToDisplay[0], Point2i(region.left, region.top), Point2i(region.right, region.bottom), Scalar(255), 2);
-			}
+			trainClassifier();
 		}
 	}
 }
-

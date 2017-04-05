@@ -86,7 +86,8 @@ int main(int argc, char* argv[])
 
 		if (classificatorMode == 1 && cvFuns.isTargetSelected)
 		{
-			// “о, что происходит после предварительного обучени€ классификатора 
+			cvFuns.classifyAndTrain();
+			cvFuns.displaySelectedTarget();
 		}
 		
 		cvFuns.displayWindow();
