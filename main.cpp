@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	CVFuns cvFuns;
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
-	
+
 	const float refreshRate = 0.02f;
 	const float deviationFactor = 5.5f;
 	const float targetsFactor = 15.0f;

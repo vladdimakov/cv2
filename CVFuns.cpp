@@ -754,6 +754,15 @@ Object CVFuns::makeBackgroundRegion()
 	return backgroundRegion;
 }
 
+int poissonRand()
+{
+	random_device randomDevice;
+	mt19937 engine(randomDevice());
+	poisson_distribution<> poissonDistribution(1);
+
+	return (int)poissonDistribution(engine);
+}
+
 void CVFuns::trainClassifier()
 {
 	const int backgroundRegionsNum = 10;
@@ -762,7 +771,7 @@ void CVFuns::trainClassifier()
 	for (int i = 0; i < backgroundRegionsNum; i++)
 		backgroundRegion[i] = makeBackgroundRegion();
 
-	int k = 1; /// 
+	int k = poissonRand(); 
 
 	for (int i = 0; i < k; i++)
 	{
@@ -812,6 +821,7 @@ bool CVFuns::classifyRegion(Object region)
 void CVFuns::classifyAndTrain()
 {
 	selectedTarget.exist = false;
+
 	for (int i = 0; i < objects.size(); i++)
 	{
 		if (classifyRegion(objects[i]))
