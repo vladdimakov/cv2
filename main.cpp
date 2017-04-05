@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	CVFuns cvFuns;
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
-
+	
 	const float refreshRate = 0.02f;
 	const float deviationFactor = 5.5f;
 	const float targetsFactor = 15.0f;
@@ -29,32 +29,18 @@ int main(int argc, char* argv[])
 	const float distanceBetweenTargets = 50.0f;
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
 	
+	const int preliminaryTrainingFramesNum = 100;
+
 	string videoSource;
-	string classificatorMode;
-	if (argc == 2 || argc == 3)
+	if (argc == 1 || argc == 2)
 	{
-		if (argc == 2)
+		if (argc == 1)
 		{
 			videoSource = "";
 		}
 		else
 		{
-			videoSource = argv[2];
-		}
-
-		classificatorMode = argv[1];
-		if (classificatorMode == "t")
-		{
-			cout << "Режим обучения классификатора" << endl;
-		}
-		else if (classificatorMode == "c")
-		{
-			cout << "Режим классификации" << endl;
-		}
-		else
-		{
-			cout << "Неверный режим работы классификатора" << endl;
-			return -1;
+			videoSource = argv[1];
 		}
 	}
 	else
@@ -66,64 +52,63 @@ int main(int argc, char* argv[])
 	if (!cvFuns.startCapture(videoSource))
 		return -1;
 
-	if (classificatorMode == "c")
-		cvFuns.forest.readForest();
-
+	int classificatorMode = 0;
+	int framesNum = 0;
+	
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;
+
 		cvtColor(colorFrame, grayFrame8U, CV_RGB2GRAY);
 		grayFrame8U.convertTo(grayFrame32F, CV_32F);
 
 		if (grayFrame8U.empty())
 		{
-			if (classificatorMode == "t")
-			{
-				cvFuns.forest.isTrained = true;
-				cvFuns.forest.writeForest();
-			}
-
 			cvFuns.startCapture(videoSource);
-
 			continue;
 		}
 
-		if (classificatorMode == "t")
-		{
-			currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
-			cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
-			cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
-			cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
-			cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-			cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
-			cvFuns.makeSegmentation(distanceBetweenTargets);
-		}
-
+		currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
+		cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
+		cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
+		cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
+		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
+		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
+		cvFuns.makeSegmentation(distanceBetweenTargets);
 		cvFuns.makeIntegralImg(grayFrame8U);
 
-		if (classificatorMode == "c")
-		{
-			cvFuns.imgToDisplay[0] = grayFrame8U;
-			cvFuns.classify();
-		}
-
-		if (classificatorMode == "t" && cvFuns.isTargetSelected && !cvFuns.forest.isTrained)
+		if (classificatorMode == 0 && cvFuns.isTargetSelected)
 		{
 			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
-            cvFuns.trainClassifier();
-			cvFuns.displaySelectedTarget();
+            cvFuns.displaySelectedTarget();
+			cvFuns.trainClassifier();
+		}
+
+		if (classificatorMode == 1 && cvFuns.isTargetSelected)
+		{
+			// То, что происходит после предварительного обучения классификатора 
 		}
 		
 		cvFuns.displayWindow();
 
-		if (classificatorMode == "t")
+		if (classificatorMode == 0 && !cvFuns.isTargetSelected)
 		{
 			setMouseCallback("Display window", mouseCallBackFunc, NULL);
 
-			if (isClicked && !cvFuns.isTargetSelected && !cvFuns.forest.isTrained)
+			if (isClicked)
 			{
 				cvFuns.selectTarget(clickedPoint);
 				isClicked = false;
+			}
+		}
+
+		if (cvFuns.isTargetSelected)
+		{
+			framesNum++;
+			if (framesNum == preliminaryTrainingFramesNum)
+			{
+				cout << "Предварительное обучение классификатора закончено" << endl;
+				classificatorMode = 1;
 			}
 		}
 

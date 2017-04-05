@@ -97,7 +97,6 @@ public:
 
 	BinaryTree **trees;
 	int treesNum;
-	bool isTrained;
 };
 
 class CVFuns

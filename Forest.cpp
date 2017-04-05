@@ -4,8 +4,6 @@ Forest::Forest()
 {
 	treesNum = 3;
 
-	isTrained = false;
-
 	trees = new BinaryTree*[treesNum];
 	
 	//trees[0] = new BinaryTree(0, 10, 50);

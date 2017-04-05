@@ -675,7 +675,7 @@ void CVFuns::selectTarget(Point2i clickedPoint)
 
 	if (isTargetSelected)
 	{
-		cout << "Цель выбрана, началось обучение классификатора" << endl;
+		cout << "Цель выбрана, предварительное обучение классификатора началось" << endl;
 	}
 }
 
