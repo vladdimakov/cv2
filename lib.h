@@ -94,7 +94,7 @@ public:
 	void buildTree(int treeNum, Features* features);
 	void writeForest();
 	void readForest();
-	bool classifyFeatures(Features** features);
+	bool classifyFeaturesByTree(int treeNum, Features* features);
 
 	BinaryTree **trees;
 	int treesNum;
@@ -149,6 +149,7 @@ public:
 
 	void classifyAndTrain();
 	bool classifyRegion(Object region);
+	bool classifyRegionByTree(int treeNum, Object region);
 
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;

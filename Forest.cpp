@@ -62,22 +62,7 @@ void Forest::readForest()
 	}
 }
 
-bool Forest::classifyFeatures(Features **features)
+bool Forest::classifyFeaturesByTree(int treeNum, Features *features)
 {
-	int voteYesNum = 0;
-	int voteNoNum = 0;
-
-	for (int i = 0; i < treesNum; i++)
-	{
-		if (trees[i]->classifyFeatures(trees[i]->root, features[i]))
-		{
-			voteYesNum++;
-		}
-		else
-		{
-			voteNoNum++;
-		}
-	}
-
-	return voteYesNum  > voteNoNum;
+	return trees[treeNum]->classifyFeatures(trees[treeNum]->root, features);
 }

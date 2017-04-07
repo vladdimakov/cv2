@@ -810,21 +810,36 @@ void CVFuns::trainTreeByRegion(int treeNum, Object region, int isTarget)
 	forest.buildTree(treeNum, features);
 }
 
+bool CVFuns::classifyRegionByTree(int treeNum, Object region)
+{
+	Features *features = new Features(forest.trees[treeNum]->featuresNum);
+
+	for (int i = 0; i < forest.trees[treeNum]->featuresNum; i++)
+	{
+		features->values[i] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[treeNum]->featuresPositions[i], region), forest.trees[treeNum]->featuresTypes[i]);
+	}
+
+	return forest.classifyFeaturesByTree(treeNum, features);
+}
+
 bool CVFuns::classifyRegion(Object region) 
 {  
-	Features **features = new Features*[forest.treesNum];
+	int voteYesNum = 0;
+	int voteNoNum = 0;
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		features[i] = new Features(forest.trees[i]->featuresNum);
-
-		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
+		if (classifyRegionByTree(i, region))
 		{
-			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featuresTypes[j]);
+			voteYesNum++;
+		}
+		else
+		{
+			voteNoNum++;
 		}
 	}
 
-	return forest.classifyFeatures(features);
+	return voteYesNum > voteNoNum;
 }
 
 void CVFuns::classifyAndTrain()
