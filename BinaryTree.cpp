@@ -8,7 +8,9 @@ BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFea
 	this->minStatisticsNumForDivide = minStatisticsNumForDivide;
 	this->minGiniCoefficient = minGiniCoefficient;
 
-	OOBE = 0;
+	correctly—lassifiedOOB = 0;
+	incorrectly—lassifiedOOB = 0;
+	OOBE = 0.0f;
 	isDiscarded = false;
 
 	nodesNum = 1;

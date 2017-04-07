@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	const float distanceBetweenTargets = 50.0f;
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
 	
-	const int preliminaryTrainingFramesNum = 100;
+	const int preliminaryTrainingFramesNum = 200;
 
 	string videoSource;
 	if (argc == 1 || argc == 2)

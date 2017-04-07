@@ -81,6 +81,8 @@ public:
 	int nodesNum;
 	int depthOfTree, featuresNum, randomlySelectedFeaturesNum, minStatisticsNumForDivide;
 	float minGiniCoefficient;
+	
+	int correctly—lassifiedOOB, incorrectly—lassifiedOOB;
 	float OOBE;
 	bool isDiscarded;
 };
@@ -140,12 +142,10 @@ public:
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object region);
 	Object makeBackgroundRegion();
-	void calcOOBE(int treeNum);
 	void trainTreeByRegion(int treeNum, Object region, int isTarget);
     void trainClassifier();
 
-	void discardeTrees();
-	void showOOBE();
+	void discardTreesRandomly();
 
 	void classifyAndTrain();
 	bool classifyRegion(Object region);

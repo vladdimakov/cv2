@@ -756,27 +756,39 @@ int poissonRand()
 	return (int)poissonDistribution(engine);
 }
 
-void CVFuns::calcOOBE(int treeNum)
+void CVFuns::discardTreesRandomly()
 {
-	if (forest.trees[treeNum]->nodesNum > 3 && !classifyRegionByTree(treeNum, selectedTarget))
+	const int randomGain = 10000;
+
+	for (int i = 0; i < forest.treesNum; i++)
 	{
-		forest.trees[treeNum]->OOBE++;
+		if (!forest.trees[i]->isDiscarded)
+		{
+			if (rand() % (int)((1 - forest.trees[i]->OOBE) * randomGain) == 0)
+			{
+				forest.trees[i]->isDiscarded = true;
+			}
+		}
 	}
 }
 
 void CVFuns::trainClassifier()
 {
+	discardTreesRandomly();
+
 	const int backgroundRegionsNum = 10;
 	Object backgroundRegion[backgroundRegionsNum];
 
 	for (int i = 0; i < backgroundRegionsNum; i++)
 		backgroundRegion[i] = makeBackgroundRegion();
 
+	int treesNum = 0; /// 
 	int samplesNum;
 	for (int i = 0; i < forest.treesNum; i++)
 	{
 		if (!forest.trees[i]->isDiscarded)
 		{
+			treesNum++; ///
 			samplesNum = poissonRand();
 
 			if (samplesNum > 0)
@@ -791,10 +803,28 @@ void CVFuns::trainClassifier()
 			}
 			else
 			{
-				calcOOBE(i);
+				if (forest.trees[i]->nodesNum >= 3)
+				{
+					for (int k = 0; k < backgroundRegionsNum; k++)
+					{
+						if (!classifyRegionByTree(i, backgroundRegion[k]))
+							forest.trees[i]->correctly—lassifiedOOB++;
+						else
+							forest.trees[i]->incorrectly—lassifiedOOB++;
+					}
+
+					if (classifyRegionByTree(i, selectedTarget))
+						forest.trees[i]->correctly—lassifiedOOB++;
+					else
+						forest.trees[i]->incorrectly—lassifiedOOB++;
+
+					forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectly—lassifiedOOB / forest.trees[i]->correctly—lassifiedOOB;
+					//cout << forest.trees[i]->OOBE << endl; ///
+				}
 			}
 		}
 	}
+	//cout << treesNum << endl; /// 
 }
 
 void CVFuns::trainTreeByRegion(int treeNum, Object region, int isTarget)
