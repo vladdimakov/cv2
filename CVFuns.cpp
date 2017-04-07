@@ -763,6 +763,11 @@ int poissonRand()
 	return (int)poissonDistribution(engine);
 }
 
+void calcOOBE(int treeNum)
+{
+
+}
+
 void CVFuns::trainClassifier()
 {
 	const int backgroundRegionsNum = 10;
@@ -771,34 +776,38 @@ void CVFuns::trainClassifier()
 	for (int i = 0; i < backgroundRegionsNum; i++)
 		backgroundRegion[i] = makeBackgroundRegion();
 
-	int k = poissonRand(); 
-
-	for (int i = 0; i < k; i++)
+	for (int i = 0; i < forest.treesNum; i++)
 	{
-		for (int j = 0; j < backgroundRegionsNum; j++)
-			trainClassifierByRegion(backgroundRegion[j], 0);
+		int samplesNum = poissonRand();
 
-		trainClassifierByRegion(selectedTarget, 1);
+		if (samplesNum > 0)
+		{
+			for (int j = 0; j < samplesNum; j++)
+			{
+				for (int k = 0; k < backgroundRegionsNum; k++)
+					trainTreeByRegion(i, backgroundRegion[k], 0);
+
+				trainTreeByRegion(i, selectedTarget, 1);
+			}
+		}
+		else
+		{
+			calcOOBE(i);
+		}
 	}
 }
 
-void CVFuns::trainClassifierByRegion(Object region, int isTarget)
+void CVFuns::trainTreeByRegion(int treeNum, Object region, int isTarget)
 {
-	Features **features = new Features*[forest.treesNum];
+	Features *features = new Features(forest.trees[treeNum]->featuresNum);
+	features->isTarget = isTarget;
 
-	for (int i = 0; i < forest.treesNum; i++)
+	for (int i = 0; i < forest.trees[treeNum]->featuresNum; i++)
 	{
-		features[i] = new Features(forest.trees[i]->featuresNum);
-
-		features[i]->isTarget = isTarget;
-
-		for (int j = 0; j < forest.trees[i]->featuresNum; j++)
-		{
-			features[i]->values[j] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[i]->featuresPositions[j], region), forest.trees[i]->featuresTypes[j]);
-		}
+		features->values[i] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[treeNum]->featuresPositions[i], region), forest.trees[treeNum]->featuresTypes[i]);
 	}
 
-	forest.buildForest(features);
+	forest.buildTree(treeNum, features);
 }
 
 bool CVFuns::classifyRegion(Object region) 

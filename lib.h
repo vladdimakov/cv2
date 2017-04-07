@@ -91,7 +91,7 @@ class Forest
 {
 public:
 	Forest();
-	void buildForest(Features** features);
+	void buildTree(int treeNum, Features* features);
 	void writeForest();
 	void readForest();
 	bool classifyFeatures(Features** features);
@@ -144,7 +144,7 @@ public:
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object region);
 	Object makeBackgroundRegion();
-	void trainClassifierByRegion(Object region, int isTarget);
+	void trainTreeByRegion(int treeNum, Object region, int isTarget);
     void trainClassifier();
 
 	void classifyAndTrain();

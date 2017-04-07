@@ -37,12 +37,9 @@ Forest::Forest()
 	trees[2] = new BinaryTree(2, 25, 50);
 }
 
-void Forest::buildForest(Features** features)
+void Forest::buildTree(int treeNum, Features* features)
 {
-	for (int i = 0; i < treesNum; i++)
-	{
-		trees[i]->buildTree(trees[i]->root, features[i]);
-	}
+	trees[treeNum]->buildTree(trees[treeNum]->root, features);
 }
 
 void Forest::writeForest()
