@@ -2,6 +2,7 @@
 
 CVFuns::CVFuns()
 {
+	framesNum = 0;
 	needToInit = true;
 	isTargetSelected = false;
 
@@ -729,25 +730,17 @@ Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object region)
 
 Object CVFuns::makeBackgroundRegion()
 {
-	int maxRegionWidth = 100;
-	int minRegionWidth = 20;
-	int maxRegionHeight = 100;
-	int minRegionHeight = 20;
+	int regionWidth = selectedTarget.right - selectedTarget.left;
+	int regionHeight = selectedTarget.bottom - selectedTarget.top;
 
 	Object backgroundRegion;
 
 	do
 	{
-		backgroundRegion.top = rand() % (CAP_FRAME_HEIGHT - minRegionHeight);
-		backgroundRegion.left = rand() % (CAP_FRAME_WIDTH - minRegionWidth);
-
-		backgroundRegion.bottom = backgroundRegion.top + minRegionHeight + rand() % (maxRegionHeight - minRegionHeight);
-		if (backgroundRegion.bottom >= CAP_FRAME_HEIGHT)
-			backgroundRegion.bottom = CAP_FRAME_HEIGHT - 1;
-
-		backgroundRegion.right = backgroundRegion.left + minRegionWidth + rand() % (maxRegionWidth - minRegionWidth);
-		if (backgroundRegion.right >= CAP_FRAME_WIDTH)
-			backgroundRegion.right = CAP_FRAME_WIDTH - 1;
+		backgroundRegion.top = rand() % (CAP_FRAME_HEIGHT - regionHeight);
+		backgroundRegion.left = rand() % (CAP_FRAME_WIDTH - regionWidth);
+		backgroundRegion.bottom = backgroundRegion.top + regionHeight;
+		backgroundRegion.right = backgroundRegion.left + regionWidth;
 
 	} while (isInside(selectedTarget, backgroundRegion) || isIntersect(selectedTarget, backgroundRegion));
 
@@ -765,9 +758,9 @@ int poissonRand()
 
 void CVFuns::calcOOBE(int treeNum)
 {
-	if (!classifyRegionByTree(treeNum, selectedTarget))
+	if (forest.trees[treeNum]->nodesNum > 3 && !classifyRegionByTree(treeNum, selectedTarget))
 	{
-		//forest.trees[treeNum]->classificationErrorProbability;
+		forest.trees[treeNum]->OOBE++;
 	}
 }
 
@@ -779,23 +772,27 @@ void CVFuns::trainClassifier()
 	for (int i = 0; i < backgroundRegionsNum; i++)
 		backgroundRegion[i] = makeBackgroundRegion();
 
+	int samplesNum;
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		int samplesNum = poissonRand();
-
-		if (samplesNum > 0)
+		if (!forest.trees[i]->isDiscarded)
 		{
-			for (int j = 0; j < samplesNum; j++)
+			samplesNum = poissonRand();
+
+			if (samplesNum > 0)
 			{
-				for (int k = 0; k < backgroundRegionsNum; k++)
-					trainTreeByRegion(i, backgroundRegion[k], 0);
+				for (int j = 0; j < samplesNum; j++)
+				{
+					for (int k = 0; k < backgroundRegionsNum; k++)
+						trainTreeByRegion(i, backgroundRegion[k], 0);
 
-				trainTreeByRegion(i, selectedTarget, 1);
+					trainTreeByRegion(i, selectedTarget, 1);
+				}
 			}
-		}
-		else
-		{
-			calcOOBE(i);
+			else
+			{
+				calcOOBE(i);
+			}
 		}
 	}
 }
@@ -825,20 +822,23 @@ bool CVFuns::classifyRegionByTree(int treeNum, Object region)
 	return forest.classifyFeaturesByTree(treeNum, features);
 }
 
-bool CVFuns::classifyRegion(Object region) 
-{  
+bool CVFuns::classifyRegion(Object region)
+{
 	int voteYesNum = 0;
 	int voteNoNum = 0;
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (classifyRegionByTree(i, region))
+		if (!forest.trees[i]->isDiscarded)
 		{
-			voteYesNum++;
-		}
-		else
-		{
-			voteNoNum++;
+			if (classifyRegionByTree(i, region))
+			{
+				voteYesNum++;
+			}
+			else
+			{
+				voteNoNum++;
+			}
 		}
 	}
 

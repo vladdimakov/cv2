@@ -8,6 +8,9 @@ BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFea
 	this->minStatisticsNumForDivide = minStatisticsNumForDivide;
 	this->minGiniCoefficient = minGiniCoefficient;
 
+	OOBE = 0;
+	isDiscarded = false;
+
 	nodesNum = 1;
 
 	root = new Node(featuresNum, randomlySelectedFeaturesNum);	
@@ -23,9 +26,9 @@ BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFea
 	int windowHeight = 100;
 	
 	int maxFeatureWidth = 100;
-	int minFeatureWidth = 20;
+	int minFeatureWidth = 10;
 	int maxFeatureHeight = 100;
-	int minFeatureHeight = 20;
+	int minFeatureHeight = 10;
 
 	for (int i = 0; i < featuresNum; i++)
 	{
@@ -109,7 +112,7 @@ void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 		{
 			currentSelectedFeature = rand() % featuresNum;
 			isSelected = true;
-
+			
 			for (int j = 0; j < child->level; j++)
 			{
 				if (currentSelectedFeature == child->previousSelectedFeatures[j])
@@ -118,7 +121,7 @@ void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 					break;
 				}
 			}
-
+			
 			if (i > 0)
 			{
 				for (int j = 0; j < i; j++)

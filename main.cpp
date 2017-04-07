@@ -53,7 +53,6 @@ int main(int argc, char* argv[])
 		return -1;
 
 	int classificatorMode = 0;
-	int framesNum = 0;
 	
 	while (true)
 	{
@@ -105,8 +104,9 @@ int main(int argc, char* argv[])
 
 		if (cvFuns.isTargetSelected)
 		{
-			framesNum++;
-			if (framesNum == preliminaryTrainingFramesNum)
+			cvFuns.framesNum++;
+			
+			if (cvFuns.framesNum == preliminaryTrainingFramesNum)
 			{
 				cout << "Предварительное обучение классификатора закончено" << endl;
 				classificatorMode = 1;

@@ -81,7 +81,8 @@ public:
 	int nodesNum;
 	int depthOfTree, featuresNum, randomlySelectedFeaturesNum, minStatisticsNumForDivide;
 	float minGiniCoefficient;
-	float classificationErrorProbability;
+	float OOBE;
+	bool isDiscarded;
 };
 
 class Forest
@@ -143,11 +144,15 @@ public:
 	void trainTreeByRegion(int treeNum, Object region, int isTarget);
     void trainClassifier();
 
+	void discardeTrees();
+	void showOOBE();
+
 	void classifyAndTrain();
 	bool classifyRegion(Object region);
 	bool classifyRegionByTree(int treeNum, Object region);
 
 	VideoCapture cap;
+	int framesNum;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
 	Point2f offset;
