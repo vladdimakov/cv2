@@ -15,12 +15,13 @@ Child::Child()
 	memset(statistics, 0, sizeof(statistics));
 }
 
-Node::Node(int childsNum)
+Node::Node(int childsNum, int randomlySelectedFeaturesNum)
 {
 	featureNumToDivide = -1;
 	left = NULL;
 	right = NULL;
 	childs = new Child[childsNum];
+	randomlySelectedFeatures = new int[randomlySelectedFeaturesNum];
 
 	memset(statistics, 0, sizeof(statistics));
 }

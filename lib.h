@@ -54,37 +54,34 @@ public:
 class Node
 {
 public:
-	Node(int childsNum);
+	Node(int childsNum, int randomlySelectedFeaturesNum);
 	void removeChilds();
 
 	int statistics[2];
-	int num, level, featureNumToDivide, prevStatisticsNumForDivideNode;
+	int num, level, featureNumToDivide;
 	Node *left, *right;
 	Child *childs;
+	int *randomlySelectedFeatures, *previousSelectedFeatures;
 };
 
 class BinaryTree
 {
 public:
-	BinaryTree(int featureType, int featuresNum, int statisticsNumForDivideNode);
+	BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient);
 	void buildNode(Node* node, Features* features);
 	float calcGiniCoefficient(Child child);
+	void makeRandomlySelectedFeatures(Node* parent, Node* child);
 	void divideNode(Node* node);
 	void buildTree(Node* node, Features* features);
-	
-	void writeNodes(Node* node, ofstream &file);
-	void writeTree(string fileName);
-
-	void buildNodesFromFile(Node* node, int nodesTmp[]);
-	void readTree(string fileName);
-
 	bool classifyFeatures(Node* node, Features* features);
 
 	Node *root;
 	Object *featuresPositions;
 	int *featuresTypes;
 	int nodesNum;
-	int featureType, featuresNum, statisticsNumForDivideNode;
+	int depthOfTree, featuresNum, randomlySelectedFeaturesNum, minStatisticsNumForDivide;
+	float minGiniCoefficient;
+	float classificationErrorProbability;
 };
 
 class Forest
@@ -92,8 +89,6 @@ class Forest
 public:
 	Forest();
 	void buildTree(int treeNum, Features* features);
-	void writeForest();
-	void readForest();
 	bool classifyFeaturesByTree(int treeNum, Features* features);
 
 	BinaryTree **trees;
@@ -144,6 +139,7 @@ public:
 	
 	Object rescaleFeaturePosition(Object featurePosition, Object region);
 	Object makeBackgroundRegion();
+	void calcOOBE(int treeNum);
 	void trainTreeByRegion(int treeNum, Object region, int isTarget);
     void trainClassifier();
 

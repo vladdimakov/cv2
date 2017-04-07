@@ -1,17 +1,20 @@
 #include "lib.h"
 
-BinaryTree::BinaryTree(int featureType, int featuresNum, int statisticsNumForDivideNode)
+BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient)
 {
-	this->featureType = featureType;
+	this->depthOfTree = depthOfTree;
 	this->featuresNum = featuresNum;
-	this->statisticsNumForDivideNode = statisticsNumForDivideNode;
+	this->randomlySelectedFeaturesNum = randomlySelectedFeaturesNum;
+	this->minStatisticsNumForDivide = minStatisticsNumForDivide;
+	this->minGiniCoefficient = minGiniCoefficient;
 
 	nodesNum = 1;
 
-	root = new Node(featuresNum);	
+	root = new Node(featuresNum, randomlySelectedFeaturesNum);	
 	root->level = 0;
 	root->num = nodesNum;
-	root->prevStatisticsNumForDivideNode = 0;
+
+	makeRandomlySelectedFeatures(NULL, root);
 
 	featuresPositions = new Object[featuresNum];
 	
@@ -50,7 +53,7 @@ void BinaryTree::buildNode(Node* node, Features* features)
 {	
 	node->statistics[features->isTarget]++;
 
-	if (node->level < featuresNum)
+	if (node->level < depthOfTree)
 	{
 		for (int i = 0; i < featuresNum; i++)
 		{
@@ -61,7 +64,7 @@ void BinaryTree::buildNode(Node* node, Features* features)
 		}
 
 
-		if (node->statistics[0] + node->statistics[1] - node->prevStatisticsNumForDivideNode >= statisticsNumForDivideNode)
+		if (node->statistics[0] + node->statistics[1] >= minStatisticsNumForDivide)
 		{
 			divideNode(node);
 		}
@@ -86,47 +89,96 @@ float BinaryTree::calcGiniCoefficient(Child child)
 	return giniCoefficient;
 }
 
+void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
+{
+	if (parent != NULL)
+	{
+		child->previousSelectedFeatures = new int[child->level];
+		for (int i = 0; i < child->level - 1; i++)
+			child->previousSelectedFeatures[i] = parent->previousSelectedFeatures[i];
+		
+		child->previousSelectedFeatures[child->level - 1] = parent->featureNumToDivide;
+	}
+
+	bool isSelected;
+	int currentSelectedFeature;
+	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
+	{
+		isSelected = false;
+		while (!isSelected)
+		{
+			currentSelectedFeature = rand() % featuresNum;
+			isSelected = true;
+
+			for (int j = 0; j < child->level; j++)
+			{
+				if (currentSelectedFeature == child->previousSelectedFeatures[j])
+				{
+					isSelected = false;
+					break;
+				}
+			}
+
+			if (i > 0)
+			{
+				for (int j = 0; j < i; j++)
+				{
+					if (currentSelectedFeature == child->randomlySelectedFeatures[j])
+					{
+						isSelected = false;
+						break;
+					}
+				}
+			}
+		}
+
+		child->randomlySelectedFeatures[i] = currentSelectedFeature;
+	}
+}
+
 void BinaryTree::divideNode(Node* node)
 {
-	float *giniCoefficients = new float[featuresNum];
-	for (int i = 0; i < featuresNum; i++)
+	float *giniCoefficients = new float[randomlySelectedFeaturesNum];
+	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
 	{
-		giniCoefficients[i] = calcGiniCoefficient(node->childs[i]);
+		giniCoefficients[i] = calcGiniCoefficient(node->childs[node->randomlySelectedFeatures[i]]);
 	}
 
 	float maxGiniCoefficient = 0;
 	int maxGiniCoefficientNum = -1;
-	for (int i = 0; i < featuresNum; i++)
+	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
 	{
 		if (giniCoefficients[i] >= maxGiniCoefficient)
 		{
 			maxGiniCoefficient = giniCoefficients[i];
-			maxGiniCoefficientNum = i;
+			maxGiniCoefficientNum = node->randomlySelectedFeatures[i];
 		}
 	}
 
 	delete[] giniCoefficients;
 	
-	if (maxGiniCoefficientNum == -1)
+	if (maxGiniCoefficientNum == -1 || maxGiniCoefficient < minGiniCoefficient)
 		return;
 		
 	node->featureNumToDivide = maxGiniCoefficientNum;
-
+	
 	nodesNum++;
-	node->left = new Node(featuresNum);
+	node->left = new Node(featuresNum, randomlySelectedFeaturesNum);
 	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[0][0];
 	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[0][1];
-	node->left->prevStatisticsNumForDivideNode = node->left->statistics[0] + node->left->statistics[1];
 	node->left->level = node->level + 1;
 	node->left->num = nodesNum;
 	
+	makeRandomlySelectedFeatures(node, node->left);
+	
 	nodesNum++;
-	node->right = new Node(featuresNum);
+	node->right = new Node(featuresNum, randomlySelectedFeaturesNum);
 	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[1][0];
 	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[1][1];
-	node->right->prevStatisticsNumForDivideNode = node->right->statistics[0] + node->right->statistics[1];
 	node->right->level = node->level + 1;
 	node->right->num = nodesNum;
+	
+	makeRandomlySelectedFeatures(node, node->right);
 	
 	node->removeChilds();
 }
@@ -150,104 +202,6 @@ void BinaryTree::buildTree(Node* node, Features* features)
 	{
 		buildNode(node, features);
 	}
-}
-
-void BinaryTree::writeNodes(Node* node, ofstream &file)
-{
-	if (node == root && node->featureNumToDivide != -1)
-	{
-		file << node->num << " 0 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
-
-		writeNodes(node->left, file);
-		writeNodes(node->right, file);
-	}
-	else if (node->featureNumToDivide == -1)
-	{
-		file << node->num << " 2 " << node->statistics[0] << " " << node->statistics[1] << " 0 " << endl;
-	}
-	else
-	{
-		file << node->num << " 1 " << node->featureNumToDivide << " " << node->left->num << " " << node->right->num << endl;
-
-		writeNodes(node->left, file);
-		writeNodes(node->right, file);
-	}
-}
-
-void BinaryTree::writeTree(string fileName)
-{
-	//cout << "Началась запись дерева №" << featureType << " в файл" << endl;
-
-	ofstream file(fileName);
-
-	for (int i = 0; i < featuresNum; i++)
-	{
-		file << featuresPositions[i].left << " " << featuresPositions[i].right << " " << featuresPositions[i].top << " " << featuresPositions[i].bottom << " " << featuresTypes[i] << endl;
-	}
-
-	file << nodesNum << endl;
-
-	writeNodes(root, file);
-
-	file.close();
-
-	cout << "Дерево №" << featureType << " записано в файл (" << nodesNum << " вершин)" << endl;
-}
-
-void BinaryTree::buildNodesFromFile(Node* node, int nodesTmp[])
-{
-	for (int i = 0; i < nodesNum; i++)
-	{
-		if (node->num == nodesTmp[i])
-		{
-			if (nodesTmp[i + nodesNum] == 0 || nodesTmp[i + nodesNum] == 1)
-			{
-				node->featureNumToDivide = nodesTmp[i + nodesNum * 2];
-
-				node->left = new Node(featuresNum);
-				node->left->num = nodesTmp[i + nodesNum * 3];
-				buildNodesFromFile(node->left, nodesTmp);
-
-				node->right = new Node(featuresNum);
-				node->right->num = nodesTmp[i + nodesNum * 4];
-				buildNodesFromFile(node->right, nodesTmp);
-			}
-			else
-			{
-				node->statistics[0] = nodesTmp[i + nodesNum * 2];
-				node->statistics[1] = nodesTmp[i + nodesNum * 3];
-			}
-		}
-	}
-}
-
-void BinaryTree::readTree(string fileName)
-{
-	//cout << "Началось чтение дерева №" << featureType << " из файла" << endl;
-
-	ifstream file(fileName);
-
-	for (int i = 0; i < featuresNum; i++)
-	{
-		file >> featuresPositions[i].left >> featuresPositions[i].right >> featuresPositions[i].top >> featuresPositions[i].bottom >> featuresTypes[i];
-	}
-	
-	file >> nodesNum;
-	
-	int *nodesTmp = new int[5 * nodesNum];
-	
-	for (int i = 0; i < nodesNum; i++)
-	{
-		file >> nodesTmp[i] >> nodesTmp[i + nodesNum] >> nodesTmp[i + nodesNum * 2] >> nodesTmp[i + nodesNum * 3] >> nodesTmp[i + nodesNum * 4];
-	}
-
-	buildNodesFromFile(root, nodesTmp);
-
-	delete[] nodesTmp;
-
-	file.close();
-
-	cout << "Дерево №" << featureType << " прочитано из файла (" << nodesNum << " вершин)" << endl;
 }
 
 bool BinaryTree::classifyFeatures(Node* node, Features* features)

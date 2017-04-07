@@ -763,9 +763,12 @@ int poissonRand()
 	return (int)poissonDistribution(engine);
 }
 
-void calcOOBE(int treeNum)
+void CVFuns::calcOOBE(int treeNum)
 {
-
+	if (!classifyRegionByTree(treeNum, selectedTarget))
+	{
+		//forest.trees[treeNum]->classificationErrorProbability;
+	}
 }
 
 void CVFuns::trainClassifier()
