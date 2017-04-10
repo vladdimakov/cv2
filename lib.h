@@ -82,7 +82,7 @@ public:
 	int depthOfTree, featuresNum, randomlySelectedFeaturesNum, minStatisticsNumForDivide;
 	float minGiniCoefficient;
 	
-	int correctly—lassifiedOOB, incorrectly—lassifiedOOB;
+	int correctlyClassifiedOOB, incorrectlyClassifiedOOB;
 	float OOBE;
 	bool isDiscarded;
 };

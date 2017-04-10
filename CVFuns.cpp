@@ -840,17 +840,17 @@ void CVFuns::trainClassifier()
 					{
 						backgroundRegion = makeBackgroundRegion();
 						if (!classifyRegionByTree(i, backgroundRegion))
-							forest.trees[i]->correctlyÑlassifiedOOB++;
+							forest.trees[i]->correctlyClassifiedOOB++;
 						else
-							forest.trees[i]->incorrectlyÑlassifiedOOB++;
+							forest.trees[i]->incorrectlyClassifiedOOB++;
 					}
 
 					if (classifyRegionByTree(i, selectedTarget))
-						forest.trees[i]->correctlyÑlassifiedOOB++;
+						forest.trees[i]->correctlyClassifiedOOB++;
 					else
-						forest.trees[i]->incorrectlyÑlassifiedOOB++;
+						forest.trees[i]->incorrectlyClassifiedOOB++;
 
-					forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyÑlassifiedOOB / forest.trees[i]->correctlyÑlassifiedOOB;
+					forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
 					//cout << forest.trees[i]->OOBE << endl; ///
 				}
 			}
