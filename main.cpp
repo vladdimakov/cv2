@@ -27,10 +27,12 @@ int main(int argc, char* argv[])
 	const float scalingFactor = 20.0f;
 	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
 	const float distanceBetweenTargets = 50.0f;
-	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
-	const float scalingFactorBetweenTargetsOnTwoFrames = 3.0f;
 	
-	const int preliminaryTrainingFramesNum = 100;
+	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
+	const float scalingFactorBetweenTargetsOnTwoFrames = 4.0f;
+	
+	cvFuns.preliminaryTrainingFramesNum = 300;
+	cvFuns.classifierNotFoundTargetMaxNum = 10;
 
 	string videoSource;
 	if (argc == 1 || argc == 2)
@@ -86,7 +88,7 @@ int main(int argc, char* argv[])
 
 		if (classificatorMode == 1 && cvFuns.isTargetSelected)
 		{
-			cvFuns.classifyAndTrain();
+			cvFuns.classifyAndTrain(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
 			cvFuns.displaySelectedTarget();
 		}
 		
@@ -107,12 +109,14 @@ int main(int argc, char* argv[])
 		{
 			cvFuns.framesNum++;
 			
-			if (cvFuns.framesNum == preliminaryTrainingFramesNum)
+			if (cvFuns.framesNum == cvFuns.preliminaryTrainingFramesNum)
 			{
-				cout << "Предварительное обучение классификатора закончено" << endl;
+				cout << "\n|Предварительное обучение классификатора закончено|\n" << endl;
 				classificatorMode = 1;
 			}
 		}
+
+		cvFuns.showStats();
 
 		char key = (char)waitKey(1); // waitKey ждет события нажатия клавиши 1 мс
 		if (key == 27) // Если нажат ESC - выходим

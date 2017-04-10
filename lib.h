@@ -147,12 +147,15 @@ public:
 
 	void discardTreesRandomly();
 
-	void classifyAndTrain();
+	void classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames);
 	bool classifyRegion(Object region);
 	bool classifyRegionByTree(int treeNum, Object region);
 
+	float calcForestOOBE();
+	void showStats();
+
 	VideoCapture cap;
-	int framesNum;
+	int framesNum, preliminaryTrainingFramesNum, classifierNotFoundTargetNum, classifierNotFoundTargetMaxNum, classifierNotFoundTargetTotalNum;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
 	Point2f offset;

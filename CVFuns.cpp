@@ -3,6 +3,9 @@
 CVFuns::CVFuns()
 {
 	framesNum = 0;
+	classifierNotFoundTargetNum = 0;
+	classifierNotFoundTargetTotalNum = 0;
+
 	needToInit = true;
 	isTargetSelected = false;
 
@@ -57,12 +60,12 @@ bool CVFuns::startCapture(string videoSource)
 
 	if (cap.isOpened()) // Успешно ли открыта камера 
 	{
-		cout << "Видеозахват успешно начался" << endl;
+		cout << "\n|Видеозахват успешно начался|\n" << endl;
 		return true;
 	}
 	else
 	{
-		cout << "Не удалось начать видеозахват" << endl;
+		cout << "|Не удалось начать видеозахват|\n" << endl;
 		return false;
 	}
 }
@@ -573,6 +576,9 @@ bool isSameSize(Object baseTarget, Object sameSizeTarget, float scalingFactor)
 	float sameSizeWidth = float(sameSizeTarget.right - sameSizeTarget.left);
 	float sameSizeHeight = float(sameSizeTarget.bottom - sameSizeTarget.top);
 
+//	if (baseWidth < 10 || baseHeight < 10)
+	//	return false;
+
 	if (baseWidth <= sameSizeWidth * scalingFactor  && sameSizeWidth <= baseWidth * scalingFactor &&
 		baseHeight <= sameSizeHeight * scalingFactor  && sameSizeHeight <= baseHeight * scalingFactor)
 	{
@@ -694,7 +700,7 @@ void CVFuns::selectTarget(Point2i clickedPoint)
 
 	if (isTargetSelected)
 	{
-		cout << "Цель выбрана, предварительное обучение классификатора началось" << endl;
+		cout << "|Цель выбрана, предварительное обучение классификатора началось|\n" << endl;
 	}
 }
 
@@ -785,17 +791,16 @@ int poissonRand()
 
 void CVFuns::discardTreesRandomly()
 {
-	const int randomGain = 10000;
+	const int randomGain = 20000;
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
 		if (!forest.trees[i]->isDiscarded)
 		{
-			if (rand() % (int)((1 - forest.trees[i]->OOBE) * randomGain) == 0)
+			if (rand() % (int)((1.01 - forest.trees[i]->OOBE) * randomGain) == 0)
 			{
 				forest.trees[i]->isDiscarded = true;
 				forest.currentTreesNum--;
-				cout << "Дерево №" << i << " исключено из ансамбля. Осталось " << forest.currentTreesNum << " деревьев" << endl;
 			}
 		}
 	}
@@ -805,16 +810,13 @@ void CVFuns::trainClassifier()
 {
 	discardTreesRandomly();
 
-	const int backgroundRegionsNum = 10;
-	Object backgroundRegion[backgroundRegionsNum];
-
-	for (int i = 0; i < backgroundRegionsNum; i++)
-		backgroundRegion[i] = makeBackgroundRegion();
+	const int backgroundRegionsNum = 5;
+	Object backgroundRegion;
 
 	int samplesNum;
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (!forest.trees[i]->isDiscarded)
+		if (!forest.trees[i]->isDiscarded && selectedTarget.exist)
 		{
 			samplesNum = poissonRand();
 			if (samplesNum > 0)
@@ -822,7 +824,10 @@ void CVFuns::trainClassifier()
 				for (int j = 0; j < samplesNum; j++)
 				{
 					for (int k = 0; k < backgroundRegionsNum; k++)
-						trainTreeByRegion(i, backgroundRegion[k], 0);
+					{
+						backgroundRegion = makeBackgroundRegion();
+						trainTreeByRegion(i, backgroundRegion, 0);
+					}
 
 					trainTreeByRegion(i, selectedTarget, 1);
 				}
@@ -833,7 +838,8 @@ void CVFuns::trainClassifier()
 				{
 					for (int k = 0; k < backgroundRegionsNum; k++)
 					{
-						if (!classifyRegionByTree(i, backgroundRegion[k]))
+						backgroundRegion = makeBackgroundRegion();
+						if (!classifyRegionByTree(i, backgroundRegion))
 							forest.trees[i]->correctlyСlassifiedOOB++;
 						else
 							forest.trees[i]->incorrectlyСlassifiedOOB++;
@@ -900,7 +906,7 @@ bool CVFuns::classifyRegion(Object region)
 	return voteYesNum > voteNoNum;
 }
 
-void CVFuns::classifyAndTrain()
+void CVFuns::classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
 {
 	selectedTarget.exist = false;
 
@@ -911,7 +917,58 @@ void CVFuns::classifyAndTrain()
 			selectedTarget = objects[i];
 			selectedTarget.exist = true;
 
+			classifierNotFoundTargetNum = 0;
+
 			trainClassifier();
+			return;
+		}
+	}
+	
+	if (!selectedTarget.exist && classifierNotFoundTargetNum < classifierNotFoundTargetMaxNum)
+	{
+		selectedTarget.exist = true;
+		findSelectedTarget(distanceBetweenTargetsOnTwoFrames / 2, scalingFactorBetweenTargetsOnTwoFrames / 2);
+		
+		if (selectedTarget.exist)
+		{
+			classifierNotFoundTargetNum++;
+			classifierNotFoundTargetTotalNum++;
+
+			trainClassifier();
+		}
+	}
+}
+
+float CVFuns::calcForestOOBE()
+{
+	vector<float> treesOOBE;
+
+	for (int i = 0; i < forest.treesNum; i++)
+	{
+		if (!forest.trees[i]->isDiscarded)
+			treesOOBE.push_back(forest.trees[i]->OOBE);
+	}
+
+	return findMedian(treesOOBE);
+}
+
+void CVFuns::showStats()
+{
+	if (framesNum == 1)
+	{
+		cout << framesNum - 1 << " | " << "Число деревьев: " << forest.currentTreesNum << endl;
+	}
+	else if (framesNum % 25 == 0 && framesNum != 0)
+	{
+		cout << framesNum << " | " << "Число деревьев: " << forest.currentTreesNum << " | OOBE: " << calcForestOOBE();
+		if (framesNum > preliminaryTrainingFramesNum)
+		{
+			cout << " | Ошибка классификатора: " << (float)classifierNotFoundTargetTotalNum / 25 << endl;
+			classifierNotFoundTargetTotalNum = 0;
+		}
+		else
+		{
+			cout << endl;
 		}
 	}
 }
