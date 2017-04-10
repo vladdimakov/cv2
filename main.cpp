@@ -28,8 +28,9 @@ int main(int argc, char* argv[])
 	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
 	const float distanceBetweenTargets = 50.0f;
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
+	const float scalingFactorBetweenTargetsOnTwoFrames = 3.0f;
 	
-	const int preliminaryTrainingFramesNum = 200;
+	const int preliminaryTrainingFramesNum = 100;
 
 	string videoSource;
 	if (argc == 1 || argc == 2)
@@ -78,7 +79,7 @@ int main(int argc, char* argv[])
 
 		if (classificatorMode == 0 && cvFuns.isTargetSelected)
 		{
-			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames);
+			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
             cvFuns.displaySelectedTarget();
 			cvFuns.trainClassifier();
 		}

@@ -15,8 +15,7 @@ BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFea
 
 	nodesNum = 1;
 
-	root = new Node(featuresNum, randomlySelectedFeaturesNum);	
-	root->level = 0;
+	root = new Node(0, featuresNum, randomlySelectedFeaturesNum);	
 	root->num = nodesNum;
 
 	makeRandomlySelectedFeatures(NULL, root);
@@ -98,10 +97,11 @@ void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 {
 	if (parent != NULL)
 	{
-		child->previousSelectedFeatures = new int[child->level];
-		for (int i = 0; i < child->level - 1; i++)
-			child->previousSelectedFeatures[i] = parent->previousSelectedFeatures[i];
+		//for (int i = 0; i < child->level - 1; i++)
+			//child->previousSelectedFeatures[i] = parent->previousSelectedFeatures[i];
 		
+		memcpy(child->previousSelectedFeatures, parent->previousSelectedFeatures, sizeof(int) * (child->level - 1));
+
 		child->previousSelectedFeatures[child->level - 1] = parent->featureNumToDivide;
 	}
 
@@ -143,49 +143,41 @@ void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 
 void BinaryTree::divideNode(Node* node)
 {
-	float *giniCoefficients = new float[randomlySelectedFeaturesNum];
-	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
-	{
-		giniCoefficients[i] = calcGiniCoefficient(node->childs[node->randomlySelectedFeatures[i]]);
-	}
-
 	float maxGiniCoefficient = 0;
-	int maxGiniCoefficientNum = -1;
+	float currentGiniCoefficient;
+	int maxGiniCoefficientNum = -1;	
 	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
 	{
-		if (giniCoefficients[i] >= maxGiniCoefficient)
+		currentGiniCoefficient = calcGiniCoefficient(node->childs[node->randomlySelectedFeatures[i]]);
+		if (currentGiniCoefficient >= maxGiniCoefficient)
 		{
-			maxGiniCoefficient = giniCoefficients[i];
+			maxGiniCoefficient = currentGiniCoefficient;
 			maxGiniCoefficientNum = node->randomlySelectedFeatures[i];
 		}
 	}
 
-	delete[] giniCoefficients;
-	
 	if (maxGiniCoefficientNum == -1 || maxGiniCoefficient < minGiniCoefficient)
 		return;
 		
 	node->featureNumToDivide = maxGiniCoefficientNum;
 	
 	nodesNum++;
-	node->left = new Node(featuresNum, randomlySelectedFeaturesNum);
+	node->left = new Node(node->level + 1, featuresNum, randomlySelectedFeaturesNum);
 	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[0][0];
 	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[0][1];
-	node->left->level = node->level + 1;
 	node->left->num = nodesNum;
 	
 	makeRandomlySelectedFeatures(node, node->left);
 	
 	nodesNum++;
-	node->right = new Node(featuresNum, randomlySelectedFeaturesNum);
+	node->right = new Node(node->level + 1, featuresNum, randomlySelectedFeaturesNum);
 	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[1][0];
 	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[1][1];
-	node->right->level = node->level + 1;
 	node->right->num = nodesNum;
 	
 	makeRandomlySelectedFeatures(node, node->right);
 	
-	node->removeChilds();
+	node->removeOldData();
 }
 
 void BinaryTree::buildTree(Node* node, Features* features)

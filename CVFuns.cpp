@@ -566,6 +566,24 @@ bool isNear(Object baseTarget, Object nearTarget, float distanceBetweenTargets)
 	}
 }
 
+bool isSameSize(Object baseTarget, Object sameSizeTarget, float scalingFactor)
+{
+	float baseWidth = float(baseTarget.right - baseTarget.left);
+	float baseHeight = float(baseTarget.bottom - baseTarget.top);
+	float sameSizeWidth = float(sameSizeTarget.right - sameSizeTarget.left);
+	float sameSizeHeight = float(sameSizeTarget.bottom - sameSizeTarget.top);
+
+	if (baseWidth <= sameSizeWidth * scalingFactor  && sameSizeWidth <= baseWidth * scalingFactor &&
+		baseHeight <= sameSizeHeight * scalingFactor  && sameSizeHeight <= baseHeight * scalingFactor)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void CVFuns::makeSegmentation(float distanceBetweenTargets)
 {
 	vector<Point2i> connectedPoints;
@@ -680,14 +698,23 @@ void CVFuns::selectTarget(Point2i clickedPoint)
 	}
 }
 
-void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames)
+void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
 {
-	for (int i = 0; i < objects.size(); i++)
+	if (selectedTarget.exist)
 	{
-		if (isInside(objects[i], selectedTarget) || isIntersect(objects[i], selectedTarget) || isNear(objects[i], selectedTarget, distanceBetweenTargetsOnTwoFrames))
+		for (int i = 0; i < objects.size(); i++)
 		{
-			selectedTarget = objects[i];
-			break;
+			if ((isInside(objects[i], selectedTarget) || isIntersect(objects[i], selectedTarget) || isNear(objects[i], selectedTarget, distanceBetweenTargetsOnTwoFrames))
+				&& isSameSize(objects[i], selectedTarget, scalingFactorBetweenTargetsOnTwoFrames))
+			{
+				selectedTarget = objects[i];
+				selectedTarget.exist = true;
+				break;
+			}
+			else
+			{
+				selectedTarget.exist = false;
+			}
 		}
 	}
 }
@@ -767,6 +794,8 @@ void CVFuns::discardTreesRandomly()
 			if (rand() % (int)((1 - forest.trees[i]->OOBE) * randomGain) == 0)
 			{
 				forest.trees[i]->isDiscarded = true;
+				forest.currentTreesNum--;
+				cout << "Дерево №" << i << " исключено из ансамбля. Осталось " << forest.currentTreesNum << " деревьев" << endl;
 			}
 		}
 	}
@@ -782,15 +811,12 @@ void CVFuns::trainClassifier()
 	for (int i = 0; i < backgroundRegionsNum; i++)
 		backgroundRegion[i] = makeBackgroundRegion();
 
-	int treesNum = 0; /// 
 	int samplesNum;
 	for (int i = 0; i < forest.treesNum; i++)
 	{
 		if (!forest.trees[i]->isDiscarded)
 		{
-			treesNum++; ///
 			samplesNum = poissonRand();
-
 			if (samplesNum > 0)
 			{
 				for (int j = 0; j < samplesNum; j++)
@@ -824,7 +850,6 @@ void CVFuns::trainClassifier()
 			}
 		}
 	}
-	//cout << treesNum << endl; /// 
 }
 
 void CVFuns::trainTreeByRegion(int treeNum, Object region, int isTarget)

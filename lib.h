@@ -54,8 +54,8 @@ public:
 class Node
 {
 public:
-	Node(int childsNum, int randomlySelectedFeaturesNum);
-	void removeChilds();
+	Node(int level, int childsNum, int randomlySelectedFeaturesNum);
+	void removeOldData();
 
 	int statistics[2];
 	int num, level, featureNumToDivide;
@@ -95,7 +95,7 @@ public:
 	bool classifyFeaturesByTree(int treeNum, Features* features);
 
 	BinaryTree **trees;
-	int treesNum;
+	int treesNum, currentTreesNum;
 };
 
 class CVFuns
@@ -124,7 +124,7 @@ public:
 	void findConnectedPoints(int x, int y, vector<Point2i>& connectedPoints);
 	void makeSegmentation(float distanceBetweenTargets);
 	void selectTarget(Point2i clickedPoint);
-	void findSelectedTarget(float distanceBetweenTargetsOnTwoFrames);
+	void findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames);
 	void displaySelectedTarget();
 
 	void makeIntegralImg(Mat currentFrame);

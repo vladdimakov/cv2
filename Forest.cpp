@@ -3,11 +3,13 @@
 Forest::Forest()
 {
 	treesNum = 100;
+	currentTreesNum = treesNum;
 
 	trees = new BinaryTree*[treesNum];
 	for (int i = 0; i < treesNum; i++)
-		trees[i] = new BinaryTree(100, 100, 10, 50, 0.1); 
+		trees[i] = new BinaryTree(100, 100, 10, 50, 0.1);
 	//(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient)
+	//BinaryTree(100, 100, 10, 50, 0.1)
 }
 
 void Forest::buildTree(int treeNum, Features* features)
