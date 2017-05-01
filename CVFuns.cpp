@@ -480,6 +480,7 @@ void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 
 	frameWith0.copyTo(backgroundBoundMask, currentDeviationImg - backgroundBound);
 	frameWith255.copyTo(frameStaticPartMask, backgroundBoundMask);
+	
 	/*
 	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
 	{

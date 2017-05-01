@@ -57,9 +57,12 @@ int main(int argc, char* argv[])
 
 	int classificatorMode = 0;
 	
+	int frameNum = 0;
 	while (true)
 	{
 		cvFuns.cap >> colorFrame;
+
+		cout << frameNum << endl;
 
 		cvtColor(colorFrame, grayFrame8U, CV_RGB2GRAY);
 		grayFrame8U.convertTo(grayFrame32F, CV_32F);
@@ -70,6 +73,8 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
+		frameNum++;
+
 		currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
 		cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
 		cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
@@ -78,6 +83,23 @@ int main(int argc, char* argv[])
 		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 		cvFuns.makeSegmentation(distanceBetweenTargets);
 		cvFuns.makeIntegralImg(grayFrame8U);
+
+		if (frameNum == 1022)
+		{
+			imwrite("current_frame.jpg", cvFuns.imgToDisplay[0]);
+			imwrite("deviation_image.jpg", cvFuns.imgToDisplay[1]);
+			imwrite("average_backgroung.jpg", cvFuns.imgToDisplay[2]);
+			imwrite("moving_target.jpg", cvFuns.imgToDisplay[3]);
+			
+			Mat currentDeviationImage = abs(grayFrame32F - cvFuns.averageBackImg) * scalingFactor;
+			currentDeviationImage.convertTo(currentDeviationImage, CV_8U);
+			imwrite("current_deviation_image.jpg", currentDeviationImage);
+
+			currentDeviationImage = abs(grayFrame32F - cvFuns.averageBackImg);
+			currentDeviationImage.convertTo(currentDeviationImage, CV_8U);
+			imwrite("current_deviation_image.bmp", currentDeviationImage);
+			break;
+		}
 
 		if (classificatorMode == 0 && cvFuns.isTargetSelected)
 		{
