@@ -149,8 +149,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BinaryTree.cpp" />
-    <ClCompile Include="CVFuns.cpp" />
+    <ClCompile Include="Tree.cpp" />
+    <ClCompile Include="Detector.cpp" />
     <ClCompile Include="Forest.cpp" />
     <ClCompile Include="FPSCounter.cpp" />
     <ClCompile Include="HaarFeatures.cpp" />

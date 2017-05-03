@@ -1,6 +1,6 @@
 #include "lib.h"
 
-CVFuns::CVFuns()
+Detector::Detector()
 {
 	framesNum = 0;
 	classifierNotFoundTargetNum = 0;
@@ -17,7 +17,7 @@ CVFuns::CVFuns()
 	integralImg = Mat(CAP_FRAME_HEIGHT + 1, CAP_FRAME_WIDTH + 1, CV_32S);
 }
 
-void CVFuns::displayWindow()
+void Detector::displayWindow()
 {
 	Mat imageToDisplay = Mat(CAP_FRAME_HEIGHT * 2 + 30, CAP_FRAME_WIDTH * 2, CV_8U);
 
@@ -47,7 +47,7 @@ void CVFuns::displayWindow()
 	imshow("Display window", imageToDisplay);
 }
 
-bool CVFuns::startCapture(string videoSource)
+bool Detector::startCapture(string videoSource)
 {
 	if (videoSource.size() == 0)
 		cap.open(0); // 0 - камера по умолчанию
@@ -70,7 +70,7 @@ bool CVFuns::startCapture(string videoSource)
 	}
 }
 
-vector<Point2f> CVFuns::findCorners(Mat grayFrame, int maxCornersNum)
+vector<Point2f> Detector::findCorners(Mat grayFrame, int maxCornersNum)
 {
 	// Shi-Tomasi Corner Detector
 	double qualityLevel = 0.01; // Мера "качества" особых точек
@@ -85,7 +85,7 @@ vector<Point2f> CVFuns::findCorners(Mat grayFrame, int maxCornersNum)
 	return corners;
 }
 
-void CVFuns::calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status)
+void Detector::calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status)
 {
 	vector<float> err; // Вектор погрешностей. Тип меры погрешности может быть установлен соответсвующим флагом
 	Size winSize(21, 21); // Размер окна при поиске
@@ -97,7 +97,7 @@ void CVFuns::calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Poi
 	calcOpticalFlowPyrLK(prevGrayFrame, currentGrayFrame, prevPoints, currentPoints, status, err, winSize, maxLevel, criteria, flags, minEigThreshold);
 }
 
-void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
+void Detector::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 {
 	Point2i intOffset;
 	intOffset.x = (int)offset.x;
@@ -131,7 +131,6 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 		}
 				
 		inputFrame = subPixTranslateFrameOpenCV(inputFrame, subPixOffset);		
-		//inputFrame = subPixTranslateFrame(inputFrame, subPixOffset);
 	}
 
 	if (intOffset.x != 0 || intOffset.y != 0)
@@ -171,52 +170,7 @@ void CVFuns::translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset)
 	}
 }
 
-Mat CVFuns::subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset)
-{
-	if (subPixOffset.x == 0.0f && subPixOffset.y == 0.0f)
-		return inputFrame;
-
-	Mat outputFrame, translatedFrame1, translatedFrame2, translatedFrame3;
-
-	inputFrame.copyTo(translatedFrame1);
-	inputFrame.copyTo(translatedFrame2);
-	inputFrame.copyTo(translatedFrame3);
-
-	if (subPixOffset.x >= 0.0f && subPixOffset.y >= 0.0f)
-	{
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y, x + 1
-		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH)); // y + 1, x
-		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame3.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH - 1)); // y + 1, x + 1
-	}
-	else if (subPixOffset.x < 0.0f && subPixOffset.y > 0.0f)
-	{
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y, x - 1
-		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH)); // y + 1, x
-		inputFrame.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame3.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(1, CAP_FRAME_WIDTH)); // y + 1, x - 1
-	}
-	else if (subPixOffset.x > 0.0f && subPixOffset.y < 0.0f)
-	{
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y, x + 1
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH)); // y - 1, x
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(1, CAP_FRAME_WIDTH).copyTo(translatedFrame3.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1)); // y - 1, x + 1
-	}
-	else if (subPixOffset.x <= 0.0f && subPixOffset.y <= 0.0f)
-	{
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame1.rowRange(0, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y, x - 1
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH).copyTo(translatedFrame2.rowRange(1, CAP_FRAME_HEIGHT).colRange(0, CAP_FRAME_WIDTH)); // y - 1, x
-		inputFrame.rowRange(0, CAP_FRAME_HEIGHT - 1).colRange(0, CAP_FRAME_WIDTH - 1).copyTo(translatedFrame3.rowRange(1, CAP_FRAME_HEIGHT).colRange(1, CAP_FRAME_WIDTH)); // y - 1, x - 1
-	}
-
-	subPixOffset.x = abs(subPixOffset.x);
-	subPixOffset.y = abs(subPixOffset.y);
-
-	outputFrame = inputFrame * (1 - subPixOffset.x) * (1 - subPixOffset.y) + translatedFrame1 * subPixOffset.x * (1 - subPixOffset.y) +
-		translatedFrame2 * (1 - subPixOffset.x) * subPixOffset.y + translatedFrame3 * subPixOffset.x * subPixOffset.y;
-
-	return outputFrame;
-}
-
-Mat CVFuns::subPixTranslateFrameOpenCV(Mat inputFrame, Point2f subPixOffset)
+Mat Detector::subPixTranslateFrameOpenCV(Mat inputFrame, Point2f subPixOffset)
 {
 	if (subPixOffset.x == 0.0f && subPixOffset.y == 0.0f)
 		return inputFrame;
@@ -232,7 +186,7 @@ Mat CVFuns::subPixTranslateFrameOpenCV(Mat inputFrame, Point2f subPixOffset)
 	return outputFrame;
 }
 
-float CVFuns::findMedian(vector<float> value)
+float Detector::findMedian(vector<float> value)
 {
 	bool exit = false;
 	size_t size = value.size();
@@ -260,7 +214,7 @@ float CVFuns::findMedian(vector<float> value)
 	}
 }
 
-Point2f CVFuns::findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints)
+Point2f Detector::findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints)
 {
 	if (currentPoints.size() != 0)
 	{
@@ -280,10 +234,8 @@ Point2f CVFuns::findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> cur
 	}	
 }
 
-void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
+void Detector::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 {
-	offset = Point2f(0, 0);
-
 	prevGrayFrame.convertTo(averageBackImg, CV_32F);
 	
 	deviationImg = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_32F, Scalar(deviationImgFillValue));
@@ -291,7 +243,7 @@ void CVFuns::makeInitialFrame(Mat prevGrayFrame, vector<Point2f>& prevPoints)
 	prevPoints = findCorners(prevGrayFrame, MAX_CORNERS_NUM);
 }
 
-Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
+Point2f Detector::calcFrameOffset(Mat& currentGrayFrame)
 {
 	vector<uchar> status;
 	Point2f frameOffset;
@@ -335,7 +287,7 @@ Point2f CVFuns::calcFrameOffset(Mat& currentGrayFrame)
 	return frameOffset;
 }
 
-void CVFuns::translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset)
+void Detector::translateAverageBackAndDeviationImg(Mat currentFrame, Point2f currentOffset)
 {
 	Mat translatedAverageBackImg, translatedDeviationImg;
 
@@ -349,7 +301,7 @@ void CVFuns::translateAverageBackAndDeviationImg(Mat currentFrame, Point2f curre
 	translatedDeviationImg.copyTo(deviationImg);
 }
 
-void CVFuns::calcFrameStaticPartMask(Mat currentFrame, float deviationFactor)
+void Detector::calcFrameStaticPartMask(Mat currentFrame, float deviationFactor)
 {
 	currentDeviationImg = abs(currentFrame - averageBackImg);
 
@@ -357,14 +309,14 @@ void CVFuns::calcFrameStaticPartMask(Mat currentFrame, float deviationFactor)
 	frameStaticPartMask.convertTo(frameStaticPartMask, CV_8U);
 }
 
-void CVFuns::showFrameStaticPartMask()
+void Detector::showFrameStaticPartMask()
 {
 	imgToDisplay[3].setTo(Scalar(0));
 	frameWith255.copyTo(imgToDisplay[3], frameStaticPartMask);
 	imgToDisplayInfo[3] = "Mask";
 }
 
-void CVFuns::calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate)
+void Detector::calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate)
 {
 	Mat currentDeviationImgStaticPart, currentFrameStaticPart;
 	
@@ -382,7 +334,7 @@ void CVFuns::calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate)
 	imgToDisplayInfo[2] = "Average backgroung";
 }
 
-void CVFuns::brightestScaling(Mat frame, float scalingFactor)
+void Detector::brightestScaling(Mat frame, float scalingFactor)
 {
 	Mat scaledFrame;
 
@@ -392,46 +344,7 @@ void CVFuns::brightestScaling(Mat frame, float scalingFactor)
 	imgToDisplayInfo[1] = "Deviation image";
 }
 
-int CVFuns::getBackgroundBound(Mat frame)
-{
-	int histogram[256];
-
-	for (int i = 0; i < 256; i++)
-		histogram[i] = 0;
-
-	for (int i = 0; i < CAP_FRAME_HEIGHT; i++)
-	{
-		for (int j = 0; j < CAP_FRAME_WIDTH; j++)
-		{
-			histogram[frame.at<uchar>(i, j)]++;
-		}
-	}
-
-	int startInd = 1;
-	if (histogram[0] <= histogram[1])
-	{
-		for (startInd = 1; startInd < 256; startInd++)
-		{
-			if (histogram[startInd + 1] < histogram[startInd])
-			{
-				break;
-			}
-		}
-	}
-
-	int endInd = 1;
-	for (endInd = startInd; endInd < 256; endInd++)
-	{
-		if (histogram[endInd + 1] >= histogram[endInd])
-		{
-			break;
-		}
-	}
-
-	return endInd;
-}
-
-int CVFuns::getBackgroundBoundOpenCV(Mat frame)
+int Detector::getBackgroundBoundOpenCV(Mat frame)
 {
 	Mat histogram;
 
@@ -465,7 +378,7 @@ int CVFuns::getBackgroundBoundOpenCV(Mat frame)
 	return endInd;
 }
 
-void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
+void Detector::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 {
 	Mat backgroundBoundMask = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
 
@@ -476,7 +389,6 @@ void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 	
 	currentDeviationImg.convertTo(currentDeviationImg, CV_8U);
 	int backgroundBound = getBackgroundBoundOpenCV(currentDeviationImg);
-	//int backgroundBound = getBackgroundBound(currentDeviationImg);
 
 	frameWith0.copyTo(backgroundBoundMask, currentDeviationImg - backgroundBound);
 	frameWith255.copyTo(frameStaticPartMask, backgroundBoundMask);
@@ -499,7 +411,7 @@ void CVFuns::calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor)
 	imgToDisplayInfo[3] = "Moving target";
 }
 
-void CVFuns::findConnectedPoints(int x, int y, vector<Point2i> &connectedPoints)
+void Detector::findConnectedPoints(int x, int y, vector<Point2i> &connectedPoints)
 {
 	connectedPoints.push_back(Point2i(x, y));
 	targetsBinaryFrame.at<uchar>(y, x) = 0;
@@ -591,7 +503,7 @@ bool isSameSize(Object baseTarget, Object sameSizeTarget, float scalingFactor)
 	}
 }
 
-void CVFuns::makeSegmentation(float distanceBetweenTargets)
+void Detector::makeSegmentation(float distanceBetweenTargets)
 {
 	vector<Point2i> connectedPoints;
 	vector<vector<Point2i>> connectedPointsRegions;
@@ -686,7 +598,7 @@ void CVFuns::makeSegmentation(float distanceBetweenTargets)
 	*/
 }
 
-void CVFuns::selectTarget(Point2i clickedPoint)
+void Detector::selectTarget(Point2i clickedPoint)
 {
 	for (int i = 0; i < objects.size(); i++)
 	{
@@ -705,7 +617,7 @@ void CVFuns::selectTarget(Point2i clickedPoint)
 	}
 }
 
-void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
+void Detector::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
 {
 	if (selectedTarget.exist)
 	{
@@ -726,7 +638,7 @@ void CVFuns::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float s
 	}
 }
 
-void CVFuns::displaySelectedTarget()
+void Detector::displaySelectedTarget()
 {
 	if (selectedTarget.exist)
 	{
@@ -734,12 +646,12 @@ void CVFuns::displaySelectedTarget()
 	}
 }
 
-void CVFuns::makeIntegralImg(Mat currentFrame)
+void Detector::makeIntegralImg(Mat currentFrame)
 {
 	integral(currentFrame, integralImg);
 }
 
-int CVFuns::calcIntegralSumForRegion(Object region)
+int Detector::calcIntegralSumForRegion(Object region)
 {
 	return integralImg.at<int>(region.bottom + 1, region.right + 1) - 
 			integralImg.at<int>(region.top, region.right + 1) - 
@@ -747,7 +659,7 @@ int CVFuns::calcIntegralSumForRegion(Object region)
 			integralImg.at<int>(region.top, region.left);
 }
 
-Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object region)
+Object Detector::rescaleFeaturePosition(Object featurePosition, Object region)
 {
 	Object newFeaturePosition;
 	
@@ -762,7 +674,7 @@ Object CVFuns::rescaleFeaturePosition(Object featurePosition, Object region)
 	return newFeaturePosition;
 }
 
-Object CVFuns::makeBackgroundRegion()
+Object Detector::makeBackgroundRegion()
 {
 	int regionWidth = selectedTarget.right - selectedTarget.left;
 	int regionHeight = selectedTarget.bottom - selectedTarget.top;
@@ -790,7 +702,7 @@ int poissonRand()
 	return (int)poissonDistribution(engine);
 }
 
-void CVFuns::discardTreesRandomly()
+void Detector::discardTreesRandomly()
 {
 	const int randomGain = 20000;
 
@@ -807,7 +719,7 @@ void CVFuns::discardTreesRandomly()
 	}
 }
 
-void CVFuns::trainClassifier()
+void Detector::trainClassifier()
 {
 	discardTreesRandomly();
 
@@ -852,14 +764,13 @@ void CVFuns::trainClassifier()
 						forest.trees[i]->incorrectlyClassifiedOOB++;
 
 					forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
-					//cout << forest.trees[i]->OOBE << endl; ///
 				}
 			}
 		}
 	}
 }
 
-void CVFuns::trainTreeByRegion(int treeNum, Object region, int isTarget)
+void Detector::trainTreeByRegion(int treeNum, Object region, int isTarget)
 {
 	Features *features = new Features(forest.trees[treeNum]->featuresNum);
 	features->isTarget = isTarget;
@@ -872,7 +783,7 @@ void CVFuns::trainTreeByRegion(int treeNum, Object region, int isTarget)
 	forest.buildTree(treeNum, features);
 }
 
-bool CVFuns::classifyRegionByTree(int treeNum, Object region)
+bool Detector::classifyRegionByTree(int treeNum, Object region)
 {
 	Features *features = new Features(forest.trees[treeNum]->featuresNum);
 
@@ -884,7 +795,7 @@ bool CVFuns::classifyRegionByTree(int treeNum, Object region)
 	return forest.classifyFeaturesByTree(treeNum, features);
 }
 
-bool CVFuns::classifyRegion(Object region)
+bool Detector::classifyRegion(Object region)
 {
 	int voteYesNum = 0;
 	int voteNoNum = 0;
@@ -907,7 +818,7 @@ bool CVFuns::classifyRegion(Object region)
 	return voteYesNum > voteNoNum;
 }
 
-void CVFuns::classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
+void Detector::classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
 {
 	selectedTarget.exist = false;
 
@@ -940,7 +851,7 @@ void CVFuns::classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float sca
 	}
 }
 
-float CVFuns::calcForestOOBE()
+float Detector::calcForestOOBE()
 {
 	vector<float> treesOOBE;
 
@@ -953,7 +864,7 @@ float CVFuns::calcForestOOBE()
 	return findMedian(treesOOBE);
 }
 
-void CVFuns::showStats()
+void Detector::showStats()
 {
 	if (framesNum == 1)
 	{

@@ -5,11 +5,6 @@ Features::Features(int featuresNum)
 	values = new int[featuresNum];
 }
 
-Features::~Features()
-{
-	//delete[] values; // TODO!!!!
-}
-
 Child::Child()
 {
 	memset(statistics, 0, sizeof(statistics));

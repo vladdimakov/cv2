@@ -33,11 +33,11 @@ endif()
 
 set(SOURCES_LIST ${SOURCES_LIST}
      ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-     ${CMAKE_CURRENT_LIST_DIR}/CVFuns.cpp
+     ${CMAKE_CURRENT_LIST_DIR}/Detector.cpp
      ${CMAKE_CURRENT_LIST_DIR}/FPSCounter.cpp
      ${CMAKE_CURRENT_LIST_DIR}/HaarFeatures.cpp
      ${CMAKE_CURRENT_LIST_DIR}/Forest.cpp
-     ${CMAKE_CURRENT_LIST_DIR}/BinaryTree.cpp
+     ${CMAKE_CURRENT_LIST_DIR}/Tree.cpp
      ${CMAKE_CURRENT_LIST_DIR}/TreeElements.cpp
 )
 

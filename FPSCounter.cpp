@@ -16,7 +16,7 @@ size_t FPSCounter::value()
 
 	if (elapsedTime >= 1)
 	{
-		oldFPS = FPSCnt / elapsedTime;
+		oldFPS = size_t(FPSCnt / elapsedTime);
 		oldTime = nowTime;
 		FPSCnt = 0;
 	}

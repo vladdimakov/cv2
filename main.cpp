@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 	setlocale(LC_ALL, "Russian");
 	srand(time(NULL));
 
-	CVFuns cvFuns;
+	Detector detector;
 	Mat colorFrame, grayFrame8U, grayFrame32F;
 	Point2f currentOffset;
 
@@ -25,14 +25,14 @@ int main(int argc, char* argv[])
 	const float deviationFactor = 5.5f;
 	const float targetsFactor = 15.0f;
 	const float scalingFactor = 20.0f;
-	cvFuns.deviationImgFillValue = 256.0f / targetsFactor;
+	detector.deviationImgFillValue = 256.0f / targetsFactor;
 	const float distanceBetweenTargets = 50.0f;
 	
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
 	const float scalingFactorBetweenTargetsOnTwoFrames = 4.0f;
 	
-	cvFuns.preliminaryTrainingFramesNum = 300;
-	cvFuns.classifierNotFoundTargetMaxNum = 10;
+	detector.preliminaryTrainingFramesNum = 300;
+	detector.classifierNotFoundTargetMaxNum = 10;
 
 	string videoSource;
 	if (argc == 1 || argc == 2)
@@ -52,93 +52,84 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	if (!cvFuns.startCapture(videoSource))
+	if (!detector.startCapture(videoSource))
 		return -1;
 
 	int classificatorMode = 0;
 	
-	int frameNum = 0;
+	//int frameNum = 0;
 	while (true)
 	{
-		cvFuns.cap >> colorFrame;
+		detector.cap >> colorFrame;
 
-		cout << frameNum << endl;
+		//cout << frameNum << endl;
 
 		cvtColor(colorFrame, grayFrame8U, CV_RGB2GRAY);
 		grayFrame8U.convertTo(grayFrame32F, CV_32F);
 
 		if (grayFrame8U.empty())
 		{
-			cvFuns.startCapture(videoSource);
+			detector.startCapture(videoSource);
 			continue;
 		}
 
-		frameNum++;
+		//frameNum++;
 
-		currentOffset = cvFuns.calcFrameOffset(grayFrame8U);
-		cvFuns.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
-		cvFuns.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
-		cvFuns.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
-		cvFuns.brightestScaling(cvFuns.deviationImg, scalingFactor);
-		cvFuns.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
-		cvFuns.makeSegmentation(distanceBetweenTargets);
-		cvFuns.makeIntegralImg(grayFrame8U);
+		currentOffset = detector.calcFrameOffset(grayFrame8U);
+		detector.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
+		detector.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
+		detector.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
+		detector.brightestScaling(detector.deviationImg, scalingFactor);
+		detector.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
+		detector.makeSegmentation(distanceBetweenTargets);
+		detector.makeIntegralImg(grayFrame8U);
 
+		/*
 		if (frameNum == 1022)
 		{
-			imwrite("current_frame.jpg", cvFuns.imgToDisplay[0]);
-			imwrite("deviation_image.jpg", cvFuns.imgToDisplay[1]);
-			imwrite("average_backgroung.jpg", cvFuns.imgToDisplay[2]);
-			imwrite("moving_target.jpg", cvFuns.imgToDisplay[3]);
-			
-			Mat currentDeviationImage = abs(grayFrame32F - cvFuns.averageBackImg) * scalingFactor;
-			currentDeviationImage.convertTo(currentDeviationImage, CV_8U);
-			imwrite("current_deviation_image.jpg", currentDeviationImage);
-
-			currentDeviationImage = abs(grayFrame32F - cvFuns.averageBackImg);
-			currentDeviationImage.convertTo(currentDeviationImage, CV_8U);
-			imwrite("current_deviation_image.bmp", currentDeviationImage);
+			imwrite("current_frame.jpg", detector.imgToDisplay[0]);
 			break;
 		}
+		*/
 
-		if (classificatorMode == 0 && cvFuns.isTargetSelected)
+		if (classificatorMode == 0 && detector.isTargetSelected)
 		{
-			cvFuns.findSelectedTarget(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
-            cvFuns.displaySelectedTarget();
-			cvFuns.trainClassifier();
+			detector.findSelectedTarget(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
+            detector.displaySelectedTarget();
+			detector.trainClassifier();
 		}
 
-		if (classificatorMode == 1 && cvFuns.isTargetSelected)
+		if (classificatorMode == 1 && detector.isTargetSelected)
 		{
-			cvFuns.classifyAndTrain(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
-			cvFuns.displaySelectedTarget();
+			detector.classifyAndTrain(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
+			detector.displaySelectedTarget();
 		}
 		
-		cvFuns.displayWindow();
+		detector.displayWindow();
 
-		if (classificatorMode == 0 && !cvFuns.isTargetSelected)
+		if (classificatorMode == 0 && !detector.isTargetSelected)
 		{
 			setMouseCallback("Display window", mouseCallBackFunc, NULL);
 
 			if (isClicked)
 			{
-				cvFuns.selectTarget(clickedPoint);
+				detector.selectTarget(clickedPoint);
 				isClicked = false;
 			}
 		}
 
-		if (cvFuns.isTargetSelected)
+		if (detector.isTargetSelected)
 		{
-			cvFuns.framesNum++;
+			detector.framesNum++;
 			
-			if (cvFuns.framesNum == cvFuns.preliminaryTrainingFramesNum)
+			if (detector.framesNum == detector.preliminaryTrainingFramesNum)
 			{
 				cout << "\n|ѕредварительное обучение классификатора закончено|\n" << endl;
 				classificatorMode = 1;
 			}
 		}
 
-		cvFuns.showStats();
+		detector.showStats();
 
 		char key = (char)waitKey(1); // waitKey ждет событи€ нажати€ клавиши 1 мс
 		if (key == 27) // ≈сли нажат ESC - выходим
@@ -147,7 +138,7 @@ int main(int argc, char* argv[])
 		}
 		else if (key == ' ')
 		{
-			cvFuns.needToInit = true;
+			detector.needToInit = true;
 			continue;
 		}
 	}

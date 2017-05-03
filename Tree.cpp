@@ -1,6 +1,6 @@
 #include "lib.h"
 
-BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient)
+Tree::Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient)
 {
 	this->depthOfTree = depthOfTree;
 	this->featuresNum = featuresNum;
@@ -53,7 +53,7 @@ BinaryTree::BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFea
 	}
 }
 
-void BinaryTree::buildNode(Node* node, Features* features)
+void Tree::buildNode(Node* node, Features* features)
 {	
 	node->statistics[features->isTarget]++;
 
@@ -75,7 +75,7 @@ void BinaryTree::buildNode(Node* node, Features* features)
 	}
 }
 
-float BinaryTree::calcGiniCoefficient(Child child)
+float Tree::calcGiniCoefficient(Child child)
 {
 	if (child.statistics[0][0] == 0 && child.statistics[0][1] == 0 || // Нельзя, чтобы M1 = 0 и M2 = 0
 		child.statistics[1][0] == 0 && child.statistics[1][1] == 0)   // Нельзя, чтобы T1 = 0 и T2 = 0
@@ -93,7 +93,7 @@ float BinaryTree::calcGiniCoefficient(Child child)
 	return giniCoefficient;
 }
 
-void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
+void Tree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 {
 	if (parent != NULL)
 	{
@@ -141,7 +141,7 @@ void BinaryTree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 	}
 }
 
-void BinaryTree::divideNode(Node* node)
+void Tree::divideNode(Node* node)
 {
 	float maxGiniCoefficient = 0;
 	float currentGiniCoefficient;
@@ -180,7 +180,7 @@ void BinaryTree::divideNode(Node* node)
 	node->removeOldData();
 }
 
-void BinaryTree::buildTree(Node* node, Features* features)
+void Tree::buildTree(Node* node, Features* features)
 {
 	if (node->featureNumToDivide != -1)
 	{
@@ -201,7 +201,7 @@ void BinaryTree::buildTree(Node* node, Features* features)
 	}
 }
 
-bool BinaryTree::classifyFeatures(Node* node, Features* features)
+bool Tree::classifyFeatures(Node* node, Features* features)
 {
 	if (node->featureNumToDivide != -1)
 	{

@@ -24,7 +24,7 @@ public:
 	FPSCounter();
 	size_t value();
 private:
-	clock_t oldTime;
+	time_t oldTime;
 	size_t FPSCnt, oldFPS;
 };
 
@@ -39,7 +39,6 @@ class Features
 {
 public:
 	Features(int featuresNum);
-	~Features();
 	int *values, isTarget;
 };
 
@@ -64,10 +63,10 @@ public:
 	int *randomlySelectedFeatures, *previousSelectedFeatures;
 };
 
-class BinaryTree
+class Tree
 {
 public:
-	BinaryTree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient);
+	Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient);
 	void buildNode(Node* node, Features* features);
 	float calcGiniCoefficient(Child child);
 	void makeRandomlySelectedFeatures(Node* parent, Node* child);
@@ -94,20 +93,19 @@ public:
 	void buildTree(int treeNum, Features* features);
 	bool classifyFeaturesByTree(int treeNum, Features* features);
 
-	BinaryTree **trees;
+	Tree **trees;
 	int treesNum, currentTreesNum;
 };
 
-class CVFuns
+class Detector
 {
 public:
-	CVFuns();
+	Detector();
 	void displayWindow();
 	bool startCapture(string videoSource);
 	vector<Point2f> findCorners(Mat grayFrame, int maxCornersNum);
 	void calcOpticalFlow(Mat prevGrayFrame, Mat currentGrayFrame, vector<Point2f> prevPoints, vector<Point2f>& currentPoints, vector<uchar>& status);
 	void translateFrame(Mat inputFrame, Mat& outputFrame, Point2f offset);
-	Mat subPixTranslateFrame(Mat inputFrame, Point2f subPixOffset);
 	Mat subPixTranslateFrameOpenCV(Mat inputFrame, Point2f subPixOffset);
 	float findMedian(vector<float> value);
 	Point2f findOffsetMedian(vector<Point2f> prevPoints, vector<Point2f> currentPoints);
@@ -118,7 +116,6 @@ public:
 	void showFrameStaticPartMask();
 	void calcAverageBackAndDeviationImg(Mat currentFrame, float refreshRate);
 	void brightestScaling(Mat frame, float scalingFactor);
-	int getBackgroundBound(Mat frame);
 	int getBackgroundBoundOpenCV(Mat frame);
 	void calcTargetsBinaryFrame(Mat currentFrame, float targetsFactor);
 	void findConnectedPoints(int x, int y, vector<Point2i>& connectedPoints);
@@ -158,7 +155,6 @@ public:
 	int framesNum, preliminaryTrainingFramesNum, classifierNotFoundTargetNum, classifierNotFoundTargetMaxNum, classifierNotFoundTargetTotalNum;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
-	Point2f offset;
 	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame, integralImg;
 	bool needToInit;
 	float deviationImgFillValue;
@@ -169,7 +165,6 @@ public:
 
 	Forest forest;
 
-private:
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;
 	vector<Point2f> prevPoints, currentPoints;
 	FPSCounter FPScounter;

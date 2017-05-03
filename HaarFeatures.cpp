@@ -1,6 +1,6 @@
 #include "lib.h"
 
-bool CVFuns::calcHaarFeature0(Object region)
+bool Detector::calcHaarFeature0(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -13,7 +13,7 @@ bool CVFuns::calcHaarFeature0(Object region)
 	return calcIntegralSumForRegion(partA) > calcIntegralSumForRegion(partB);
 }
 
-bool CVFuns::calcHaarFeature1(Object region)
+bool Detector::calcHaarFeature1(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -26,7 +26,7 @@ bool CVFuns::calcHaarFeature1(Object region)
 	return calcIntegralSumForRegion(partA) < calcIntegralSumForRegion(partB);
 }
 
-bool CVFuns::calcHaarFeature2(Object region)
+bool Detector::calcHaarFeature2(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -39,7 +39,7 @@ bool CVFuns::calcHaarFeature2(Object region)
 	return calcIntegralSumForRegion(partA) > calcIntegralSumForRegion(partB);
 }
 
-bool CVFuns::calcHaarFeature3(Object region)
+bool Detector::calcHaarFeature3(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -52,7 +52,7 @@ bool CVFuns::calcHaarFeature3(Object region)
 	return calcIntegralSumForRegion(partA) < calcIntegralSumForRegion(partB);
 }
 
-bool CVFuns::calcHaarFeature4(Object region)
+bool Detector::calcHaarFeature4(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -82,7 +82,7 @@ bool CVFuns::calcHaarFeature4(Object region)
 	return A + B > C + D && A > B;
 }
 
-bool CVFuns::calcHaarFeature5(Object region)
+bool Detector::calcHaarFeature5(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -112,7 +112,7 @@ bool CVFuns::calcHaarFeature5(Object region)
 	return A + B > C + D && A < B;
 }
 
-bool CVFuns::calcHaarFeature6(Object region)
+bool Detector::calcHaarFeature6(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -142,7 +142,7 @@ bool CVFuns::calcHaarFeature6(Object region)
 	return C + D > A + B && C > D;
 }
 
-bool CVFuns::calcHaarFeature7(Object region)
+bool Detector::calcHaarFeature7(Object region)
 {
 	Object partA = region;
 	Object partB = region;
@@ -172,7 +172,7 @@ bool CVFuns::calcHaarFeature7(Object region)
 	return C + D > A + B && C < D;
 }
 
-int CVFuns::calcHaarFeatures(Object region, int featureType)
+int Detector::calcHaarFeatures(Object region, int featureType)
 {
 	switch (featureType)
 	{
