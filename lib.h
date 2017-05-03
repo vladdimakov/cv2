@@ -95,6 +95,9 @@ public:
 
 	Tree **trees;
 	int treesNum;
+
+	int correctlyClassifiedOOB, incorrectlyClassifiedOOB;
+	float OOBE;
 };
 
 class HaarFeatures
@@ -117,7 +120,6 @@ public:
 	int calcFeatures(Object region, Object featurePosition, int featureType);
 
 	Mat integralImg;
-	bool(*pf)(Object);
 };
 class Detector
 {
@@ -149,6 +151,8 @@ public:
 	Object makeBackgroundRegion();
 	void trainTreeByRegion(int treeNum, Object region, int isTarget);
     void trainClassifier();
+	void calcTreeOOBE(int treeNum, Object region, int isTarget);
+	void calcForestOOBE(vector<int> notUsedTrees, Object region, int isTarget);
 
 	void discardTreesRandomly();
 
@@ -156,7 +160,6 @@ public:
 	bool classifyRegion(Object region);
 	bool classifyRegionByTree(int treeNum, Object region);
 
-	float calcForestOOBE();
 	void showStats();
 
 	VideoCapture cap;

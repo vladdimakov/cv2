@@ -693,6 +693,8 @@ void Detector::trainClassifier()
 	const int backgroundRegionsNum = 5;
 	Object backgroundRegion;
 
+	vector<int> notUsedTrees;
+
 	int samplesNum;
 	for (int i = 0; i < forest.treesNum; i++)
 	{
@@ -702,37 +704,98 @@ void Detector::trainClassifier()
 			for (int k = 0; k < samplesNum; k++)
 				trainTreeByRegion(i, selectedTarget, 1);
 		}
-		else if (forest.trees[i]->nodesNum >= 3)
-		{
-			if (classifyRegionByTree(i, selectedTarget))
-				forest.trees[i]->correctlyClassifiedOOB++;
-			else
-				forest.trees[i]->incorrectlyClassifiedOOB++;
-
-			forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
-		}		
+		else
+		{	
+			notUsedTrees.push_back(i);
+			calcTreeOOBE(i, selectedTarget, 1);
+		}
 
 		for (int j = 0; j < backgroundRegionsNum; j++)
 		{
 			backgroundRegion = makeBackgroundRegion();
-			
+
 			samplesNum = poissonRand();
 			if (samplesNum > 0)
 			{
 				for (int k = 0; k < samplesNum; k++)
 					trainTreeByRegion(i, backgroundRegion, 0);
 			}
-			else if (forest.trees[i]->nodesNum >= 3)
+			else
 			{
-				if (!classifyRegionByTree(i, backgroundRegion))
-					forest.trees[i]->correctlyClassifiedOOB++;
-				else
-					forest.trees[i]->incorrectlyClassifiedOOB++;
-
-				forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
-			}			
+				//calcTreeOOBE(i, backgroundRegion, 0); // ???
+			}
 		}
 	}
+	
+	calcForestOOBE(notUsedTrees, selectedTarget, 1);
+}
+
+void Detector::calcTreeOOBE(int treeNum, Object region, int isTarget)
+{
+	if (forest.trees[treeNum]->nodesNum >= 3)
+	{
+		if (classifyRegionByTree(treeNum, region))
+		{		
+			if (isTarget == 1)
+				forest.trees[treeNum]->correctlyClassifiedOOB++;
+			else
+				forest.trees[treeNum]->incorrectlyClassifiedOOB++;
+		}
+		else
+		{
+			if (isTarget == 0)
+				forest.trees[treeNum]->correctlyClassifiedOOB++;
+			else
+				forest.trees[treeNum]->incorrectlyClassifiedOOB++;
+		}
+
+		forest.trees[treeNum]->OOBE = (float)forest.trees[treeNum]->incorrectlyClassifiedOOB / 
+			(forest.trees[treeNum]->correctlyClassifiedOOB + forest.trees[treeNum]->incorrectlyClassifiedOOB);
+	}
+}
+
+bool isMember(vector<int> valuesVector, int value)
+{
+	for (int i = 0; i < valuesVector.size(); i++)
+	{
+		if (valuesVector[i] == value)
+			return true;
+	}
+	return false;
+}
+
+void Detector::calcForestOOBE(vector<int> notUsedTrees, Object region, int isTarget)
+{
+	int voteYesNum = 0;
+	int voteNoNum = 0;
+
+	for (int i = 0; i < forest.treesNum; i++)
+	{
+		if (isMember(notUsedTrees, i) && forest.trees[i]->nodesNum >= 3)
+		{
+			if (classifyRegionByTree(i, region))
+				voteYesNum++;
+			else
+				voteNoNum++;
+		}
+	}
+
+	if (voteYesNum > voteNoNum)
+	{
+		if (isTarget == 1)
+			forest.correctlyClassifiedOOB++;
+		else
+			forest.incorrectlyClassifiedOOB++;
+	}
+	else
+	{
+		if (isTarget == 0)
+			forest.correctlyClassifiedOOB++;
+		else
+			forest.incorrectlyClassifiedOOB++;
+	}
+
+	forest.OOBE = (float)forest.incorrectlyClassifiedOOB / (forest.correctlyClassifiedOOB + forest.incorrectlyClassifiedOOB);
 }
 
 void Detector::trainTreeByRegion(int treeNum, Object region, int isTarget)
@@ -768,13 +831,9 @@ bool Detector::classifyRegion(Object region)
 	for (int i = 0; i < forest.treesNum; i++)
 	{
 		if (classifyRegionByTree(i, region))
-		{
 			voteYesNum++;
-		}
 		else
-		{
-				voteNoNum++;
-		}
+			voteNoNum++;
 	}
 
 	return voteYesNum > voteNoNum;
@@ -813,18 +872,6 @@ void Detector::classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float s
 	}
 }
 
-float Detector::calcForestOOBE()
-{
-	vector<float> treesOOBE;
-
-	for (int i = 0; i < forest.treesNum; i++)
-	{
-		treesOOBE.push_back(forest.trees[i]->OOBE);
-	}
-
-	return findMedian(treesOOBE);
-}
-
 void Detector::showStats()
 {
 	if (framesNum == 1)
@@ -833,7 +880,7 @@ void Detector::showStats()
 	}
 	else if (framesNum % 25 == 0 && framesNum != 0)
 	{
-		cout << framesNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << calcForestOOBE();
+		cout << framesNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << forest.OOBE;
 		if (framesNum > preliminaryTrainingFramesNum)
 		{
 			cout << " | Ошибка классификатора: " << (float)classifierNotFoundTargetTotalNum / 25 << endl;

@@ -9,6 +9,10 @@ Forest::Forest()
 		trees[i] = new Tree(100, 100, 10, 25, 0.1);
 	//(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient)
 	//BinaryTree(100, 100, 10, 50, 0.1)
+
+	correctlyClassifiedOOB = 0;
+	incorrectlyClassifiedOOB = 0;
+	OOBE = 0.0f;
 }
 
 void Forest::buildTree(int treeNum, Features* features)
