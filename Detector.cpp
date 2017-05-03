@@ -679,13 +679,9 @@ void Detector::discardTreesRandomly()
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (!forest.trees[i]->isDiscarded)
+		if (rand() % (int)((1.01 - forest.trees[i]->OOBE) * randomGain) == 0) // Придумать рандом получше
 		{
-			if (rand() % (int)((1.01 - forest.trees[i]->OOBE) * randomGain) == 0)
-			{
-				forest.trees[i]->isDiscarded = true;
-				forest.currentTreesNum--;
-			}
+			forest.discardTree(i);
 		}
 	}
 }
@@ -700,43 +696,41 @@ void Detector::trainClassifier()
 	int samplesNum;
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (!forest.trees[i]->isDiscarded && selectedTarget.exist)
+		samplesNum = poissonRand();
+		if (samplesNum > 0)
 		{
+			for (int k = 0; k < samplesNum; k++)
+				trainTreeByRegion(i, selectedTarget, 1);
+		}
+		else if (forest.trees[i]->nodesNum >= 3)
+		{
+			if (classifyRegionByTree(i, selectedTarget))
+				forest.trees[i]->correctlyClassifiedOOB++;
+			else
+				forest.trees[i]->incorrectlyClassifiedOOB++;
+
+			forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
+		}		
+
+		for (int j = 0; j < backgroundRegionsNum; j++)
+		{
+			backgroundRegion = makeBackgroundRegion();
+			
 			samplesNum = poissonRand();
 			if (samplesNum > 0)
 			{
-				for (int j = 0; j < samplesNum; j++)
-				{
-					for (int k = 0; k < backgroundRegionsNum; k++)
-					{
-						backgroundRegion = makeBackgroundRegion();
-						trainTreeByRegion(i, backgroundRegion, 0);
-					}
-
-					trainTreeByRegion(i, selectedTarget, 1);
-				}
+				for (int k = 0; k < samplesNum; k++)
+					trainTreeByRegion(i, backgroundRegion, 0);
 			}
-			else
+			else if (forest.trees[i]->nodesNum >= 3)
 			{
-				if (forest.trees[i]->nodesNum >= 3)
-				{
-					for (int k = 0; k < backgroundRegionsNum; k++)
-					{
-						backgroundRegion = makeBackgroundRegion();
-						if (!classifyRegionByTree(i, backgroundRegion))
-							forest.trees[i]->correctlyClassifiedOOB++;
-						else
-							forest.trees[i]->incorrectlyClassifiedOOB++;
-					}
+				if (!classifyRegionByTree(i, backgroundRegion))
+					forest.trees[i]->correctlyClassifiedOOB++;
+				else
+					forest.trees[i]->incorrectlyClassifiedOOB++;
 
-					if (classifyRegionByTree(i, selectedTarget))
-						forest.trees[i]->correctlyClassifiedOOB++;
-					else
-						forest.trees[i]->incorrectlyClassifiedOOB++;
-
-					forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
-				}
-			}
+				forest.trees[i]->OOBE = (float)forest.trees[i]->incorrectlyClassifiedOOB / forest.trees[i]->correctlyClassifiedOOB;
+			}			
 		}
 	}
 }
@@ -773,16 +767,13 @@ bool Detector::classifyRegion(Object region)
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (!forest.trees[i]->isDiscarded)
+		if (classifyRegionByTree(i, region))
 		{
-			if (classifyRegionByTree(i, region))
-			{
-				voteYesNum++;
-			}
-			else
-			{
+			voteYesNum++;
+		}
+		else
+		{
 				voteNoNum++;
-			}
 		}
 	}
 
@@ -828,8 +819,7 @@ float Detector::calcForestOOBE()
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (!forest.trees[i]->isDiscarded)
-			treesOOBE.push_back(forest.trees[i]->OOBE);
+		treesOOBE.push_back(forest.trees[i]->OOBE);
 	}
 
 	return findMedian(treesOOBE);
@@ -839,11 +829,11 @@ void Detector::showStats()
 {
 	if (framesNum == 1)
 	{
-		cout << framesNum - 1 << " | " << "Число деревьев: " << forest.currentTreesNum << endl;
+		cout << framesNum - 1 << " | " << "Число деревьев: " << forest.treesNum << endl;
 	}
 	else if (framesNum % 25 == 0 && framesNum != 0)
 	{
-		cout << framesNum << " | " << "Число деревьев: " << forest.currentTreesNum << " | OOBE: " << calcForestOOBE();
+		cout << framesNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << calcForestOOBE();
 		if (framesNum > preliminaryTrainingFramesNum)
 		{
 			cout << " | Ошибка классификатора: " << (float)classifierNotFoundTargetTotalNum / 25 << endl;

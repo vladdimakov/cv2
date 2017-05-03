@@ -83,7 +83,6 @@ public:
 	
 	int correctlyClassifiedOOB, incorrectlyClassifiedOOB;
 	float OOBE;
-	bool isDiscarded;
 };
 
 class Forest
@@ -95,7 +94,7 @@ public:
 	void discardTree(int treeNum);
 
 	Tree **trees;
-	int treesNum, currentTreesNum;
+	int treesNum;
 };
 
 class HaarFeatures

@@ -11,7 +11,6 @@ Tree::Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, in
 	correctlyClassifiedOOB = 0;
 	incorrectlyClassifiedOOB = 0;
 	OOBE = 0.0f;
-	isDiscarded = false;
 
 	nodesNum = 1;
 

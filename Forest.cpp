@@ -3,7 +3,6 @@
 Forest::Forest()
 {
 	treesNum = 50;
-	currentTreesNum = treesNum;
 
 	trees = new Tree*[treesNum];
 	for (int i = 0; i < treesNum; i++)
