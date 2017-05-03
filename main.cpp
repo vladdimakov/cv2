@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 		detector.brightestScaling(detector.deviationImg, scalingFactor);
 		detector.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 		detector.makeSegmentation(distanceBetweenTargets);
-		detector.makeIntegralImg(grayFrame8U);
+		detector.haarFeatures.makeIntegralImg(grayFrame8U);
 
 		/*
 		if (frameNum == 1022)

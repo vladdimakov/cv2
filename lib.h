@@ -92,11 +92,34 @@ public:
 	Forest();
 	void buildTree(int treeNum, Features* features);
 	bool classifyFeaturesByTree(int treeNum, Features* features);
+	void discardTree(int treeNum);
 
 	Tree **trees;
 	int treesNum, currentTreesNum;
 };
 
+class HaarFeatures
+{
+public:
+	HaarFeatures();
+	void makeIntegralImg(Mat currentFrame);
+	int calcIntegralSumForRegion(Object region);
+
+	bool calcFeature0(Object region);
+	bool calcFeature1(Object region);
+	bool calcFeature2(Object region);
+	bool calcFeature3(Object region);
+	bool calcFeature4(Object region);
+	bool calcFeature5(Object region);
+	bool calcFeature6(Object region);
+	bool calcFeature7(Object region);
+
+	Object rescaleFeaturePosition(Object featurePosition, Object region);
+	int calcFeatures(Object region, Object featurePosition, int featureType);
+
+	Mat integralImg;
+	bool(*pf)(Object);
+};
 class Detector
 {
 public:
@@ -123,21 +146,7 @@ public:
 	void selectTarget(Point2i clickedPoint);
 	void findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames);
 	void displaySelectedTarget();
-
-	void makeIntegralImg(Mat currentFrame);
-	int calcIntegralSumForRegion(Object region);
-
-	bool calcHaarFeature0(Object region);
-	bool calcHaarFeature1(Object region);
-	bool calcHaarFeature2(Object region);
-	bool calcHaarFeature3(Object region);
-	bool calcHaarFeature4(Object region);
-	bool calcHaarFeature5(Object region);
-	bool calcHaarFeature6(Object region);
-	bool calcHaarFeature7(Object region);
-	int calcHaarFeatures(Object region, int featureType);
 	
-	Object rescaleFeaturePosition(Object featurePosition, Object region);
 	Object makeBackgroundRegion();
 	void trainTreeByRegion(int treeNum, Object region, int isTarget);
     void trainClassifier();
@@ -155,7 +164,7 @@ public:
 	int framesNum, preliminaryTrainingFramesNum, classifierNotFoundTargetNum, classifierNotFoundTargetMaxNum, classifierNotFoundTargetTotalNum;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
-	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame, integralImg;
+	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame;
 	bool needToInit;
 	float deviationImgFillValue;
 	
@@ -163,6 +172,7 @@ public:
 	bool isTargetSelected;
 	Object selectedTarget;
 
+	HaarFeatures haarFeatures;
 	Forest forest;
 
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;

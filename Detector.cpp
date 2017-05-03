@@ -14,7 +14,6 @@ Detector::Detector()
 
 	frameWith0 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(0));
 	frameWith255 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
-	integralImg = Mat(CAP_FRAME_HEIGHT + 1, CAP_FRAME_WIDTH + 1, CV_32S);
 }
 
 void Detector::displayWindow()
@@ -646,34 +645,6 @@ void Detector::displaySelectedTarget()
 	}
 }
 
-void Detector::makeIntegralImg(Mat currentFrame)
-{
-	integral(currentFrame, integralImg);
-}
-
-int Detector::calcIntegralSumForRegion(Object region)
-{
-	return integralImg.at<int>(region.bottom + 1, region.right + 1) - 
-			integralImg.at<int>(region.top, region.right + 1) - 
-			integralImg.at<int>(region.bottom + 1, region.left) + 
-			integralImg.at<int>(region.top, region.left);
-}
-
-Object Detector::rescaleFeaturePosition(Object featurePosition, Object region)
-{
-	Object newFeaturePosition;
-	
-	int regionWidth = region.right - region.left;
-	int regionHeight = region.bottom - region.top;
-
-	newFeaturePosition.left = region.left + int(featurePosition.left / 100.0f * regionWidth);
-	newFeaturePosition.right = region.left + int(featurePosition.right / 100.0f * regionWidth);
-	newFeaturePosition.top = region.top + int(featurePosition.top / 100.0f * regionHeight);
-	newFeaturePosition.bottom = region.top + int(featurePosition.bottom / 100.0f * regionHeight);
-
-	return newFeaturePosition;
-}
-
 Object Detector::makeBackgroundRegion()
 {
 	int regionWidth = selectedTarget.right - selectedTarget.left;
@@ -777,7 +748,7 @@ void Detector::trainTreeByRegion(int treeNum, Object region, int isTarget)
 
 	for (int i = 0; i < forest.trees[treeNum]->featuresNum; i++)
 	{
-		features->values[i] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[treeNum]->featuresPositions[i], region), forest.trees[treeNum]->featuresTypes[i]);
+		features->values[i] = haarFeatures.calcFeatures(region, forest.trees[treeNum]->featuresPositions[i], forest.trees[treeNum]->featuresTypes[i]);
 	}
 
 	forest.buildTree(treeNum, features);
@@ -789,7 +760,7 @@ bool Detector::classifyRegionByTree(int treeNum, Object region)
 
 	for (int i = 0; i < forest.trees[treeNum]->featuresNum; i++)
 	{
-		features->values[i] = calcHaarFeatures(rescaleFeaturePosition(forest.trees[treeNum]->featuresPositions[i], region), forest.trees[treeNum]->featuresTypes[i]);
+		features->values[i] = haarFeatures.calcFeatures(region, forest.trees[treeNum]->featuresPositions[i], forest.trees[treeNum]->featuresTypes[i]);
 	}
 
 	return forest.classifyFeaturesByTree(treeNum, features);
