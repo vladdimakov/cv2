@@ -145,7 +145,7 @@ public:
 	void findConnectedPoints(int x, int y, vector<Point2i>& connectedPoints);
 	void makeSegmentation(float distanceBetweenTargets);
 	void selectTarget(Point2i clickedPoint);
-	void findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames);
+	void trekSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames);
 	void displaySelectedTarget();
 	
 	Object makeBackgroundRegion();
@@ -156,14 +156,14 @@ public:
 
 	void discardTreesRandomly();
 
-	void classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames);
-	bool classifyRegion(Object region);
+	void detectSelectedTarget();
+	int classifyRegion(Object region);
 	bool classifyRegionByTree(int treeNum, Object region);
 
 	void showStats();
 
+	int framesNum;
 	VideoCapture cap;
-	int framesNum, preliminaryTrainingFramesNum, classifierNotFoundTargetNum, classifierNotFoundTargetMaxNum, classifierNotFoundTargetTotalNum;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
 	Mat frameStaticPartMask, averageBackImg, deviationImg, targetsBinaryFrame;

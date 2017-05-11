@@ -2,12 +2,10 @@
 
 Detector::Detector()
 {
-	framesNum = 0;
-	classifierNotFoundTargetNum = 0;
-	classifierNotFoundTargetTotalNum = 0;
-
 	needToInit = true;
 	isTargetSelected = false;
+
+	framesNum = 0;
 
 	for (int i = 0; i < 4; i++)
 		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
@@ -612,11 +610,11 @@ void Detector::selectTarget(Point2i clickedPoint)
 
 	if (isTargetSelected)
 	{
-		cout << "|Цель выбрана, предварительное обучение классификатора началось|\n" << endl;
+		cout << "|Цель выбрана|\n" << endl;
 	}
 }
 
-void Detector::findSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
+void Detector::trekSelectedTarget(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
 {
 	if (selectedTarget.exist)
 	{
@@ -823,7 +821,7 @@ bool Detector::classifyRegionByTree(int treeNum, Object region)
 	return forest.classifyFeaturesByTree(treeNum, features);
 }
 
-bool Detector::classifyRegion(Object region)
+int Detector::classifyRegion(Object region)
 {
 	int voteYesNum = 0;
 	int voteNoNum = 0;
@@ -836,39 +834,29 @@ bool Detector::classifyRegion(Object region)
 			voteNoNum++;
 	}
 
-	return voteYesNum > voteNoNum;
+	return voteYesNum - voteNoNum;
 }
 
-void Detector::classifyAndTrain(float distanceBetweenTargetsOnTwoFrames, float scalingFactorBetweenTargetsOnTwoFrames)
+void Detector::detectSelectedTarget()
 {
-	selectedTarget.exist = false;
+	int probability;
+	int maxProbability = 0;
+	int objectWithMaxProbability = -1;
 
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (classifyRegion(objects[i]))
+		probability = classifyRegion(objects[i]);
+		if (probability >= maxProbability)
 		{
-			selectedTarget = objects[i];
-			selectedTarget.exist = true;
-
-			classifierNotFoundTargetNum = 0;
-
-			trainClassifier();
-			return;
+			maxProbability = probability;
+			objectWithMaxProbability = i;
 		}
 	}
-	
-	if (!selectedTarget.exist && classifierNotFoundTargetNum < classifierNotFoundTargetMaxNum)
-	{
-		selectedTarget.exist = true;
-		findSelectedTarget(distanceBetweenTargetsOnTwoFrames / 2, scalingFactorBetweenTargetsOnTwoFrames / 2);
-		
-		if (selectedTarget.exist)
-		{
-			classifierNotFoundTargetNum++;
-			classifierNotFoundTargetTotalNum++;
 
-			trainClassifier();
-		}
+	if (objectWithMaxProbability != -1)
+	{
+		selectedTarget = objects[objectWithMaxProbability];
+		selectedTarget.exist = true;
 	}
 }
 
@@ -880,15 +868,6 @@ void Detector::showStats()
 	}
 	else if (framesNum % 25 == 0 && framesNum != 0)
 	{
-		cout << framesNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << forest.OOBE;
-		if (framesNum > preliminaryTrainingFramesNum)
-		{
-			cout << " | Ошибка классификатора: " << (float)classifierNotFoundTargetTotalNum / 25 << endl;
-			classifierNotFoundTargetTotalNum = 0;
-		}
-		else
-		{
-			cout << endl;
-		}
+		cout << framesNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << forest.OOBE << endl;
 	}
 }

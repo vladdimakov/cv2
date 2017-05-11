@@ -30,9 +30,6 @@ int main(int argc, char* argv[])
 	
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
 	const float scalingFactorBetweenTargetsOnTwoFrames = 4.0f;
-	
-	detector.preliminaryTrainingFramesNum = 300;
-	detector.classifierNotFoundTargetMaxNum = 10;
 
 	string videoSource;
 	if (argc == 1 || argc == 2)
@@ -55,8 +52,6 @@ int main(int argc, char* argv[])
 	if (!detector.startCapture(videoSource))
 		return -1;
 
-	int classificatorMode = 0;
-	
 	//int frameNum = 0;
 	while (true)
 	{
@@ -92,22 +87,22 @@ int main(int argc, char* argv[])
 		}
 		*/
 
-		if (classificatorMode == 0 && detector.isTargetSelected)
+		if (detector.isTargetSelected)
 		{
-			detector.findSelectedTarget(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
+			detector.trekSelectedTarget(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
+
+			if (detector.selectedTarget.exist)
+				detector.trainClassifier();
+			else
+				detector.detectSelectedTarget();
+			
             detector.displaySelectedTarget();
-			detector.trainClassifier();
+			detector.framesNum++;
 		}
 
-		if (classificatorMode == 1 && detector.isTargetSelected)
-		{
-			detector.classifyAndTrain(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
-			detector.displaySelectedTarget();
-		}
-		
 		detector.displayWindow();
 
-		if (classificatorMode == 0 && !detector.isTargetSelected)
+		if (!detector.isTargetSelected)
 		{
 			setMouseCallback("Display window", mouseCallBackFunc, NULL);
 
@@ -115,17 +110,6 @@ int main(int argc, char* argv[])
 			{
 				detector.selectTarget(clickedPoint);
 				isClicked = false;
-			}
-		}
-
-		if (detector.isTargetSelected)
-		{
-			detector.framesNum++;
-			
-			if (detector.framesNum == detector.preliminaryTrainingFramesNum)
-			{
-				cout << "\n|Предварительное обучение классификатора закончено|\n" << endl;
-				classificatorMode = 1;
 			}
 		}
 
