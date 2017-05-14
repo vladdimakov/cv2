@@ -12,8 +12,8 @@ const int CAP_FRAME_WIDTH = 640;
 const int CAP_FRAME_HEIGHT = 480;
 const int CAP_FPS = 20;
 
-const int MAX_CORNERS_NUM = 64;
-const int MIN_CORNERS_NUM = 16;
+const int MAX_CORNERS_NUM = 100;
+const int MIN_CORNERS_NUM = 10;
 
 const int WINDOW_WIDTH = 853;
 const int WINDOW_HEIGHT = 660;

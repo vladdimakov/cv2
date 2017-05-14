@@ -52,12 +52,12 @@ int main(int argc, char* argv[])
 	if (!detector.startCapture(videoSource))
 		return -1;
 
-	//int frameNum = 0;
+	int frameNum = 0;
 	while (true)
 	{
 		detector.cap >> colorFrame;
 
-		//cout << frameNum << endl;
+		cout << frameNum << endl;
 
 		cvtColor(colorFrame, grayFrame8U, CV_RGB2GRAY);
 		grayFrame8U.convertTo(grayFrame32F, CV_32F);
@@ -68,24 +68,16 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		//frameNum++;
+		frameNum++;
 
 		currentOffset = detector.calcFrameOffset(grayFrame8U);
-		detector.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
+		//detector.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
 		detector.calcFrameStaticPartMask(grayFrame32F, deviationFactor);
 		detector.calcAverageBackAndDeviationImg(grayFrame32F, refreshRate);
 		detector.brightestScaling(detector.deviationImg, scalingFactor);
 		detector.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 		detector.makeSegmentation(distanceBetweenTargets);
 		detector.haarFeatures.makeIntegralImg(grayFrame8U);
-
-		/*
-		if (frameNum == 1022)
-		{
-			imwrite("current_frame.jpg", detector.imgToDisplay[0]);
-			break;
-		}
-		*/
 
 		if (detector.isTargetSelected)
 		{
@@ -100,7 +92,19 @@ int main(int argc, char* argv[])
 			detector.framesNum++;
 		}
 
+		for (int i = 0; i < detector.prevPoints.size(); i++)
+			circle(detector.imgToDisplay[0], detector.prevPoints[i], 2, Scalar(255),5);
+
 		detector.displayWindow();
+
+		if (frameNum == 2)
+		{
+			imwrite("current_frame.jpg", detector.imgToDisplay[0]);
+			//imwrite("deviation_image.jpg", detector.imgToDisplay[1]);
+			//imwrite("average_backgroung.jpg", detector.imgToDisplay[2]);
+			//imwrite("moving_target.jpg", detector.imgToDisplay[3]);
+			break;
+		}
 
 		if (!detector.isTargetSelected)
 		{
