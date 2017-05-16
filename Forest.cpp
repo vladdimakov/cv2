@@ -2,11 +2,11 @@
 
 Forest::Forest()
 {
-	treesNum = 50;
+	treesNum = 101;
 
 	trees = new Tree*[treesNum];
 	for (int i = 0; i < treesNum; i++)
-		trees[i] = new Tree(100, 100, 10, 25, 0.1);
+		trees[i] = new Tree(100, 100, 10, 10, 5);
 	//(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient)
 	//BinaryTree(100, 100, 10, 50, 0.1)
 

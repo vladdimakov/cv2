@@ -53,14 +53,15 @@ public:
 class Node
 {
 public:
-	Node(int level, int childsNum, int randomlySelectedFeaturesNum);
+	Node(int level, int childsNum);
 	void removeOldData();
 
 	int statistics[2];
 	int num, level, featureNumToDivide;
 	Node *left, *right;
 	Child *childs;
-	int *randomlySelectedFeatures, *previousSelectedFeatures;
+	int /**randomlySelectedFeatures,*/ *previousSelectedFeatures;
+	vector<int> randomlySelectedFeatures;
 };
 
 class Tree

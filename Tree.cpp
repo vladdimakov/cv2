@@ -14,7 +14,7 @@ Tree::Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, in
 
 	nodesNum = 1;
 
-	root = new Node(0, featuresNum, randomlySelectedFeaturesNum);	
+	root = new Node(0, featuresNum);	
 	root->num = nodesNum;
 
 	makeRandomlySelectedFeatures(NULL, root);
@@ -26,9 +26,9 @@ Tree::Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, in
 	int windowHeight = 100;
 	
 	int maxFeatureWidth = 100;
-	int minFeatureWidth = 10;
+	int minFeatureWidth = 20;
 	int maxFeatureHeight = 100;
-	int minFeatureHeight = 10;
+	int minFeatureHeight = 20;
 
 	for (int i = 0; i < featuresNum; i++)
 	{
@@ -48,7 +48,7 @@ Tree::Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, in
 
 	for (int i = 0; i < featuresNum; i++)
 	{
-		featuresTypes[i] = rand() % 8;
+		featuresTypes[i] = rand() % 4;
 	}
 }
 
@@ -94,6 +94,8 @@ float Tree::calcGiniCoefficient(Child child)
 
 void Tree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 {
+	int currentRandomlySelectedFeaturesNum = randomlySelectedFeaturesNum;
+
 	if (parent != NULL)
 	{
 		//for (int i = 0; i < child->level - 1; i++)
@@ -102,11 +104,14 @@ void Tree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 		memcpy(child->previousSelectedFeatures, parent->previousSelectedFeatures, sizeof(int) * (child->level - 1));
 
 		child->previousSelectedFeatures[child->level - 1] = parent->featureNumToDivide;
+		
+		if (depthOfTree - child->level < randomlySelectedFeaturesNum)
+			currentRandomlySelectedFeaturesNum = depthOfTree - child->level;
 	}
 
 	bool isSelected;
 	int currentSelectedFeature;
-	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
+	for (int i = 0; i < currentRandomlySelectedFeaturesNum; i++)
 	{
 		isSelected = false;
 		while (!isSelected)
@@ -136,7 +141,7 @@ void Tree::makeRandomlySelectedFeatures(Node* parent, Node* child)
 			}
 		}
 
-		child->randomlySelectedFeatures[i] = currentSelectedFeature;
+		child->randomlySelectedFeatures.push_back(currentSelectedFeature);
 	}
 }
 
@@ -145,7 +150,7 @@ void Tree::divideNode(Node* node)
 	float maxGiniCoefficient = 0;
 	float currentGiniCoefficient;
 	int maxGiniCoefficientNum = -1;	
-	for (int i = 0; i < randomlySelectedFeaturesNum; i++)
+	for (int i = 0; i < node->randomlySelectedFeatures.size(); i++)
 	{
 		currentGiniCoefficient = calcGiniCoefficient(node->childs[node->randomlySelectedFeatures[i]]);
 		if (currentGiniCoefficient >= maxGiniCoefficient)
@@ -161,7 +166,7 @@ void Tree::divideNode(Node* node)
 	node->featureNumToDivide = maxGiniCoefficientNum;
 	
 	nodesNum++;
-	node->left = new Node(node->level + 1, featuresNum, randomlySelectedFeaturesNum);
+	node->left = new Node(node->level + 1, featuresNum);
 	node->left->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[0][0];
 	node->left->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[0][1];
 	node->left->num = nodesNum;
@@ -169,7 +174,7 @@ void Tree::divideNode(Node* node)
 	makeRandomlySelectedFeatures(node, node->left);
 	
 	nodesNum++;
-	node->right = new Node(node->level + 1, featuresNum, randomlySelectedFeaturesNum);
+	node->right = new Node(node->level + 1, featuresNum);
 	node->right->statistics[0] = node->childs[maxGiniCoefficientNum].statistics[1][0];
 	node->right->statistics[1] = node->childs[maxGiniCoefficientNum].statistics[1][1];
 	node->right->num = nodesNum;

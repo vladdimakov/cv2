@@ -697,10 +697,9 @@ void Detector::discardTreesRandomly()
 
 void Detector::trainClassifier()
 {
-	//if (framesNum > 20)
-	//	discardTreesRandomly();
+	discardTreesRandomly();
 
-	const int backgroundRegionsNum = 5;
+	const int backgroundRegionsNum = 4;
 	Object backgroundRegion;
 
 	vector<int> notUsedTrees;
