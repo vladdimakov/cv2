@@ -160,9 +160,12 @@ public:
 	int classifyRegion(Object region);
 	bool classifyRegionByTree(int treeNum, Object region);
 
-	void showStats();
+	void writeTargetPositions();
+	void readTargetPositions();
+	int calcMethodError();
+	void makeStats();
+	int methodErrorSum;
 
-	int framesNum;
 	VideoCapture cap;
 	vector<Mat> imgToDisplay;
 	string imgToDisplayInfo[4];
@@ -180,4 +183,10 @@ public:
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;
 	vector<Point2f> prevPoints, currentPoints;
 	FPSCounter FPScounter;
+
+	int frameNum;
+	ifstream targetPositionsFile;
+	//ofstream targetPositionsFile;
+	vector<Object> targetPositions;
+	ofstream OOBEFile, methodErrorFile;
 };

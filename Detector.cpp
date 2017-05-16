@@ -4,14 +4,22 @@ Detector::Detector()
 {
 	needToInit = true;
 	isTargetSelected = false;
+	selectedTarget.exist = false;
 
-	framesNum = 0;
+	frameNum = 0;
+
+	methodErrorSum = 0;
 
 	for (int i = 0; i < 4; i++)
 		imgToDisplay.push_back(Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U));
 
 	frameWith0 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(0));
 	frameWith255 = Mat(CAP_FRAME_HEIGHT, CAP_FRAME_WIDTH, CV_8U, Scalar(255));
+
+	OOBEFile.open("stats/OOBE.txt");
+	methodErrorFile.open("stats/methodError.txt");
+
+	readTargetPositions();
 }
 
 void Detector::displayWindow()
@@ -25,7 +33,7 @@ void Detector::displayWindow()
 	if (FPSStr.length() < 2)
 		FPSStr = "0" + FPSStr;
 
-	string infoStr = "FPS: " + FPSStr + " | 1." + imgToDisplayInfo[0] + " | 2." + imgToDisplayInfo[1] + " | 3." + imgToDisplayInfo[2] + " | 4." + imgToDisplayInfo[3];
+	string infoStr = "FPS: " + FPSStr + " | 1." + imgToDisplayInfo[0] + " | 2." + imgToDisplayInfo[1] + " | 3." + imgToDisplayInfo[2] + " | 4." + imgToDisplayInfo[3] + " | " + to_string(frameNum);
 	putText(infoImg, infoStr, Point(10, 20), 1, 1.5, Scalar(0), 2);
 
 	namedWindow("Display window", CV_WINDOW_NORMAL);
@@ -610,7 +618,7 @@ void Detector::selectTarget(Point2i clickedPoint)
 
 	if (isTargetSelected)
 	{
-		cout << "|Цель выбрана|\n" << endl;
+		cout << "\n|Цель выбрана|\n" << endl;
 	}
 }
 
@@ -671,22 +679,26 @@ int poissonRand()
 	return (int)poissonDistribution(engine);
 }
 
+float uniformRand()
+{
+	return (float)rand() / RAND_MAX;
+}
+
 void Detector::discardTreesRandomly()
 {
-	const int randomGain = 20000;
+	const int discardSpeed = 5000;
 
 	for (int i = 0; i < forest.treesNum; i++)
 	{
-		if (rand() % (int)((1.01 - forest.trees[i]->OOBE) * randomGain) == 0) // Придумать рандом получше
-		{
+		if (uniformRand() * discardSpeed < forest.trees[i]->OOBE)
 			forest.discardTree(i);
-		}
 	}
 }
 
 void Detector::trainClassifier()
 {
-	discardTreesRandomly();
+	//if (framesNum > 20)
+	//	discardTreesRandomly();
 
 	const int backgroundRegionsNum = 5;
 	Object backgroundRegion;
@@ -717,10 +729,6 @@ void Detector::trainClassifier()
 			{
 				for (int k = 0; k < samplesNum; k++)
 					trainTreeByRegion(i, backgroundRegion, 0);
-			}
-			else
-			{
-				//calcTreeOOBE(i, backgroundRegion, 0); // ???
 			}
 		}
 	}
@@ -859,15 +867,82 @@ void Detector::detectSelectedTarget()
 		selectedTarget.exist = true;
 	}
 }
-
-void Detector::showStats()
+/*
+void Detector::writeTargetPositions()
 {
-	if (framesNum == 1)
+	if (selectedTarget.exist)
+		targetPositionsFile << selectedTarget.left << " " << selectedTarget.right << " " << selectedTarget.top << " " << selectedTarget.bottom << endl;
+	else
+		targetPositionsFile << "-1 -1 -1 -1" << endl;
+}
+*/
+void Detector::readTargetPositions()
+{
+	targetPositionsFile.open("targetPositions.txt");
+
+	int framesNum;
+	Object targetPosition;
+
+	targetPositionsFile >> framesNum;
+
+	for (int i = 0; i < framesNum; i++)
 	{
-		cout << framesNum - 1 << " | " << "Число деревьев: " << forest.treesNum << endl;
+		targetPositionsFile >> targetPosition.left >> targetPosition.right >> targetPosition.top >> targetPosition.bottom;
+		
+		if (targetPosition.left != -1)
+		{
+			targetPosition.exist = true;
+			targetPosition.center.x = (float)(targetPosition.left + targetPosition.right) / 2;
+			targetPosition.center.y = (float)(targetPosition.top + targetPosition.bottom) / 2;
+		}
+		else
+		{
+			targetPosition.exist = false;
+		}
+
+		targetPositions.push_back(targetPosition);
 	}
-	else if (framesNum % 25 == 0 && framesNum != 0)
+
+	targetPositionsFile.close();
+}
+
+int Detector::calcMethodError()
+{
+	Object targetPosition = targetPositions[frameNum % targetPositions.size()];
+
+	if (selectedTarget.exist && targetPosition.exist || !selectedTarget.exist && !targetPosition.exist)
 	{
-		cout << framesNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << forest.OOBE << endl;
+		if (selectedTarget.exist && targetPosition.exist)
+		{
+			if (isNear(selectedTarget, targetPosition, 50.0f) && isSameSize(selectedTarget, targetPosition, 1.5f))
+				return 0;
+			else
+				return 1;
+		}
+		else
+		{
+			return 0;
+		}
 	}
+	else
+	{
+		return 1;
+	}
+}
+
+void Detector::makeStats()
+{
+	int methodError = calcMethodError();
+	methodErrorSum += methodError;
+
+	if (frameNum % 10 == 0)
+	{
+		cout << frameNum << " | " << "Число деревьев: " << forest.treesNum << " | OOBE: " << forest.OOBE << " | Method error: " << methodErrorSum << endl;
+	}
+
+	OOBEFile << forest.correctlyClassifiedOOB << " " << forest.incorrectlyClassifiedOOB << " ";
+	methodErrorFile << methodError << " ";
+	
+	//writeTargetPositions();
+	frameNum++;
 }

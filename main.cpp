@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	const float distanceBetweenTargets = 50.0f;
 	
 	const float distanceBetweenTargetsOnTwoFrames = 50.0f;
-	const float scalingFactorBetweenTargetsOnTwoFrames = 4.0f;
+	const float scalingFactorBetweenTargetsOnTwoFrames = 3.0f;
 
 	string videoSource;
 	if (argc == 1 || argc == 2)
@@ -52,12 +52,12 @@ int main(int argc, char* argv[])
 	if (!detector.startCapture(videoSource))
 		return -1;
 
-	//int frameNum = 0;
+	int frameNum = 0;
 	while (true)
 	{
 		detector.cap >> colorFrame;
 
-		//cout << frameNum << endl;
+		//cout << frameNum + 1 << endl;
 
 		cvtColor(colorFrame, grayFrame8U, CV_RGB2GRAY);
 		grayFrame8U.convertTo(grayFrame32F, CV_32F);
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		//frameNum++;
+		frameNum++;
 
 		currentOffset = detector.calcFrameOffset(grayFrame8U);
 		detector.translateAverageBackAndDeviationImg(grayFrame32F, currentOffset);
@@ -97,8 +97,9 @@ int main(int argc, char* argv[])
 				detector.detectSelectedTarget();
 			
             detector.displaySelectedTarget();
-			detector.framesNum++;
 		}
+
+		detector.makeStats();
 
 		detector.displayWindow();
 
@@ -113,8 +114,6 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		detector.showStats();
-
 		char key = (char)waitKey(1); // waitKey ждет событи€ нажати€ клавиши 1 мс
 		if (key == 27) // ≈сли нажат ESC - выходим
 		{
@@ -125,6 +124,8 @@ int main(int argc, char* argv[])
 			detector.needToInit = true;
 			continue;
 		}
+		else if (key == 'p')
+			while ((char)waitKey(1) != 'p') {};
 	}
 
 	return 0;
