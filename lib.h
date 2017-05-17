@@ -22,10 +22,11 @@ class FPSCounter
 {
 public:
 	FPSCounter();
-	size_t value();
+	float value();
 private:
 	time_t oldTime;
-	size_t FPSCnt, oldFPS;
+	size_t FPSCnt;
+	float oldFPS;
 };
 
 struct Object
