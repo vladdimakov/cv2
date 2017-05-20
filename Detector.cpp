@@ -78,7 +78,7 @@ bool Detector::startCapture(string videoSource)
 vector<Point2f> Detector::findCorners(Mat grayFrame, int maxCornersNum)
 {
 	// Shi-Tomasi Corner Detector
-	double qualityLevel = 0.01; // ћера "качества" особых точек
+	double qualityLevel = 0.25;//0.01; // ћера "качества" особых точек
 	double minDistance = 10; // ћинимальное рассто€ние между особыми точками (в евклидовой мере)
 	int blockSize = 3; // –азмер блока дл€ вычислени€ производной ковариационной матрицы в окрестности каждого пиксел€
 	bool useHarrisDetector = false; // ѕараметр, указывающий, следует ли использовать детектор ’арриса
