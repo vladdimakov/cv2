@@ -19,6 +19,16 @@ h.FaceColor = 'k';
 h.EdgeColor = 'w';
 axis([-0.5 7.5 0 14*10^4]);
 text(k0-0.25, H1(k0+1)+7000, '\nu_0', 'FontSize', 14);
+yTickLabels = { '0'
+                '20000'
+                '40000'
+                '60000'
+                '80000'
+                '100000'
+                '120000'
+                '140000'};
+set(gca, 'YTickLabel', yTickLabels);
+
 
 H2 = [H2 16*ones(1,10)];
 H2 = [H2 17*ones(1,10)];
