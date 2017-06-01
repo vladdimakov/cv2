@@ -87,7 +87,7 @@ text(470, 0.096, 'Число деревьев в ансамбле:');
 
 clear;
 
-lims = [1250 1950];
+lims = [1300 1700];
 
 OOBE51 = calcOOBE('OOBE51.txt', lims);
 OOBE75 = calcOOBE('OOBE75.txt', lims);
@@ -103,9 +103,9 @@ plot((lims(1):lims(2)), OOBE75, 'Color', [194/255 57/255 204/255], 'LineWidth', 
 plot((lims(1):lims(2)), OOBE101, 'Color', [50/255 50/255 50/255], 'LineWidth', 1.2);
 
 xlabel('Номер кадра'); ylabel('OOBE');
-axis([1250 1950 0.1 0.3]); 
+axis([1300 1700 0.1 0.3]); 
 
-rectangle('Position',[1252 0.273 696 0.026], 'FaceColor', 'w', 'EdgeColor', 'w')
+rectangle('Position',[1302 0.273 396 0.026], 'FaceColor', 'w', 'EdgeColor', 'w')
 line([1250 1950], [0.273 0.273], 'Color', 'k')
 
 legend('50,', '75,', '100', 'Orientation', 'horizontal')
@@ -113,7 +113,18 @@ legend('50,', '75,', '100', 'Orientation', 'horizontal')
 box on;
 legend boxoff;
 
-text(1460, 0.293, 'Число деревьев в ансамбле:');
+text(1420, 0.293, 'Число деревьев в ансамбле:');
+
+xTickLabels = { '1000'
+                '1250'
+                '1500'
+                '1750'
+                '2000'
+                '2250'
+                '2500'
+                '2750'
+                '3000'};
+set(gca, 'XTickLabel', xTickLabels);
 
 clear;
 %%

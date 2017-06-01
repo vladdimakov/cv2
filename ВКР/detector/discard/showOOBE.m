@@ -15,11 +15,11 @@ figure(1); hold on; grid on;
 plot(lims(1):lims(2), OOBE0, 'Color', [57/255 204/255 194/255], 'LineWidth', 1.2);
 plot(lims(1):lims(2), OOBE5000, 'Color', [194/255 57/255 204/255], 'LineWidth', 1.2);
 
-axis([1250 1600 0.15 0.22]);
+axis([1270 1450 0.15 0.22]);
 xlabel('Номер кадра'); ylabel('OOBE');
 
-rectangle('Position',[1252 0.21 346 0.0097], 'FaceColor', 'w','EdgeColor', 'w')
-line([1250 1600], [0.21 0.21], 'Color', 'k')
+rectangle('Position',[1272 0.21 176 0.0097], 'FaceColor', 'w','EdgeColor', 'w')
+line([1250 1450], [0.21 0.21], 'Color', 'k')
 
 legend('Без исключения деревьев из ансамбля', 'С исключением деревьев из ансамбля');
 legend boxoff;

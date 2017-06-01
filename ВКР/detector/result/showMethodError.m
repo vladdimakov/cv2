@@ -5,7 +5,6 @@ lims = [700 1700];
 methodError0 = calcMethodError('methodError1.txt', lims);
 methodError5000 = calcMethodError('methodError2.txt', lims);
 
-
 point1 = [952 0];
 point2 = [1457 58];
 point3 = [1510 58];
@@ -30,3 +29,4 @@ legend('Без использования детектора', 'С использованием детектора');
 
 box on;
 legend boxoff;
+
