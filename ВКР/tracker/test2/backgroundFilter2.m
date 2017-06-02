@@ -37,11 +37,13 @@ H2 = [H2 19*ones(1,35)];
 H2 = [H2 20*ones(1,40)];
 
 figure(2);
-hist(H2, 9:21);
+hist(H2, 9:21); 
 h = findobj(gca, 'Type', 'patch');
 h.FaceColor = 'k';
 h.EdgeColor = 'w';
-axis([9.5 20.5 0 250]);
+axis([9.5 20.5 0 240]);
 text(k3-0.2, H1(k3+1)+15, '\omega', 'FontSize', 17);
+
+box off;
 
 clear H1 H2;
