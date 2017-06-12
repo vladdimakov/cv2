@@ -75,21 +75,7 @@ int main(int argc, char* argv[])
 		detector.calcTargetsBinaryFrame(grayFrame32F, targetsFactor);
 		detector.makeSegmentation(distanceBetweenTargets);
 		detector.haarFeatures.makeIntegralImg(grayFrame8U);
-
 		
-		for (int i = 0; i < detector.prevPoints.size(); i++)
-			circle(detector.imgToDisplay[0], detector.prevPoints[i], 2, Scalar(255), 5);
-
-		if (detector.frameNum == 125)
-		{
-			imwrite("current_frame.jpg", detector.imgToDisplay[0]);
-			//imwrite("deviation_image.jpg", detector.imgToDisplay[1]);
-			//imwrite("average_background.jpg", detector.imgToDisplay[2]);
-			//imwrite("moving_target.jpg", detector.imgToDisplay[3]);
-			break;
-		}
-		
-
 		if (detector.isTargetSelected)
 		{
 			detector.trekSelectedTarget(distanceBetweenTargetsOnTwoFrames, scalingFactorBetweenTargetsOnTwoFrames);
