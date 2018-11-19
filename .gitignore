@@ -31,3 +31,4 @@
 *.sdf
 *.opensdf
 /x64/*
+/.vs

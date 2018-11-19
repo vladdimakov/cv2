@@ -8,8 +8,8 @@
 using namespace cv;
 using namespace std;
 
-const int CAP_FRAME_WIDTH = 640;
-const int CAP_FRAME_HEIGHT = 480;
+const int CAP_FRAME_WIDTH = 1280;
+const int CAP_FRAME_HEIGHT = 960;
 const int CAP_FPS = 20;
 
 const int MAX_CORNERS_NUM = 64;
@@ -43,86 +43,6 @@ public:
 	int *values, isTarget;
 };
 
-class Child
-{
-public:
-	Child();
-
-	int statistics[2][2];
-};
-
-class Node
-{
-public:
-	Node(int level, int childsNum);
-	void removeOldData();
-
-	int statistics[2];
-	int num, level, featureNumToDivide;
-	Node *left, *right;
-	Child *childs;
-	int /**randomlySelectedFeatures,*/ *previousSelectedFeatures;
-	vector<int> randomlySelectedFeatures;
-};
-
-class Tree
-{
-public:
-	Tree(int depthOfTree, int featuresNum, int randomlySelectedFeaturesNum, int minStatisticsNumForDivide, float minGiniCoefficient);
-	void buildNode(Node* node, Features* features);
-	float calcGiniCoefficient(Child child);
-	void makeRandomlySelectedFeatures(Node* parent, Node* child);
-	void divideNode(Node* node);
-	void buildTree(Node* node, Features* features);
-	bool classifyFeatures(Node* node, Features* features);
-
-	Node *root;
-	Object *featuresPositions;
-	int *featuresTypes;
-	int nodesNum;
-	int depthOfTree, featuresNum, randomlySelectedFeaturesNum, minStatisticsNumForDivide;
-	float minGiniCoefficient;
-	
-	int correctlyClassifiedOOB, incorrectlyClassifiedOOB;
-	float OOBE;
-};
-
-class Forest
-{
-public:
-	Forest();
-	void buildTree(int treeNum, Features* features);
-	bool classifyFeaturesByTree(int treeNum, Features* features);
-	void discardTree(int treeNum);
-
-	Tree **trees;
-	int treesNum;
-
-	int correctlyClassifiedOOB, incorrectlyClassifiedOOB;
-	float OOBE;
-};
-
-class HaarFeatures
-{
-public:
-	HaarFeatures();
-	void makeIntegralImg(Mat currentFrame);
-	int calcIntegralSumForRegion(Object region);
-
-	bool calcFeature0(Object region);
-	bool calcFeature1(Object region);
-	bool calcFeature2(Object region);
-	bool calcFeature3(Object region);
-	bool calcFeature4(Object region);
-	bool calcFeature5(Object region);
-	bool calcFeature6(Object region);
-	bool calcFeature7(Object region);
-
-	Object rescaleFeaturePosition(Object featurePosition, Object region);
-	int calcFeatures(Object region, Object featurePosition, int featureType);
-
-	Mat integralImg;
-};
 class Detector
 {
 public:
@@ -151,21 +71,6 @@ public:
 	void displaySelectedTarget();
 	
 	Object makeBackgroundRegion();
-	void trainTreeByRegion(int treeNum, Object region, int isTarget);
-    void trainClassifier();
-	void calcTreeOOBE(int treeNum, Object region, int isTarget);
-	void calcForestOOBE(vector<int> notUsedTrees, Object region, int isTarget);
-
-	void discardTreesRandomly();
-
-	void detectSelectedTarget();
-	int classifyRegion(Object region);
-	bool classifyRegionByTree(int treeNum, Object region);
-
-	void writeTargetPositions();
-	void readTargetPositions();
-	int calcMethodError();
-	void makeStats();
 	int methodErrorSum;
 
 	VideoCapture cap;
@@ -178,9 +83,6 @@ public:
 	vector<Object> objects;
 	bool isTargetSelected;
 	Object selectedTarget;
-
-	HaarFeatures haarFeatures;
-	Forest forest;
 
 	Mat prevGrayFrame, currentDeviationImg, frameWith0, frameWith255;
 	vector<Point2f> prevPoints, currentPoints;
